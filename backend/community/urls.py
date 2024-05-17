@@ -17,4 +17,5 @@ urlpatterns = [
          views.ReplyListAPIView.as_view(), name='reply-list'),
     path('comments/<int:comment_id>/replies/create/',
          views.ReplyCreateAPIView.as_view(), name='reply-create'),
+    path('search/', views.CommunitySearch.as_view(), name='search'),  # 새로운 검색 및 필터 뷰 추가 구현
 ]

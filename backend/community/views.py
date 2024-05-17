@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from .filters import CommunityFilter 
 from community.serializers import CommunitySerializer, CommentSerializer, ReplySerializer
 from community.models import Community, Comment, Reply
 from django.shortcuts import get_object_or_404
@@ -7,6 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from accounts.models import User
 from rest_framework import generics
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
+
+
 
 class CommunityList(APIView):
     def get(self, request):
@@ -136,3 +143,28 @@ class ReplyListAPIView(APIView):
         replies = comment.reply_comments.all()
         serializer = ReplySerializer(replies, many=True)
         return Response(serializer.data)
+
+
+
+class CommunitySearch(ListAPIView):
+    queryset = Community.objects.all()
+    serializer_class = CommunitySerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CommunityFilter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.query_params.get('search', None)
+        search_type = self.request.query_params.get('search_type', None)
+        
+        if search_query and search_type:
+            if search_type == 'title':
+                queryset = queryset.filter(title__icontains=search_query)
+            elif search_type == 'content':
+                queryset = queryset.filter(content__icontains=search_query)
+            elif search_type == 'title_content':
+                queryset = queryset.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
+            elif search_type == 'author':
+                queryset = queryset.filter(author__username__icontains=search_query)
+        
+        return queryset
