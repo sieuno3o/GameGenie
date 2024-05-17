@@ -12,9 +12,8 @@ class CommunitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id', 'type', 'title', 'content',
-                  'link', 'community_likes', 'community_upvotes', 'author']
-
+        fields = ['id', 'type', 'category', 'title', 'content',
+                  'link', 'community_likes', 'community_upvotes', 'author', 'created_at']
 
 class CommentSerializer(serializers.ModelSerializer):
     comments_likes = serializers.PrimaryKeyRelatedField(
@@ -33,7 +32,6 @@ class CommentSerializer(serializers.ModelSerializer):
         replies = Comment.objects.filter(parent_comment_id=obj.id)
         serializer = CommentSerializer(replies, many=True)
         return serializer.data
-
 
 class ReplySerializer(serializers.ModelSerializer):
     reply_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
