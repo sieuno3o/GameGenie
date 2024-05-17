@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +42,12 @@ INSTALLED_APPS = [
     'rest_framework',
     "accounts",
     "community",
+    "recommendations",
 ]
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') # openai 키 환경변수 설정
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
