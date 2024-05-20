@@ -385,6 +385,6 @@ node_modules/
 # Puppeteer cache
 **/node_modules/puppeteer/.cache/
 
-
+config.py
 
 # End of https://www.toptal.com/developers/gitignore/api/python,venv,visualstudiocode,pycharm,macos,windows

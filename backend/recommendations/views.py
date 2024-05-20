@@ -1,14 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-import openai
 from django.conf import settings
 from .steam_api import SteamAPI
-
-# OpenAI API 키 설정
-openai.api_key = settings.OPENAI_API_KEY
+from openai import OpenAI
+from GameGenie import config
 
 # Steam 클라이언트 설정
 steam_client = SteamAPI()
+
+client = OpenAI(
+    api_key=config.OPENAI_API_KEY,
+)
 
 class GameViewSet(viewsets.ViewSet):
     genre_mapping = {
@@ -34,8 +36,9 @@ class GameViewSet(viewsets.ViewSet):
         'racing game': 'Racing',
         'casual': 'Casual',
         'casual game': 'Casual',
-        'roguelike': 'Roguelike',  # 추가된 매핑
-        # 필요에 따라 추가 장르 매핑
+        'roguelike': 'Roguelike',
+        'Open world' : 'Openworld',
+        'open world' : 'Openworld',
     }
 
     abbreviation_mapping = {
@@ -89,20 +92,20 @@ class GameViewSet(viewsets.ViewSet):
 
     def extract_game_name_or_genre(self, query):
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. If it is a genre, return only the genre name in English. If it is a game name, return only the name in English."},
-                    {"role": "user", "content": f"Identify if the following query is a game name or a genre: '{query}'"}
+                {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. If it is a genre, return only the genre name in English. If it is a game name, return only the name in English."},
+                {"role": "user", "content": f"Identify if the following query is a game name or a genre: '{query}'"}
                 ],
                 max_tokens=50
             )
 
             print('OpenAI 응답:', response)
 
-            extracted_info = response['choices'][0]['message']['content'].strip().lower()
+            extracted_info = response.choices[0].message.content.strip().lower()
             if 'genre' in extracted_info:
-                genre = extracted_info.split('genre')[-1].strip().replace('.', '').replace('"', '').split(':')[-1].strip()
+                genre = extracted_info.split(':')[-1].strip().replace('.', '').replace('"', '').strip()
                 mapped_genre = self.genre_mapping.get(genre.lower(), genre.capitalize())
                 return mapped_genre, 'genre'
             else:
