@@ -2,9 +2,10 @@ from django.db import models
 from accounts.models import User
 from django.utils import timezone
 
+
 class Community(models.Model):
     TYPE_CHOICES = [('news', 'News'), ('show', 'Show'), ('ask', 'Ask')]
-    
+
     CATEGORY_CHOICES = [
         # 액션
         ('action', '액션'),
@@ -15,7 +16,7 @@ class Community(models.Model):
         ('arcade_rhythm', '아케이드 및 리듬'),
         ('platform_runner', '플랫폼 게임 및 러너'),
         ('hack_slash', '핵 앤 슬래시'),
-        
+
         # 어드벤처
         ('adventure', '어드벤처'),
         ('metroidvania', '메트로베니아'),
@@ -44,7 +45,7 @@ class Community(models.Model):
         ('life_sim', '생활 및 몰입형'),
         ('space_flight', '우주 및 비행'),
         ('hobby_job', '취미 및 직업'),
-        
+
         # 전략
         ('strategy', '전략'),
         ('card_board', '카드 및 보드'),
@@ -80,17 +81,17 @@ class Community(models.Model):
         ('singleplayer', '싱글 플레이어'),
         ('online_competitive', '온라인 경쟁'),
         ('co_op', '협동'),
-        
+
         ('other', '기타')
     ]
-    
+
     type = models.CharField(max_length=4, choices=TYPE_CHOICES)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     title = models.CharField(max_length=255)
     content = models.TextField()
     link = models.URLField(blank=True, null=True)
-    community_like = models.ManyToManyField(User, related_name='liked_communities', blank=True)
-    community_upvote = models.ManyToManyField(User, related_name='upvoted_communities', blank=True)
+    community_like = models.ManyToManyField(
+        User, related_name='liked_communities', blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -100,7 +101,7 @@ class Community(models.Model):
 
         comments_count = self.comments.count()
         comments_count_point = 3 * comments_count
-        
+
         likes_count = self.community_like.count()
         likes_count_point = 1 * likes_count
 
@@ -114,14 +115,9 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comments_likes = models.ManyToManyField(
         User, related_name='liked_comments', blank=True)
-    comments_upvotes = models.ManyToManyField(
-        User, related_name='upvoted_comments', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     parent_comment = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
-
-    class Meta:
-        unique_together = ['community', 'author']
 
 
 class Reply(models.Model):
@@ -131,6 +127,4 @@ class Reply(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     reply_likes = models.ManyToManyField(
         User, related_name='liked_replies', blank=True)
-    reply_upvotes = models.ManyToManyField(
-        User, related_name='upvoted_replies', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
