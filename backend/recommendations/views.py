@@ -67,24 +67,13 @@ class GameViewSet(viewsets.ViewSet):
                 if not extracted_info:
                     return Response({"error": "Game name or genre not found in user input"}, status=status.HTTP_400_BAD_REQUEST)
 
-                if info_type == 'genre':
-                    # 추출된 장르를 매핑
-                    mapped_genre = self.genre_mapping.get(extracted_info.lower(), extracted_info.capitalize())
-                    print(f"매핑된 장르: {mapped_genre}")
-
-                    # 장르 기반 상위 게임 스크래핑
-                    top_games = steam_client.scrape_top_games_by_genre(mapped_genre)
-                    if top_games:
-                        return Response({"similar_games": top_games})
-                    else:
-                        return Response({"error": f"No top games found for the genre {mapped_genre}"}, status=status.HTTP_404_NOT_FOUND)
+                # 게임 이름 또는 장르에 대한 정보 스크랩
+                games = steam_client.scrape_similar_games_by_name(extracted_info)
+                if games:
+                    return Response({"games": games})
                 else:
-                    # 스팀에서 게임 정보 및 비슷한 게임 검색
-                    similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info)
-                    if not similar_games_info:
-                        return Response({"error": "No similar games found"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({"error": f"No games found for {extracted_info}"}, status=status.HTTP_404_NOT_FOUND)
                 
-                    return Response({"similar_games": similar_games_info})
             except Exception as e:
                 print(f"list 메서드에서 에러 발생: {e}")
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
