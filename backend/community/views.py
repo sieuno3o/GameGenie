@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .filters import CommunityFilter 
+from .filters import CommunityFilter
 from community.serializers import CommunitySerializer, CommentSerializer, ReplySerializer
 from community.models import Community, Comment, Reply
 from django.shortcuts import get_object_or_404
@@ -14,16 +14,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 
 
-
 class CommunityList(APIView):
     def get(self, request):
         communities = Community.objects.all()
         for community in communities:
             community.points = community.communitylist_points()
-        sorted_communities = sorted(
-            communities, key=lambda x: x.points, reverse=True)
+
+        def get_points(community):
+            return community.points
+        sorted_communities = sorted(communities, key=get_points, reverse=True)
         serializer = CommunitySerializer(sorted_communities, many=True)
         return Response(serializer.data)
+
 
 class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
@@ -37,6 +39,7 @@ class CommunityCreate(APIView):
             return Response({"message": "등록완료", "communityId": community.id}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CommunityDetail(APIView):
     def get(self, request, pk):
@@ -58,6 +61,7 @@ class CommunityDetail(APIView):
         community.delete()
         return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
+
 class CommentCreate(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -71,6 +75,7 @@ class CommentCreate(APIView):
             serializer.save(author=request.user, community=community)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CommentUpdate(APIView):
     permission_classes = [IsAuthenticated]
@@ -97,9 +102,11 @@ class CommentUpdate(APIView):
         comment.delete()
         return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
+
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
 
 class CommentsList(APIView):
     def get(self, request, pk):
@@ -112,6 +119,7 @@ class CommentsList(APIView):
         community_list.sort(key=lambda x: x['created_at'], reverse=True)
         return Response(community_list)
 
+
 class UserCommentsListView(APIView):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
@@ -122,6 +130,7 @@ class UserCommentsListView(APIView):
         post_list = list(comments) + list(replies)
         post_list.sort(key=lambda x: x['created_at'], reverse=True)
         return Response(post_list)
+
 
 class ReplyCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -137,13 +146,13 @@ class ReplyCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ReplyListAPIView(APIView):
     def get(self, request, comment_id):
         comment = get_object_or_404(Comment, id=comment_id)
         replies = comment.reply_comments.all()
         serializer = ReplySerializer(replies, many=True)
         return Response(serializer.data)
-
 
 
 class CommunitySearch(ListAPIView):
@@ -156,15 +165,17 @@ class CommunitySearch(ListAPIView):
         queryset = super().get_queryset()
         search_query = self.request.query_params.get('search', None)
         search_type = self.request.query_params.get('search_type', None)
-        
+
         if search_query and search_type:
             if search_type == 'title':
                 queryset = queryset.filter(title__icontains=search_query)
             elif search_type == 'content':
                 queryset = queryset.filter(content__icontains=search_query)
             elif search_type == 'title_content':
-                queryset = queryset.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
+                queryset = queryset.filter(
+                    Q(title__icontains=search_query) | Q(content__icontains=search_query))
             elif search_type == 'author':
-                queryset = queryset.filter(author__username__icontains=search_query)
-        
+                queryset = queryset.filter(
+                    author__username__icontains=search_query)
+
         return queryset
