@@ -5,7 +5,7 @@ async function scrapeGameDetails(appid) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     
-    // 쿠키 설정을 통해 연령 확인 우회
+    // 쿠키 설정을 통한 연령확인 우회
     await page.setCookie({
         name: 'birthtime',
         value: '28801',
