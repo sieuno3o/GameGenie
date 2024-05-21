@@ -54,10 +54,13 @@ class DeleteView(APIView):
     def delete(self, request):
         user = request.user
         password = request.data.get('password')
+
         if not password:
             return Response({'message': '비밀번호를 입력해주세요.'}, status=status.HTTP_400_BAD_REQUEST)
+
         if not user.check_password(password):
             return Response({'message': '비밀번호가 일치하지 않습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
         user.delete()
         return Response({"message": "삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
