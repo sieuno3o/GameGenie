@@ -28,7 +28,6 @@ class CommunityList(APIView):
         serializer = CommunitySerializer(sorted_communities, many=True)
         return Response(serializer.data)
 
-
 class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
 

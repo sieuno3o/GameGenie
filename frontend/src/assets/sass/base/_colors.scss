@@ -1,25 +1,8 @@
 // main colors
-$MAIN-COLOR-GREEN: #22ccb7;
+$MAIN-COLOR-SKYBLUE: #EEF1F6;
 $MAIN-COLOR-PINK: #fd9f9f;
 $MAIN-COLOR-NAVY: #1a5c96;
 $MAIN-COLOR-GRAY: #8e8e8e;
-
-// sub colors
-$SUB-COLOR-GREEN: rgba(red($MAIN-COLOR-GREEN),
-    green($MAIN-COLOR-GREEN),
-    blue($MAIN-COLOR-GREEN),
-    0.05);
-$SUB-COLOR-DARKGREEN: #26b3a4;
-$SUB-COLOR-GRAYGREEN: #e6edec;
-$SUB-COLOR-GRAY: rgba(red($MAIN-COLOR-GRAY),
-    green($MAIN-COLOR-GRAY),
-    blue($MAIN-COLOR-GRAY),
-    0.2);
-$SUB-COLOR-LIGHTGRAY: rgba(red($MAIN-COLOR-GRAY),
-    green($MAIN-COLOR-GRAY),
-    blue($MAIN-COLOR-GRAY),
-    0.03);
-$SUB-COLOR-BLACK: #454545;
 
 // hover color
 $HOVER-COLOR: #cff6f2;
