@@ -95,6 +95,18 @@ class Community(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def like(self, user):
+        self.community_like.add(user)
+
+    def unlike(self, user):
+        self.community_like.remove(user)
+
+    def is_liked_by_user(self, user):
+        return self.community_like.filter(id=user.id).exists()
+    
+    def get_likes_count(self):
+        return self.community_like.count()
+
     def communitylist_points(self):
         after_day = (timezone.now() - self.created_at).days
         after_day_point = -5 * after_day
@@ -119,6 +131,18 @@ class Comment(models.Model):
     parent_comment = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
+    def like(self, user):
+        self.comments_likes.add(user)
+
+    def unlike(self, user):
+        self.comments_likes.remove(user)
+
+    def is_liked_by_user(self, user):
+        return self.comments_likes.filter(id=user.id).exists()
+    
+    def get_likes_count(self):
+        return self.comments_likes.count()
+
 
 class Reply(models.Model):
     community_comment = models.ForeignKey(
@@ -128,3 +152,15 @@ class Reply(models.Model):
     reply_likes = models.ManyToManyField(
         User, related_name='liked_replies', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def like(self, user):
+        self.reply_likes.add(user)
+
+    def unlike(self, user):
+        self.reply_likes.remove(user)
+
+    def is_liked_by_user(self, user):
+        return self.reply_likes.filter(id=user.id).exists()
+    
+    def get_likes_count(self):
+        return self.reply_likes.count()
