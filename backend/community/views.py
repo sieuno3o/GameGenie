@@ -12,6 +12,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
+from django.http import JsonResponse
 
 
 class CommunityList(APIView):
@@ -22,10 +23,10 @@ class CommunityList(APIView):
 
         def get_points(community):
             return community.points
+
         sorted_communities = sorted(communities, key=get_points, reverse=True)
         serializer = CommunitySerializer(sorted_communities, many=True)
         return Response(serializer.data)
-
 
 class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
@@ -41,7 +42,7 @@ class CommunityCreate(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommunityDetail(APIView):
+class CommunityUpdate(APIView):
     def get(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
         serializer = CommunitySerializer(community)
@@ -53,13 +54,36 @@ class CommunityDetail(APIView):
             community, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "수정완료"}, serializer.data)
+            return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
         community.delete()
         return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class CommunityLike(generics.UpdateAPIView):
+    queryset = Community.objects.all()
+    serializer_class = CommunitySerializer
+    permission_classes = [IsAuthenticated]
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+
+        if instance.is_liked_by_user(user):
+            instance.unlike(user)
+            liked = False
+        else:
+            instance.like(user)
+            liked = True
+
+        instance.save()
+
+        likes_count = instance.get_likes_count()
+
+        return Response({'liked': liked, 'likes_count': likes_count}, status=status.HTTP_200_OK)
 
 
 class CommentCreate(APIView):
@@ -103,6 +127,31 @@ class CommentUpdate(APIView):
         return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
 
+class CommentLike(generics.UpdateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = 'comment_id'
+
+    def partial_update(self, request, *args, **kwargs):
+        comment_id = self.kwargs.get('comment_id')
+        instance = self.get_object()
+        user = request.user
+
+        if instance.is_liked_by_user(user):
+            instance.unlike(user)
+            liked = False
+        else:
+            instance.like(user)
+            liked = True
+
+        instance.save()
+
+        likes_count = instance.get_likes_count()
+
+        return Response({'liked': liked, 'likes_count': likes_count}, status=status.HTTP_200_OK)
+
+
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -120,7 +169,7 @@ class CommentsList(APIView):
         return Response(community_list)
 
 
-class UserCommentsListView(APIView):
+class UserCommentsList(APIView):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         comments = Comment.objects.filter(
@@ -132,7 +181,7 @@ class UserCommentsListView(APIView):
         return Response(post_list)
 
 
-class ReplyCreateAPIView(APIView):
+class ReplyCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, comment_id):
@@ -147,7 +196,51 @@ class ReplyCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ReplyListAPIView(APIView):
+class ReplyUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, comment_id, reply_id):
+        reply = get_object_or_404(
+            Reply, id=reply_id, community_comment__id=comment_id, author=request.user)
+        serializer = ReplySerializer(reply, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, comment_id, reply_id):
+        reply = get_object_or_404(
+            Reply, id=reply_id, community_comment__id=comment_id, author=request.user)
+        reply.delete()
+        return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class ReplyLike(generics.UpdateAPIView):
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    permission_classes = [IsAuthenticated]
+    lookup_url_kwarg = 'reply_id'
+
+    def partial_update(self, request, *args, **kwargs):
+        reply_id = self.kwargs.get('reply_id')
+        instance = self.get_object()
+        user = request.user
+
+        if instance.is_liked_by_user(user):
+            instance.unlike(user)
+            liked = False
+        else:
+            instance.like(user)
+            liked = True
+
+        instance.save()
+
+        likes_count = instance.get_likes_count()
+
+        return Response({'liked': liked, 'likes_count': likes_count}, status=status.HTTP_200_OK)
+
+
+class ReplyList(APIView):
     def get(self, request, comment_id):
         comment = get_object_or_404(Comment, id=comment_id)
         replies = comment.reply_comments.all()
