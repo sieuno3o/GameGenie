@@ -19,7 +19,7 @@ export default {
 
 <style lang="scss" scoped>
 #contents {
-  padding-top: 60px;
+  padding-top: 45px;
   max-width: 1920px;
   min-height: calc(100vh - 130px - 70px);
 }
