@@ -11,6 +11,7 @@ charset-normalizer==3.3.2
 colorama==0.4.6
 distro==1.9.0
 Django==4.2
+django-filter==24.2
 djangorestframework==3.15.1
 djangorestframework-simplejwt==5.3.1
 frozenlist==1.4.1
