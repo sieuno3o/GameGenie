@@ -1,4 +1,6 @@
 import defaultRoutes from "./routes/defaultRoutes";
+import communityRoutes from "./routes/communityRoutes";
+
 import defaultLayout from "../layout/TheLayout";
 
 const routes = [
@@ -7,6 +9,11 @@ const routes = [
     component: defaultLayout,
     children: defaultRoutes,
   },
+  {
+    path: "/community",
+    component: defaultLayout,
+    children: communityRoutes,
+  }
 ];
 
 export default routes;
