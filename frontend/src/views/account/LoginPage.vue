@@ -2,11 +2,11 @@
   <div class="flex-col-center loginPageBox">
     <span class="loginTitle heading3">로그인</span>
     <div id="id" class="loginInputBox flex-row-left">
-      <img src="../../assets/image/loginIdIcon.png" class="loginIconImg">
+      <img src="../../assets/image/account/idIcon.png" class="loginIconImg">
       <input type="text" class="loginInput button2" id="inputId" placeholder="아이디">
     </div>
     <div id="password" class="loginInputBox flex-row-left">
-      <img src="../../assets/image/loginPasswordIcon.png" class="loginIconImg">
+      <img src="../../assets/image/account/passwordIcon.png" class="loginIconImg">
       <input type="text" class="loginInput button2" id="inputPassword" placeholder="비밀번호">
     </div>
     <button type="submit" class="loginInputBox" id="loginButton">로그인</button>
@@ -55,7 +55,7 @@
 
 #loginButton {
   background-color: $MAIN-COLOR-SKYBLUE;
-  height: 43px;
+  height: 48px;
   margin-bottom: 35px;
 }
 
