@@ -3,6 +3,7 @@ import communityRoutes from "./routes/communityRoutes";
 import accountRoutes from "./routes/accountRoutes";
 
 import defaultLayout from "../layout/TheLayout";
+import accountLayout from "../layout/TheAccountLayout"
 
 const routes = [
   {
@@ -17,7 +18,7 @@ const routes = [
   },
   {
     path: "/account",
-    component: defaultLayout,
+    component: accountLayout,
     children: accountRoutes,
   }
 ];
