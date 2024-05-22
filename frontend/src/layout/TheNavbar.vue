@@ -3,16 +3,15 @@
     <router-link to="/">
       <img src="../assets/image/logo2.png" class="navLogoImg">
     </router-link>
-    <router-link to="/community">
-      <span class="navCommunity">커뮤니티</span>
-    </router-link>
-    <div class="navAccount">
-      <router-link to="/login">
-        <span class="navLogin">로그인</span>
+    <div class="flex-center">
+      <router-link to="/community">
+        <span class="navCommunity">커뮤니티</span>
       </router-link>
-      <router-link to="/signup">
-        <span class="navSignup">회원가입</span>
-      </router-link>
+      <div class="navAccount">
+        <router-link to="/login">
+          <span class="navLogin">로그인</span>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -32,7 +31,7 @@ export default {
 }
 
 .navLogoImg {
-  width: 130px;
+  width: 140px;
   margin-top: -4px;
   padding-left: 25px;
 }
@@ -44,11 +43,8 @@ a.router-link-active {
   color: inherit;
 }
 
-.navAccount {
-  padding-right: 25px;
-}
-
 .navLogin {
   padding-right: 30px;
+  margin-left: 30px;
 }
 </style>
