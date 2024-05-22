@@ -36,7 +36,7 @@ class GameViewSet(viewsets.ViewSet):
         'racing game': 'Racing',
         'casual': 'Casual',
         'casual game': 'Casual',
-        'roguelike': 'Roguelike',  # 추가된 매핑
+        'roguelike': 'Roguelike',
         # 필요에 따라 추가 장르 매핑
     }
 
@@ -44,6 +44,8 @@ class GameViewSet(viewsets.ViewSet):
         '레데리': '레드 데드 리뎀션',
         '포나': '포트나이트',
         '라오어': '라스트 오브 어스',
+        '배그' : "PUBG",
+        '배틀그라운드' : "PUBG",
         # 추가적인 줄임말 매핑
     }
 
@@ -81,7 +83,7 @@ class GameViewSet(viewsets.ViewSet):
                     # 스팀에서 게임 정보 및 비슷한 게임 검색
                     similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info)
                     if not similar_games_info:
-                        return Response({"error": "No similar games found"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response({"서비스 초기라 불안정합니다. 다시 시도해주세요!"}, status=status.HTTP_404_NOT_FOUND)
                 
                     return Response({"similar_games": similar_games_info})
             except Exception as e:
