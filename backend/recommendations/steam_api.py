@@ -24,16 +24,6 @@ class SteamAPI:
         review_summary = soup.find('span', {'class': 'game_review_summary'})
         return review_summary.text if review_summary else 'No reviews'
 
-    def search_game(self, game_name):
-        search_url = f"{self.base_url}/search/?term={game_name}"
-        response = requests.get(search_url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        first_result = soup.find('a', {'class': 'search_result_row'})
-        if first_result:
-            appid = first_result['data-ds-appid']
-            return self.scrape_similar_games(appid)
-        return []
-
     def scrape_similar_games_by_name(self, game_name):
         search_url = f"{self.base_url}/search/?term={game_name}"
         response = requests.get(search_url)
