@@ -76,16 +76,18 @@ class GameViewSet(viewsets.ViewSet):
                     # 장르 기반 상위 게임 스크래핑
                     top_games = steam_client.scrape_top_games_by_genre(mapped_genre)
                     if top_games:
-                        return Response({"similar_games": top_games})
+                        top_games_with_urls = self.add_store_urls(top_games)
+                        return Response({"similar_games": top_games_with_urls})
                     else:
                         return Response({"error": f"No top games found for the genre {mapped_genre}"}, status=status.HTTP_404_NOT_FOUND)
                 else:
                     # 스팀에서 게임 정보 및 비슷한 게임 검색
                     similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info)
                     if not similar_games_info:
-                        return Response({"서비스 초기라 불안정합니다. 다시 시도해주세요!"}, status=status.HTTP_404_NOT_FOUND)
-                
-                    return Response({"similar_games": similar_games_info})
+                        return Response({"error": "서비스 초기라 불안정합니다. 다시 시도해주세요!"}, status=status.HTTP_404_NOT_FOUND)
+
+                    similar_games_with_urls = self.add_store_urls(similar_games_info)
+                    return Response({"similar_games": similar_games_with_urls})
             except Exception as e:
                 print(f"list 메서드에서 에러 발생: {e}")
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -104,9 +106,9 @@ class GameViewSet(viewsets.ViewSet):
 
             print('OpenAI 응답:', response)
 
-            extracted_info = response.choices[0].message.content.strip()
+            extracted_info = response.choices[0].message.content.strip().lower()
             if 'genre' in extracted_info:
-                genre = extracted_info.split('genre')[-1].strip().replace('.', '').replace('"', '').split(':')[-1].strip()
+                genre = extracted_info.split(':')[-1].strip().replace('.', '').replace('"', '').strip()
                 mapped_genre = self.genre_mapping.get(genre.lower(), genre.capitalize())
                 return mapped_genre, 'genre'
             else:
@@ -115,3 +117,8 @@ class GameViewSet(viewsets.ViewSet):
         except Exception as e:
             print(f"extract_game_name_or_genre 메서드에서 에러 발생: {e}")
             return None, None
+
+    def add_store_urls(self, games):
+        for game in games:
+            game['store_url'] = f"https://store.steampowered.com/app/{game['appid']}/"
+        return games
