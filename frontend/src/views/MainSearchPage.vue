@@ -1,5 +1,5 @@
 <template>
-  <div class="backgroundMain flex-col-center">
+  <div class="backgroundMain">
     <div class="box"></div>
     <img src="../assets/image/logo2.png" class="mainLogoImg">
     <div class="flex-col-center">
@@ -57,10 +57,9 @@ export default {
 
 <style lang="scss" scoped>
 .backgroundMain {
-  width: 100vw;
-  height: 130vh;
-  background-color: $MAIN-COLOR-SKYBLUE;
-  padding-bottom: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .mainLogoImg {
