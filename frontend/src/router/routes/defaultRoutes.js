@@ -1,19 +1,32 @@
-import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
+import MainPageDashboard from "@/layout/dashboard/MainDashboard.vue";
+import DefaultDashboard from "@/layout/dashboard/DefaultDashboard.vue";
 
-const MainPage = () => import("@/views/MainPage.vue");
+const MainSearchPage = () => import("@/views/MainSearchPage.vue");
+const RecommendPage = () => import("@/views/RecommendPage.vue");
 
 const defaultRoutes = [
   {
     path: "",
-    component: defaultDashboard,
+    component: MainPageDashboard,
     children: [
       {
         path: "",
         name: "main",
-        component: MainPage,
+        component: MainSearchPage,
       },
     ]
-    }
+  },
+  {
+    path: "recommend",
+    component: DefaultDashboard,
+    children: [
+      {
+        path: "",
+        name: "recommend",
+        component: RecommendPage,
+      },
+    ]
+  }
 ]
 
 export default defaultRoutes;

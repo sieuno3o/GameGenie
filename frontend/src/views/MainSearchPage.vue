@@ -1,5 +1,5 @@
 <template>
-  <div class="backgroundMain flex-col-center">
+  <div class="backgroundMain">
     <div class="box"></div>
     <img src="../assets/image/logo2.png" class="mainLogoImg">
     <div class="flex-col-center">
@@ -36,7 +36,6 @@ export default {
       axios
         .get('http://localhost:8000/api/community/categories/?query=${this.query}')
         .then((response) => {
-          // 사용자의 입력(query)과 비슷한 value만을 필터링하여 suggestions에 추가
           this.suggestions = response.data.filter(item =>
             item.value.toLowerCase().includes(this.query.toLowerCase())
           ).map(item => ({
@@ -49,7 +48,7 @@ export default {
         });
     },
     selectSuggestion(suggestion) {
-      this.query = suggestion.value; // 선택된 suggestion의 value를 query로 설정
+      this.query = suggestion.value; 
       this.suggestions = [];
     },
   },
@@ -58,10 +57,9 @@ export default {
 
 <style lang="scss" scoped>
 .backgroundMain {
-  width: 100vw;
-  height: 130vh;
-  background-color: $MAIN-COLOR-SKYBLUE;
-  padding-bottom: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .mainLogoImg {
