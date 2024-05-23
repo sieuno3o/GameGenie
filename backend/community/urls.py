@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import CategoryListView
 
 app_name = 'community'
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path('replies/<int:reply_id>/like/', 
          views.ReplyLike.as_view(), name='reply-like'), # 대댓글 좋아요
     path('search/', views.CommunitySearch.as_view(), name='search'),  # 새로운 검색 및 필터 뷰 추가 구현
+    path('categories/', CategoryListView.as_view(), name='category-list'), # 카테고리
 ]
