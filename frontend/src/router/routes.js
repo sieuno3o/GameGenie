@@ -1,6 +1,7 @@
 import defaultRoutes from "./routes/defaultRoutes";
 import communityRoutes from "./routes/communityRoutes";
 import accountRoutes from "./routes/accountRoutes";
+import recommendationsRoutes from "./routes/recommendationsRoutes";
 
 import defaultLayout from "../layout/TheLayout";
 import accountLayout from "../layout/TheAccountLayout"
@@ -20,7 +21,13 @@ const routes = [
     path: "/account",
     component: accountLayout,
     children: accountRoutes,
-  }
+  },
+  {
+    path: "/recommendations",
+    component: defaultLayout,
+    children: recommendationsRoutes,
+  },
+
 ];
 
 export default routes;
