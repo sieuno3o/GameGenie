@@ -1,6 +1,6 @@
 import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
 
-const MainPage = () => import("@/views/MainPage.vue");
+const MainSearchPage = () => import("@/views/MainSearchPage.vue");
 
 const defaultRoutes = [
   {
@@ -10,7 +10,7 @@ const defaultRoutes = [
       {
         path: "",
         name: "main",
-        component: MainPage,
+        component: MainSearchPage,
       },
     ]
     }
