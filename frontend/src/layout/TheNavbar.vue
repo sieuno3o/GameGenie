@@ -1,7 +1,7 @@
 <template>
   <div id="navbar" class="flex-center">
     <router-link to="/">
-      <img src="../assets/image/logo2.png" class="navLogoImg">
+      <img src="../assets/image/logo.png" class="navLogoImg">
     </router-link>
     <div class="flex-center">
       <router-link to="/community">
