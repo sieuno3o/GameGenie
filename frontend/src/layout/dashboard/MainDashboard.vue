@@ -17,7 +17,7 @@ export default {
 #contents {
   max-width: 1920px;
   min-height: calc(100vh - 130px - 70px);
-  margin-top: 120px
+  margin-top: 135px
 }
 
 #contents-wrapper {
