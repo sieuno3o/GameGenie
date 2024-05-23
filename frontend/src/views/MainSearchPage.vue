@@ -1,7 +1,7 @@
 <template>
   <div class="backgroundMain">
     <div class="box"></div>
-    <img src="../assets/image/logo2.png" class="mainLogoImg">
+    <img src="../assets/image/logo.png" class="mainLogoImg">
     <div class="flex-col-center">
       <div :class="{ 'mainSearchbar': true, 'active': suggestions.length > 0 }" class="flex-left mainSearchbar">
         <img src="../assets/image/searchIcon.png" class="searchIcon">
