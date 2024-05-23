@@ -1,10 +1,14 @@
 <template>
   <div class="backgroundMain flex-col-center">
+    <div class="box"></div>
     <img src="../assets/image/logo2.png" class="mainLogoImg">
-    <div class="mainSearchbar flex-left" id="mainSearchbar">
-      <img src="../assets/image/searchIcon.png" class="searchIcon">
-      <input type="text" v-model="query" @input="fetchSuggestions" placeholder="검색어를 입력하세요" />
-      <ul v-if="suggestions.length > 0" class="suggestions-list">
+    <div class="flex-col-center">
+      <div :class="{ 'mainSearchbar': true, 'active': suggestions.length > 0 }" class="flex-left mainSearchbar">
+        <img src="../assets/image/searchIcon.png" class="searchIcon">
+        <input type="text" v-model="query" @input="fetchSuggestions" class="mainSearchInput body1"
+          placeholder="검색어를 입력하세요" />
+      </div>
+      <ul v-if="suggestions.length > 0" class="suggestions-list body1">
         <li v-for="suggestion in suggestions" :key="suggestion.key" @click="selectSuggestion(suggestion)">
           {{ suggestion.value }}
         </li>
@@ -29,12 +33,13 @@ export default {
         this.suggestions = [];
         return;
       }
-
       axios
-        .get(`http://localhost:8000/api/community/categories/?query=${this.query}`)
+        .get('http://localhost:8000/api/community/categories/?query=${this.query}')
         .then((response) => {
-          console.log(response.data); // 응답 데이터 로그 출력
-          this.suggestions = response.data.map(item => ({
+          // 사용자의 입력(query)과 비슷한 value만을 필터링하여 suggestions에 추가
+          this.suggestions = response.data.filter(item =>
+            item.value.toLowerCase().includes(this.query.toLowerCase())
+          ).map(item => ({
             key: item.key,
             value: item.value
           }));
@@ -54,22 +59,30 @@ export default {
 <style lang="scss" scoped>
 .backgroundMain {
   width: 100vw;
-  height: 100vh;
+  height: 130vh;
   background-color: $MAIN-COLOR-SKYBLUE;
+  padding-bottom: 400px;
 }
 
 .mainLogoImg {
-  margin-top: -200px;
   width: 480px;
 }
 
 .mainSearchbar {
   margin-top: 30px;
   background-color: white;
-  width: 800px; height: 80px;
+  width: 800px;
+  height: 80px;
   border-radius: 90px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding-left: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.mainSearchbar.active {
+  border-radius: 45px 45px 0 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .mainSearchInput {
@@ -82,33 +95,23 @@ export default {
 
 .searchIcon {
   width: 20px;
-}
-
-#mainSearchbar {
-  position: relative;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border:none;
+  cursor: pointer;
 }
 
 .suggestions-list {
-  position: absolute;
-  top: 80px;
+  margin: 0;
   width: 100%;
-  border-top: none;
-  background-color: white;
   max-height: 200px;
   overflow-y: auto;
   list-style: none;
-  padding: 0;
-  margin: 0;
+  background-color: white;
+  border-radius: 0 0 45px 45px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: -5px;
 }
 
 .suggestions-list li {
-  padding: 10px;
+  padding: 15px;
   cursor: pointer;
 }
 
