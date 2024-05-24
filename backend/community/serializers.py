@@ -37,3 +37,8 @@ class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Reply
         fields = '__all__'
+
+
+class CategorySerializer(serializers.Serializer):
+    key = serializers.CharField()
+    value = serializers.CharField()

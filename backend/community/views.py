@@ -13,6 +13,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.http import JsonResponse
+from .serializers import CategorySerializer
 
 
 class CommunityList(APIView):
@@ -272,3 +273,10 @@ class CommunitySearch(ListAPIView):
                     author__username__icontains=search_query)
 
         return queryset
+
+
+class CategoryListView(APIView):
+    def get(self, request, *args, **kwargs):
+        categories = [{'key': choice[0], 'value': choice[1]} for choice in Community.CATEGORY_CHOICES]
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
