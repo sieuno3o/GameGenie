@@ -3,13 +3,13 @@
     <span class="loginTitle heading3">로그인</span>
     <div id="id" class="loginInputBox flex-row-left">
       <img src="../../assets/image/account/idIcon.png" class="loginIconImg">
-      <input type="text" class="loginInput button2" id="inputId" placeholder="아이디">
+      <input v-model="username" type="text" class="loginInput button2" id="inputId" placeholder="아이디">
     </div>
     <div id="password" class="loginInputBox flex-row-left">
       <img src="../../assets/image/account/passwordIcon.png" class="loginIconImg">
-      <input type="text" class="loginInput button2" id="inputPassword" placeholder="비밀번호">
+      <input v-model="password" type="password" class="loginInput button2" id="inputPassword" placeholder="비밀번호">
     </div>
-    <button type="submit" class="loginInputBox" id="loginButton">로그인</button>
+    <button @click="login" type="submit" class="loginInputBox" id="loginButton">로그인</button>
     <div class="flex-row-center">
       <span>아직 계정이 없으신가요?</span>
       <router-link to="/signup">
@@ -20,6 +20,35 @@
 </template>
 
 <script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      username: '',
+      password: ''
+    };
+  },
+  methods: {
+    async login() {
+      try {
+        const response = await axios.post('http://localhost:8000/api/accounts/login/', {
+          username: this.username,
+          password: this.password
+        });
+        if (response.status === 200) {
+          this.$router.push({ name: 'main' })
+        }
+        console.log("login-> username, password: ", response);
+        const tokens = response.data;
+        localStorage.setItem('access', tokens.access);
+        localStorage.setItem('refresh', tokens.refresh);
+      } catch (error) {
+        console.error('Login failed:', error);
+      }
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -33,9 +62,12 @@
 }
 
 .loginInput {
+  width: 100%;
+  height: 100%;
   border: 0px;
   outline: none;
   padding-left: 15px;
+  border-radius: 5px;
 }
 
 .loginIconImg {
@@ -49,7 +81,8 @@
   border-style: solid;
   border-color: rgb(178, 178, 178);
   border-radius: 5px;
-  width: 310px; height: 50px;
+  width: 310px;
+  height: 50px;
   margin-bottom: 23px;
 }
 
