@@ -10,6 +10,7 @@
       <input v-model="password" type="password" class="loginInput button2" id="inputPassword" placeholder="비밀번호">
     </div>
     <button @click="login" type="submit" class="loginInputBox" id="loginButton">로그인</button>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <div class="flex-row-center">
       <span>아직 계정이 없으신가요?</span>
       <router-link to="/signup">
@@ -26,7 +27,8 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      errorMessage: ''
     };
   },
   methods: {
@@ -45,6 +47,11 @@ export default {
         localStorage.setItem('refresh', tokens.refresh);
       } catch (error) {
         console.error('Login failed:', error);
+        if (error.response && error.response.status === 401) {
+          this.errorMessage = '아이디 또는 비밀번호가 잘못되었습니다.';
+        } else {
+          this.errorMessage = '로그인 중 오류가 발생했습니다. 다시 시도해주세요.';
+        }
       }
     }
   }
