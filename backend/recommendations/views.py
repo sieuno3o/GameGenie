@@ -64,8 +64,8 @@ class GameViewSet(viewsets.ViewSet):
             try:
                 # 줄임말을 원래 이름으로 변환
                 for abbreviation, full_name in self.abbreviation_mapping.items():
-                    if abbreviation in user_input:
-                        user_input = user_input.replace(abbreviation, full_name)
+                    if abbreviation in user_input.lower():
+                        user_input = user_input.lower().replace(abbreviation, full_name)
                 print(f"변환된 사용자 입력: {user_input}")
 
                 # 사용자 입력에서 게임 이름 또는 장르 추출
@@ -119,9 +119,19 @@ class GameViewSet(viewsets.ViewSet):
             if 'genre' in extracted_info:
                 genre = extracted_info.split('genre:')[-1].strip()
                 return genre, 'genre'
-            else:
+            elif 'game name' in extracted_info:
                 name = extracted_info.split('game name:')[-1].strip()
                 return name, 'name'
+            else:
+                # 추출된 정보가 없을 경우 추가 처리
+                return self.additional_processing(query)
         except Exception as e:
             print(f"extract_game_name_or_genre 메서드에서 에러 발생: {e}")
             return None, None
+
+    def additional_processing(self, query):
+        # 추가 처리: 줄임말 매핑 시도
+        if query.lower() in self.abbreviation_mapping:
+            mapped_info = self.abbreviation_mapping[query.lower()]
+            return mapped_info, 'name'
+        return query, 'name'
