@@ -107,7 +107,7 @@ class GameViewSet(viewsets.ViewSet):
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. Respond with 'genre: <genre>' if it is a genre, or 'game name: <name>' if it is a game name."},
+                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. Respond with 'genre: <genre>' in english if it is a genre, or 'game name: <name>' if it is a game name."},
                     {"role": "user", "content": f"Identify if the following query is a game name or a genre: '{query}'"}
                 ],
                 max_tokens=50

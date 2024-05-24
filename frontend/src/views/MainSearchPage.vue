@@ -4,7 +4,7 @@
     <img src="../assets/image/logo.png" class="mainLogoImg">
     <div class="flex-col-center">
       <div :class="{ 'mainSearchbar': true, 'active': suggestions.length > 0 }" class="flex-left mainSearchbar">
-        <img src="../assets/image/searchIcon.png" class="searchIcon">
+        <img src="../assets/image/searchIcon.png" class="searchIcon" @click="searchGames">
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1"
           placeholder="검색어를 입력하세요" />
       </div>
