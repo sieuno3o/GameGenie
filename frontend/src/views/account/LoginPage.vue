@@ -36,12 +36,13 @@ export default {
           username: this.username,
           password: this.password
         });
+        if (response.status === 200) {
+          this.$router.push({ name: 'main' })
+        }
         console.log("login-> username, password: ", response);
         const tokens = response.data;
         localStorage.setItem('access', tokens.access);
         localStorage.setItem('refresh', tokens.refresh);
-        // 로그인 성공 후 원하는 페이지로 이동
-        this.$router.push({ name: "/" });
       } catch (error) {
         console.error('Login failed:', error);
       }
