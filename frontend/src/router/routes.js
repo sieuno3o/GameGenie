@@ -18,7 +18,7 @@ const routes = [
     children: communityRoutes,
   },
   {
-    path: "/account",
+    path: "/",
     component: accountLayout,
     children: accountRoutes,
   },

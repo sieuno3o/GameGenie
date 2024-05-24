@@ -1,6 +1,6 @@
 <template>
-  <div id="footer" class="flex-center">
-    footer
+  <div id="footer">
+    <span>GameGenie</span>
   </div>
 </template>
 
@@ -11,4 +11,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+div {
+  background-color: $MAIN-COLOR-SKYBLUE;
+}
+
+span {
+  color: $MAIN-COLOR-GRAY;
+}
+
+#footer {
+  padding: 170px 30px 50px 30px;
+}
 </style>
