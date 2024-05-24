@@ -63,7 +63,7 @@ export default {
           introduction: this.introduction
         });
         alert('회원가입이 완료되었습니다.');
-        this.$router.push({ name: "" });
+        this.$router.push({ name: "main" });
       } catch (error) {
         console.error('Signup failed:', error);
       }
