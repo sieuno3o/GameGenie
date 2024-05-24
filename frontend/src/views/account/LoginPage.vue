@@ -62,9 +62,12 @@ export default {
 }
 
 .loginInput {
+  width: 100%;
+  height: 100%;
   border: 0px;
   outline: none;
   padding-left: 15px;
+  border-radius: 5px;
 }
 
 .loginIconImg {
