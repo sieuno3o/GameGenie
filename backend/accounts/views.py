@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+
 class CreateView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -30,6 +31,9 @@ class CreateView(APIView):
             return Response({"message": "저장되었습니다", "userId": user.id}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 class LogoutView(APIView):
