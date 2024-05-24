@@ -2,15 +2,14 @@ import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
 
 const LoginPage = () => import("@/views/account/LoginPage.vue");
 const SignupPage = () => import("@/views/account/SignupPage.vue");
-const SuccessSignup = () => import("@/views/account/SuccessSignup.vue");
 
 const accountRoutes = [
   {
-    path: "",
+    path: "login",
     component: defaultDashboard,
     children: [
       {
-        path: "login",
+        path: "",
         name: "login",
         component: LoginPage,
       },
@@ -24,11 +23,6 @@ const accountRoutes = [
         path: "",
         name: "signup",
         component: SignupPage,
-      },
-      {
-        path: "success",
-        name: "success_signup",
-        component: SuccessSignup,
       },
     ],
   }, 
