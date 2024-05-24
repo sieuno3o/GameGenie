@@ -3,33 +3,39 @@
     <span class="signupTitle heading3">회원가입</span>
     <div id="id" class="signupInputBox flex-row-left">
       <img src="../../assets/image/account/idIcon.png" class="signupIconImg">
-      <input type="text" class="signupInput button2" id="inputId" placeholder="아이디">
+      <input v-model="username" type="text" class="signupInput button2" id="inputId" placeholder="아이디">
     </div>
     <div id="password" class="signupInputBox flex-row-left">
       <img src="../../assets/image/account/passwordIcon.png" class="signupIconImg">
-      <input type="text" class="signupInput button2" id="inputPassword" placeholder="비밀번호">
+      <input v-model="password" type="password" class="signupInput button2" id="inputPassword" placeholder="비밀번호">
     </div>
     <div id="email" class="signupInputBox flex-row-left">
       <img src="../../assets/image/account/emailIcon.png" class="signupIconImg">
-      <input type="text" class="signupInput button2" id="inputEmail" placeholder="이메일">
+      <input v-model="email" type="text" class="signupInput button2" id="inputEmail" placeholder="이메일">
     </div>
     <div id="nickname" class="signupInputBox flex-row-left">
       <img src="../../assets/image/account/nicknameIcon.png" class="signupIconImg">
-      <input type="text" class="signupInput button2" id="inputNickname" placeholder="닉네임">
+      <input v-model="introduction" type="text" class="signupInput button2" id="inputNickname" placeholder="닉네임">
     </div>
     <div class="profileImageBox flex-col-center">
       <img :src="profileImage || defaultImage" class="profileImagePreview" />
       <button @click="triggerFileInput" class="profileImageButton button2">📸 사진 업로드</button>
       <input type="file" ref="fileInput" @change="onImageChange" accept="image/*" class="profileImageInput">
     </div>
-    <button type="submit" class="signupInputBox" id="signupButton">회원가입</button>
+    <button @click="signup" type="submit" class="signupInputBox" id="signupButton">회원가입</button>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
+      username: '',
+      password: '',
+      email: '',
+      introduction: '',
       profileImage: null,
       defaultImage: require('../../assets/image/account/profileImgIcon.png'),
     };
@@ -48,7 +54,21 @@ export default {
         reader.readAsDataURL(file);
       }
     },
-  },
+    async signup() {
+      try {
+        await axios.post('http://localhost:8000/api/accounts/create/', {
+          username: this.username,
+          password: this.password,
+          email: this.email,
+          introduction: this.introduction
+        });
+        alert('회원가입이 완료되었습니다.');
+        this.$router.push({ name: "main" });
+      } catch (error) {
+        console.error('Signup failed:', error);
+      }
+    }
+  }
 };
 </script>
 
@@ -63,9 +83,12 @@ export default {
 }
 
 .signupInput {
+  width: 100%;
+  height: 100%;
   border: 0px;
   outline: none;
   padding-left: 15px;
+  border-radius: 5px;
 }
 
 .signupIconImg {
