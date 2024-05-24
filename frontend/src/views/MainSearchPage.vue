@@ -5,7 +5,7 @@
     <div class="flex-col-center">
       <div :class="{ 'mainSearchbar': true, 'active': suggestions.length > 0 }" class="flex-left mainSearchbar">
         <img src="../assets/image/searchIcon.png" class="searchIcon">
-        <input type="text" v-model="query" @input="fetchSuggestions" class="mainSearchInput body1"
+        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1"
           placeholder="검색어를 입력하세요" />
       </div>
       <ul v-if="suggestions.length > 0" class="suggestions-list body1">
@@ -34,7 +34,7 @@ export default {
         return;
       }
       axios
-        .get('http://localhost:8000/api/community/categories/?query=${this.query}')
+        .get(`http://localhost:8000/api/community/categories/?query=${this.query}`)
         .then((response) => {
           this.suggestions = response.data.filter(item =>
             item.value.toLowerCase().includes(this.query.toLowerCase())
@@ -50,6 +50,11 @@ export default {
     selectSuggestion(suggestion) {
       this.query = suggestion.value; 
       this.suggestions = [];
+    },
+    searchGames() {
+      if (this.query.trim() !== "") {
+        this.$router.push({ path: '/recommendations', query: { user_input: this.query } });
+      }
     },
   },
 };

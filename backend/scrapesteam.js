@@ -4,7 +4,7 @@ async function scrapeGameDetails(appid) {
     const url = `https://store.steampowered.com/app/${appid}`;
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    
+
     // 쿠키 설정을 통한 연령확인 우회
     await page.setCookie({
         name: 'birthtime',
@@ -43,8 +43,8 @@ async function scrapeSimilarGames(appid) {
     const url = `https://store.steampowered.com/app/${appid}`;
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    
-    // 쿠키 설정을 통해 연령 확인 우회
+
+    // 쿠키 설정을 통한 연령확인 우회
     await page.setCookie({
         name: 'birthtime',
         value: '28801',
@@ -79,23 +79,6 @@ async function scrapeSimilarGames(appid) {
 
         return games;
     });
-
-    for (let game of similarGames) {
-        try {
-            const gamePageUrl = `https://store.steampowered.com/app/${game.appid}`;
-            await page.goto(gamePageUrl);
-
-            const reviewSummary = await page.evaluate(() => {
-                let reviewSummaryElement = document.querySelector('.game_review_summary');
-                return reviewSummaryElement ? reviewSummaryElement.innerText : 'No reviews';
-            });
-
-            game.review_summary = reviewSummary;
-        } catch (e) {
-            console.log(`Error scraping review summary for appid ${game.appid}: ${e}`);
-            game.review_summary = 'No reviews';
-        }
-    }
 
     await browser.close();
     return similarGames;
