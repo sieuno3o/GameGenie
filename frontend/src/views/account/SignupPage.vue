@@ -56,14 +56,16 @@ export default {
     },
     async signup() {
       try {
-        await axios.post('http://localhost:8000/api/accounts/create/', {
+        const response = await axios.post('http://localhost:8000/api/accounts/create/', {
           username: this.username,
           password: this.password,
           email: this.email,
           introduction: this.introduction
         });
         alert('회원가입이 완료되었습니다.');
-        this.$router.push({ name: "main" });
+        if (response.status === 201) {
+          this.$router.push({ name: 'login' });
+        }
       } catch (error) {
         console.error('Signup failed:', error);
       }
@@ -136,5 +138,9 @@ export default {
   height: 100px;
   object-fit: cover;
   border-radius: 50%;
+}
+
+#signupButton {
+  margin-bottom: 100px
 }
 </style>
