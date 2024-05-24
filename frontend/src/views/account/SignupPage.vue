@@ -76,7 +76,7 @@ export default {
 
 <style lang="scss" scoped>
 .signupPageBox {
-  margin-top: 70px;
+  margin-top: 100px;
 }
 
 .signupTitle {
@@ -141,6 +141,6 @@ export default {
 }
 
 #signupButton {
-  margin-bottom: 100px
+  margin-bottom: 130px
 }
 </style>
