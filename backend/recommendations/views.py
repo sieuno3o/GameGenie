@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.conf import settings
+from django.contrib.sessions.models import Session
 from .steam_api import SteamAPI
 from openai import OpenAI
 from GameGenie import config
@@ -44,14 +45,20 @@ class GameViewSet(viewsets.ViewSet):
         '레데리': '레드 데드 리뎀션',
         '포나': '포트나이트',
         '라오어': '라스트 오브 어스',
-        '배그' : "PUBG",
-        '배틀그라운드' : "PUBG",
+        '배그': 'PUBG',
+        '배틀그라운드': 'PUBG',
         # 추가적인 줄임말 매핑
     }
 
     def list(self, request):
         user_input = request.query_params.get('user_input')
+        session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
+
         print(f"받은 사용자 입력: {user_input}")
+        print(f"세션 키: {session_key}")
 
         if user_input:
             try:
@@ -68,26 +75,28 @@ class GameViewSet(viewsets.ViewSet):
                 if not extracted_info:
                     return Response({"error": "Game name or genre not found in user input"}, status=status.HTTP_400_BAD_REQUEST)
 
+                request.session['last_input'] = user_input
+                request.session['last_info'] = extracted_info
+                request.session['last_info_type'] = info_type
+
                 if info_type == 'genre':
                     # 추출된 장르를 매핑
                     mapped_genre = self.genre_mapping.get(extracted_info.lower(), extracted_info.capitalize())
                     print(f"매핑된 장르: {mapped_genre}")
 
                     # 장르 기반 상위 게임 스크래핑
-                    top_games = steam_client.scrape_top_games_by_genre(mapped_genre)
+                    top_games = steam_client.scrape_top_games_by_genre(mapped_genre, lang='koreana')
                     if top_games:
-                        top_games_with_urls = self.add_store_urls(top_games)
-                        return Response({"similar_games": top_games_with_urls})
+                        return Response({"similar_games": top_games})
                     else:
                         return Response({"error": f"No top games found for the genre {mapped_genre}"}, status=status.HTTP_404_NOT_FOUND)
                 else:
                     # 스팀에서 게임 정보 및 비슷한 게임 검색
-                    similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info)
+                    similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info, lang='koreana')
                     if not similar_games_info:
-                        return Response({"error": "서비스 초기라 불안정합니다. 다시 시도해주세요!"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response({"error": "No similar games found"}, status=status.HTTP_404_NOT_FOUND)
 
-                    similar_games_with_urls = self.add_store_urls(similar_games_info)
-                    return Response({"similar_games": similar_games_with_urls})
+                    return Response({"similar_games": similar_games_info})
             except Exception as e:
                 print(f"list 메서드에서 에러 발생: {e}")
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -96,9 +105,9 @@ class GameViewSet(viewsets.ViewSet):
     def extract_game_name_or_genre(self, query):
         try:
             response = client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. If it is a genre, return only the genre name in English. If it is a game name, return only the name in English."},
+                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. Respond with 'genre: <genre>' if it is a genre, or 'game name: <name>' if it is a game name."},
                     {"role": "user", "content": f"Identify if the following query is a game name or a genre: '{query}'"}
                 ],
                 max_tokens=50
@@ -106,19 +115,13 @@ class GameViewSet(viewsets.ViewSet):
 
             print('OpenAI 응답:', response)
 
-            extracted_info = response.choices[0].message.content.strip().lower()
+            extracted_info = response.choices[0].message.content.strip()
             if 'genre' in extracted_info:
-                genre = extracted_info.split(':')[-1].strip().replace('.', '').replace('"', '').strip()
-                mapped_genre = self.genre_mapping.get(genre.lower(), genre.capitalize())
-                return mapped_genre, 'genre'
+                genre = extracted_info.split('genre:')[-1].strip()
+                return genre, 'genre'
             else:
-                name = extracted_info.split('game name')[-1].strip().replace('.', '').replace('"', '').split(':')[-1].strip()
+                name = extracted_info.split('game name:')[-1].strip()
                 return name, 'name'
         except Exception as e:
             print(f"extract_game_name_or_genre 메서드에서 에러 발생: {e}")
             return None, None
-
-    def add_store_urls(self, games):
-        for game in games:
-            game['store_url'] = f"https://store.steampowered.com/app/{game['appid']}/"
-        return games
