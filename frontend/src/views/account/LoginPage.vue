@@ -53,7 +53,7 @@ export default {
 
 <style lang="scss" scoped>
 .loginPageBox {
-  margin-top: 70px;
+  margin-top: 100px;
 }
 
 .loginTitle {
