@@ -14,20 +14,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.http import JsonResponse
 from .serializers import CategorySerializer
+from rest_framework.pagination import PageNumberPagination
 
+class CommunityList(ListAPIView):
+    queryset = Community.objects.all()
+    serializer_class = CommunitySerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = ['created_at', 'likes_count', 'views_count']
+    search_fields = ['title', 'content', 'author__username']
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 10
 
-class CommunityList(APIView):
-    def get(self, request):
-        communities = Community.objects.all()
-        for community in communities:
-            community.points = community.communitylist_points()
-
-        def get_points(community):
-            return community.points
-
-        sorted_communities = sorted(communities, key=get_points, reverse=True)
-        serializer = CommunitySerializer(sorted_communities, many=True)
-        return Response(serializer.data)
 
 class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
