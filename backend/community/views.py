@@ -155,16 +155,15 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
 
 
-class CommentsList(APIView):
-    def get(self, request, pk):
-        community = get_object_or_404(Community, pk=pk)
-        comments = Comment.objects.filter(
-            community=community).order_by('created_at').values()
-        replies = Comment.objects.filter(
-            parent_comment__community=community).order_by('created_at').values()
-        community_list = list(comments) + list(replies)
-        community_list.sort(key=lambda x: x['created_at'], reverse=True)
-        return Response(community_list)
+class CommentsList(ListAPIView):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
+
+    def get_queryset(self):
+        community = get_object_or_404(Community, pk=self.kwargs['pk'])
+        return Comment.objects.filter(community=community).order_by('created_at')
+
 
 
 class UserCommentsList(APIView):
