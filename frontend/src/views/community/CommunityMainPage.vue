@@ -3,7 +3,7 @@
     <div class="communityTitle">
       <h1>커뮤니티</h1>
     </div>
-    <img class="banner" src="">
+    <img class="banner" src="" alt="배너 사진">
     <div class="communityMain">
       <div class="communityRow1">
         <div class="categoryButton">
@@ -37,6 +37,10 @@
 </script>
 
 <style lang="scss" scoped>
+.community {
+  width: auto;
+}
+
 .communityTitle {
   background-color: beige;
   width: 100%;
@@ -44,6 +48,7 @@
   text-align: center;
   align-content: center;
 }
+
 .banner {
   position: relative;
   width: 100%;
@@ -51,15 +56,18 @@
   top: 10px;
   background-color: lightgray;
 }
+
 .communityRow1 {
   position: relative;
   display: flex;
   gap: 0px 14px;
   margin: 12px;
 }
+
 .communityRow2 {
   display: flex;
 }
+
 .categorylist {
   display: flex;
   justify-content: center;
@@ -69,17 +77,21 @@
   border-radius: 10px;
   background-color: beige;
 }
+
 .categoryButton {
   display: flex;
   align-items: center;
   gap: 30px;
 }
+
 .subtitle {
   font-size: 16px;
 }
+
 .categorySortButton {
   display: flex;
 }
+
 .hamburgericon {
   width: 25px;
   height: 25px;
