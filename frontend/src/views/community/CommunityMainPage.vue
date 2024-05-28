@@ -22,8 +22,13 @@
       <div class="communityRow2">
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1"
           placeholder="게임 이름 또는 장르 검색"/>
-        <button class="communityCreate"><h2 class="medium_title">글 작성</h2></button>
+        <div class="communityCreate">
+          <router-link to="/communityCreate">
+            <span class="communityCreate">로그인</span>
+          </router-link>
+        </div>
       </div>
+      
     </div>
   </div>
 </template>
