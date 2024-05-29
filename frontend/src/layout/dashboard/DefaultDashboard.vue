@@ -1,8 +1,6 @@
 <template>
-  <div class="flex-center" id="contents-wrapper">
-    <div class="flex-row-around" id="contents">
-      <router-view></router-view>
-    </div>
+  <div class="flex-row-around" id="contents">
+    <router-view></router-view>
   </div>
 </template>
 
@@ -16,6 +14,6 @@ export default {
 <style lang="scss" scoped>
 #contents {
   max-width: 1920px;
-  min-height: calc(100vh - 130px - 70px);
+  min-height: calc(100vh - 55px);
 }
 </style>
