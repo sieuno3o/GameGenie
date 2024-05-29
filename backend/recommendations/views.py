@@ -46,7 +46,7 @@ class GameViewSet(viewsets.ViewSet):
 
             # AI에게 사용자 입력을 이해하도록 요청
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
                 messages=self.conversation_history,
                 max_tokens=500  # 토큰 수를 늘림
             )
