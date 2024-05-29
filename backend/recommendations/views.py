@@ -5,20 +5,20 @@ from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from GameGenie import config
 
-client = OpenAI(
-    api_key=config.OPENAI_API_KEY,
-)
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 # Steam 클라이언트 설정
 steam_client = SteamAPI()
+
 
 class GameViewSet(viewsets.ViewSet):
     # 대화를 위한 초기 시스템 메시지 설정
     system_instructions = """
     당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
-    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
+    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 
+    Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
     """
-    
+
     # 대화 기록을 저장할 변수
     conversation_history = [
         {"role": "system", "content": system_instructions}
