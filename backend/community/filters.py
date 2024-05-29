@@ -1,6 +1,7 @@
 import django_filters
 from .models import Community
 
+
 class CommunityFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='icontains')
     content = django_filters.CharFilter(lookup_expr='icontains')

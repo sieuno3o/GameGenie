@@ -1,98 +1,82 @@
 import requests
-import subprocess
 import json
 from bs4 import BeautifulSoup
-import random
+
 
 class SteamAPI:
     def __init__(self):
         self.base_url = "https://store.steampowered.com"
 
-    def get_game_details(self, appid):
-        result = subprocess.run(['node', 'scrapesteam.js', 'details', str(appid)], capture_output=True, text=True, encoding='utf-8')
-        if result.returncode == 0:
-            try:
-                return json.loads(result.stdout)
-            except json.JSONDecodeError as e:
-                print(f"Error decoding JSON for game details of appid {appid}: {e}")
-                print(f"Output was: {result.stdout}")
-        return None
-
-    def scrape_review_summary(self, appid):
-        url = f"https://store.steampowered.com/app/{appid}/"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        review_summary = soup.find('span', {'class': 'game_review_summary'})
-        return review_summary.text if review_summary else 'No reviews'
-
-    def search_game(self, game_name):
-        search_url = f"{self.base_url}/search/?term={game_name}&l=koreana"
+    def get_top_search_result(self, game_name):
+        search_url = f"{self.base_url}/search/?term={game_name}"
         response = requests.get(search_url)
         soup = BeautifulSoup(response.text, 'html.parser')
         first_result = soup.find('a', {'class': 'search_result_row'})
+
         if first_result:
-            appid = first_result['data-ds-appid']
-            return self.scrape_similar_games(appid)
-        return []
-
-    def scrape_similar_games_by_name(self, game_name, lang='koreana'):
-        search_url = f"{self.base_url}/search/?term={game_name}&l={lang}"
-        response = requests.get(search_url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        first_result = soup.find('a', {'class': 'search_result_row'})
-        if first_result:
-            appid = first_result['data-ds-appid']
-            similar_games = self.scrape_similar_games(appid)
-            random.shuffle(similar_games)
-            return similar_games[:5]
-        return []
-
-    def scrape_similar_games(self, appid):
-        result = subprocess.run(['node', 'scrapesteam.js', 'similar', str(appid)], capture_output=True, text=True, encoding='utf-8')
-        if result.returncode == 0:
             try:
-                similar_games = json.loads(result.stdout)
-                for game in similar_games:
-                    game['image_url'] = self.convert_to_akamai(game['image_url'])
-                    game['store_url'] = f"{self.base_url}/app/{game['appid']}/"
-                return similar_games
-            except json.JSONDecodeError as e:
-                print(f"Error decoding JSON for similar games of appid {appid}: {e}")
-                print(f"Output was: {result.stdout}")
-        return []
-
-    def scrape_top_games_by_genre(self, genre, lang='koreana'):
-        search_url = f"{self.base_url}/search/?term={genre}&l={lang}"
-        response = requests.get(search_url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        game_divs = soup.find_all('a', {'class': 'search_result_row'})
-        top_games = []
-        for game_div in game_divs:
-            try:
-                appid = game_div['data-ds-appid']
-                name = game_div.find('span', {'class': 'title'}).text.strip()
-                review_summary_element = game_div.find('span', {'class': 'search_review_summary'})
-                review_summary = 'No reviews'
-                if review_summary_element:
-                    review_summary = review_summary_element['data-tooltip-html'].split('<br>')[0]
-                image_url = self.convert_to_akamai(game_div.find('img')['src'])
-                price_element = game_div.find('div', {'class': 'col search_price responsive_secondrow'})
-                price = price_element.text.strip() if price_element else 'No price'
-                top_games.append({
-                    'appid': appid,
-                    'name': name,
-                    'review_summary': review_summary,
-                    'price': price,
-                    'image_url': image_url,
-                    'store_url': f"{self.base_url}/app/{appid}/"
-                })
+                appid = first_result['data-ds-appid']
+                return self.get_game_details(appid)
             except Exception as e:
                 print(f"Error scraping game card: {e}")
-        
-        random.shuffle(top_games)
-        return top_games[:5]
+        return None
 
-    def convert_to_akamai(self, url):
-        if 'cloudflare' in url:
-            return url.replace('cloudflare', 'akamai')
-        return url
+    def get_game_details(self, appid):
+        game_url = f"{self.base_url}/app/{appid}/"
+        response = requests.get(game_url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        try:
+            name = soup.find('div', {'class': 'apphub_AppName'}).text.strip()
+            image_url = soup.find('img', {'class': 'game_header_image_full'})['src']
+            review_summary = self.get_all_reviews_summary(soup)
+            price = self.extract_price(soup)
+
+            return {
+                'appid': appid,
+                'name': name,
+                'review_summary': review_summary,
+                'price': price,
+                'image_url': image_url,
+                'store_url': game_url
+            }
+        except Exception as e:
+            print(f"Error scraping game details: {e}")
+        return None
+
+    def get_all_reviews_summary(self, soup):
+        try:
+            # 'All Reviews'가 있는 div를 정확히 찾아서 텍스트를 추출
+            reviews = soup.find_all('div', {'class': 'user_reviews_summary_row'})
+            for review in reviews:
+                if 'All Reviews' in review.text:
+                    all_reviews_summary = review.find('span', {'class': 'game_review_summary'}).text.strip()
+                    return all_reviews_summary
+            return 'No reviews'
+        except Exception as e:
+            print(f"Error scraping all reviews summary: {e}")
+            return 'No reviews'
+
+    def extract_price(self, soup):
+        # 가격 요소를 찾아서 추출
+        price_element = soup.find('div', {'class': 'game_purchase_price price'})
+        if not price_element:
+            price_element = soup.find('div', {'class': 'discount_final_price'})
+
+        if price_element:
+            price = price_element.text.strip()
+            if "무료 데모" not in price and "FREE" not in price.upper():
+                return price
+
+        # 여러 버전의 게임 가격을 포함하는 경우를 처리
+        prices = soup.find_all('div', {'class': 'game_area_purchase_game_wrapper'})
+        for price_div in prices:
+            if price_div.find('h1', text=lambda x: x and "DEMO" not in x.upper()):
+                price = price_div.find('div', {'class': 'game_purchase_price price'})
+                if not price:
+                    price = price_div.find('div', {'class': 'discount_final_price'})
+
+                if price:
+                    return price.text.strip()
+
+        return 'No price'
