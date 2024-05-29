@@ -96,8 +96,7 @@ class Community(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='community_images/', null=True, blank=True)
     video = models.FileField(upload_to='community_videos/', null=True, blank=True)
-    
-    
+
     def like(self, user):
         self.community_like.add(user)
 
@@ -106,7 +105,7 @@ class Community(models.Model):
 
     def is_liked_by_user(self, user):
         return self.community_like.filter(id=user.id).exists()
-    
+
     def get_likes_count(self):
         return self.community_like.count()
 
@@ -142,7 +141,7 @@ class Comment(models.Model):
 
     def is_liked_by_user(self, user):
         return self.comments_likes.filter(id=user.id).exists()
-    
+
     def get_likes_count(self):
         return self.comments_likes.count()
 
@@ -164,6 +163,6 @@ class Reply(models.Model):
 
     def is_liked_by_user(self, user):
         return self.reply_likes.filter(id=user.id).exists()
-    
+
     def get_likes_count(self):
         return self.reply_likes.count()

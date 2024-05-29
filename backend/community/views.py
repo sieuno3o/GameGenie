@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
 
+
 class CommunityList(ListAPIView):
     queryset = Community.objects.all()
     serializer_class = CommunitySerializer
@@ -163,7 +164,6 @@ class CommentsList(ListAPIView):
     def get_queryset(self):
         community = get_object_or_404(Community, pk=self.kwargs['pk'])
         return Comment.objects.filter(community=community).order_by('created_at')
-
 
 
 class UserCommentsList(APIView):
