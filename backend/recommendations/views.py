@@ -25,8 +25,8 @@ class GameViewSet(viewsets.ViewSet):
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that helps users find similar games on Steam. When a user asks for a game recommendation, analyze the user's input and provide a list of up to 5 recommended games based on Steam data."},
-                    {"role": "user", "content": f"Recommend up to 5 games based on the following user input: '{user_input}'"}
+                        {"role": "system", "content": "당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다. 사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다."},
+                        {"role": "user", "content": f"다음 사용자 입력을 기반으로 최대 5개의 게임을 추천해줘: '{user_input}'"}
                 ],
                 max_tokens=500  # 토큰 수를 늘림
             )
