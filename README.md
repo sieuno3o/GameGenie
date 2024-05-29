@@ -57,7 +57,7 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 - [📖 GG S.A.](https://www.notion.so/teamsparta/S-A-GG-f171c28b31bd4d85b210cf13c19da9b3)
 - [📌 기능정의서 및 정책서](https://docs.google.com/spreadsheets/d/1hobOW0uL0eCD4xPE-cuJ8muZjCl3EkYzNvOXJbEfCd0/edit#gid=0)
-- [📂 ERD]()
+- [📂 ERD](https://dbdiagram.io/d/6655adcdb65d933879dcd4bb)
 - [🖌️ 와이어프레임](https://www.figma.com/file/qV9SY9bMTZ8krWhaOsa84h?embed_host=notion&kind=file&node-id=0%3A1&t=oAZOhWUeoI0PgmFp-1&viewer=1)
 
 <br>
