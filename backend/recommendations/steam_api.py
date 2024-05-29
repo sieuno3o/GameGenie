@@ -15,23 +15,33 @@ class SteamAPI:
         if first_result:
             try:
                 appid = first_result['data-ds-appid']
-                name = first_result.find('span', {'class': 'title'}).text.strip()
-                review_summary_element = first_result.find('span', {'class': 'search_review_summary'})
-                review_summary = 'No reviews'
-                if review_summary_element:
-                    review_summary = review_summary_element['data-tooltip-html'].split('<br>')[0]
-                image_url = first_result.find('img')['src']
-                price_element = first_result.find('div', {'class': 'col search_price responsive_secondrow'})
-                price = price_element.text.strip() if price_element else 'No price'
-                
-                return {
-                    'appid': appid,
-                    'name': name,
-                    'review_summary': review_summary,
-                    'price': price,
-                    'image_url': image_url,
-                    'store_url': f"{self.base_url}/app/{appid}/"
-                }
+                return self.get_game_details(appid)
             except Exception as e:
                 print(f"Error scraping game card: {e}")
+        return None
+
+    def get_game_details(self, appid):
+        game_url = f"{self.base_url}/app/{appid}/"
+        response = requests.get(game_url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        try:
+            name = soup.find('div', {'class': 'apphub_AppName'}).text.strip()
+            image_url = soup.find('img', {'class': 'game_header_image_full'})['src']
+            review_summary = soup.find('span', {'class': 'game_review_summary'}).text.strip()
+            price_element = soup.find('div', {'class': 'game_purchase_price price'})
+            if not price_element:
+                price_element = soup.find('div', {'class': 'discount_final_price'})
+            price = price_element.text.strip() if price_element else 'No price'
+
+            return {
+                'appid': appid,
+                'name': name,
+                'review_summary': review_summary,
+                'price': price,
+                'image_url': image_url,
+                'store_url': game_url
+            }
+        except Exception as e:
+            print(f"Error scraping game details: {e}")
         return None
