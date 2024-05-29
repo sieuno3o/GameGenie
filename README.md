@@ -22,43 +22,7 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 <br>
 
-## 주요 기능
-
-### 계정 관련 기능
-
-#### 1. 회원가입
-
-<img src="https://media.discordapp.net/attachments/1245260060024635464/1245265002135420948/image.png?ex=66581ee8&is=6656cd68&hm=24345489a5c5afdebb967dacbd7372d730de7922aefa29966124894ccd83567c&=&format=webp&quality=lossless&width=2160&height=958">
-
-- 아이디, 비밀번호, 이메일, 닉네임 (필수) / 프로필 사진 (선택)
-- 비밀번호를 제외한 모든 사항 중복체크
-- 비밀번호 암호화 (SHA-256)
-
-#### 2. 로그인
-
-<img src="https://media.discordapp.net/attachments/1245260060024635464/1245264222288482305/image.png?ex=66581e2e&is=6656ccae&hm=e316da53d8d01b8a632bc9bc76a48172d7dd5014773834ff77f33df2e5bd6efe&=&format=webp&quality=lossless&width=2160&height=964">
-
-- 아이디, 비밀번호 입력
-- DB 값 검증
-
-#### 3. 로그아웃
-
-#### 4. 회원정보 수정
-
-#### 5. 회원 탈퇴
-
-### 게임 검색 관련 기능
-
-### 커뮤니티 관련 기능
-
-<br>
-
 ## 문서
-
-- [📖 GG S.A.](https://www.notion.so/teamsparta/S-A-GG-f171c28b31bd4d85b210cf13c19da9b3)
-- [📌 기능정의서 및 정책서](https://docs.google.com/spreadsheets/d/1hobOW0uL0eCD4xPE-cuJ8muZjCl3EkYzNvOXJbEfCd0/edit#gid=0)
-- [📂 ERD]()
-- [🖌️ 와이어프레임](https://www.figma.com/file/qV9SY9bMTZ8krWhaOsa84h?embed_host=notion&kind=file&node-id=0%3A1&t=oAZOhWUeoI0PgmFp-1&viewer=1)
 
 <br>
 
