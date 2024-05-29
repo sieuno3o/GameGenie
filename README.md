@@ -52,20 +52,23 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 ### 게임 검색 관련 기능
 
 #### 1. 메인 페이지의 입력창에 게임 추천 텍스트 입력 가능
+
 <img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245268855765467167/2024-05-29_155208.png?ex=6658227f&is=6656d0ff&hm=79683030f3a64fdb1786fea369572b40128ae49bea717dfc23841051635c72f3&">
 
 #### 2. openai의 GPT를 이용해 게임 추천 받기 가능
+
 <img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245271631174176768/2024-05-29_160419.png?ex=66582514&is=6656d394&hm=488a6a06250e3382f4a48f55a2353de325d195553e9957fbc2d541baa42be67d&">
 
 - 추천 받은 게임들의 정보를 BeautifulSoup를 이용해 가져온 후 사용자에게 카드형태로 표시
+
 <img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245271630721056798/2024-05-29_160357.png?ex=66582514&is=6656d394&hm=b4fa96040128d2b92dd264a1f671f0466f16e9488cc2ff60878d527384b2b7be&">
 
 
 #### 3. 검색어 추천 기능
 
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245277391115386910/image.png?ex=66582a72&is=6656d8f2&hm=e916dce22c17cab62bdbf786611aac82869c4d098e882ea8617ad73a30ee2963&">
+- 검색창에 게임 장르 입력시 비슷한 장르를 유도 추천
 
--검색창에 게임 장르 입력시 비슷한 장르를 유도 추천
+<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245277391115386910/image.png?ex=66582a72&is=6656d8f2&hm=e916dce22c17cab62bdbf786611aac82869c4d098e882ea8617ad73a30ee2963&">
 
 <br>
 
