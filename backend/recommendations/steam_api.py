@@ -29,11 +29,8 @@ class SteamAPI:
         try:
             name = soup.find('div', {'class': 'apphub_AppName'}).text.strip()
             image_url = soup.find('img', {'class': 'game_header_image_full'})['src']
-            review_summary = soup.find('span', {'class': 'game_review_summary'}).text.strip()
-            price_element = soup.find('div', {'class': 'game_purchase_price price'})
-            if not price_element:
-                price_element = soup.find('div', {'class': 'discount_final_price'})
-            price = price_element.text.strip() if price_element else 'No price'
+            review_summary = self.get_all_reviews_summary(soup)
+            price = self.extract_price(soup)
 
             return {
                 'appid': appid,
@@ -46,3 +43,40 @@ class SteamAPI:
         except Exception as e:
             print(f"Error scraping game details: {e}")
         return None
+
+    def get_all_reviews_summary(self, soup):
+        try:
+            # 'All Reviews'가 있는 div를 정확히 찾아서 텍스트를 추출
+            reviews = soup.find_all('div', {'class': 'user_reviews_summary_row'})
+            for review in reviews:
+                if 'All Reviews' in review.text:
+                    all_reviews_summary = review.find('span', {'class': 'game_review_summary'}).text.strip()
+                    return all_reviews_summary
+            return 'No reviews'
+        except Exception as e:
+            print(f"Error scraping all reviews summary: {e}")
+            return 'No reviews'
+
+    def extract_price(self, soup):
+        # 가격 요소를 찾아서 추출
+        price_element = soup.find('div', {'class': 'game_purchase_price price'})
+        if not price_element:
+            price_element = soup.find('div', {'class': 'discount_final_price'})
+
+        if price_element:
+            price = price_element.text.strip()
+            if "무료 데모" not in price and "FREE" not in price.upper():
+                return price
+
+        # 여러 버전의 게임 가격을 포함하는 경우를 처리
+        prices = soup.find_all('div', {'class': 'game_area_purchase_game_wrapper'})
+        for price_div in prices:
+            if price_div.find('h1', text=lambda x: x and "DEMO" not in x.upper()):
+                price = price_div.find('div', {'class': 'game_purchase_price price'})
+                if not price:
+                    price = price_div.find('div', {'class': 'discount_final_price'})
+
+                if price:
+                    return price.text.strip()
+
+        return 'No price'
