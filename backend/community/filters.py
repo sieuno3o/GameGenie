@@ -8,4 +8,4 @@ class CommunityFilter(django_filters.FilterSet):
 
     class Meta:
         model = Community
-        fields = ['category', 'type', 'title', 'content', 'author']
+        fields = ['category', 'title', 'content', 'author']

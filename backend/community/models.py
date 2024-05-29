@@ -4,8 +4,6 @@ from django.utils import timezone
 
 
 class Community(models.Model):
-    TYPE_CHOICES = [('news', 'News'), ('show', 'Show'), ('ask', 'Ask')]
-
     CATEGORY_CHOICES = [
         # 액션
         ('action', '액션'),
@@ -85,7 +83,6 @@ class Community(models.Model):
         ('other', '기타')
     ]
 
-    type = models.CharField(max_length=4, choices=TYPE_CHOICES)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     title = models.CharField(max_length=255)
     content = models.TextField()
