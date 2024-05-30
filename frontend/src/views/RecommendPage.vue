@@ -2,15 +2,16 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <div v-for="(message, index) in messages" :key="index" class="chat-message">
+        <div v-for="(message, index) in messages" :key="index" class="chat-message"
+          :class="{ 'user-message-container': message.isUser, 'bot-message-container': !message.isUser }">
           <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
             {{ message.text }}
           </div>
         </div>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" v-if="recommendedGames.length > 0">
+    <v-row v-if="recommendedGames.length > 0">
+      <v-col cols="12">
         <h2>추천 게임</h2>
         <v-row>
           <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="3">
@@ -65,9 +66,8 @@ export default {
 
       try {
         const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.userInput)}`);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
         const data = await response.json();
 
         if (data.similar_games) {
@@ -92,9 +92,8 @@ export default {
 
       try {
         const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.previousInput)}`);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
         const data = await response.json();
 
         if (data.similar_games) {
@@ -113,43 +112,59 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.user-message {
-  position: relative;
-  padding: 20px;
-  min-width: 200px;
-  min-height: 60px;
-  color: #FFF;
-  border-radius: 10px;
-  background-color: white;
-  border: 1px solid rgb(147, 147, 147);
-  color: black;
+.user-message-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
 }
 
-.user-message:before,
+.bot-message-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.user-message,
+.bot-message {
+  position: relative;
+  padding: 20px;
+  max-width: 60%;
+  min-width: 100px;
+  word-wrap: break-word;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-message {
+  background-color: #000;
+  color: #fff;
+}
+
 .user-message:after {
-  content: "";
+  content: '';
   position: absolute;
+  top: 21px;
+  right: -30px;
+  border-left: 30px solid #000;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
 }
 
-.user-message:before {
-  border-left: 31px solid rgb(147, 147, 147);
-  top: 21px;
-  right: -33px;
-  z-index: 1;
-}
-
-.user-message:after {
-  border-left: 30px solid white;
-  top: 21px;
-  right: -30px;
-  z-index: 2;
-}
-
 .bot-message {
-  text-align: left;
-  color: green;
+  background-color: #4caf50;
+  color: white;
+}
+
+.bot-message:before {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: -30px;
+  border-right: 30px solid #4caf50;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
 }
 
 .search-bar {
