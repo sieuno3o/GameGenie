@@ -20,7 +20,7 @@ const communityRoutes = [
         component: CommunityDetailPage,
       },
       {
-        path: "create",
+        path: "",
         name: "communityCreate",
         component: CommunityCreatePage,
       },
