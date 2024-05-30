@@ -21,7 +21,7 @@
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
           class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
-          <router-link to="communityCreate">
+          <router-link to="community/create">
             <span class="Create">글 작성</span>
           </router-link>
         </div>
