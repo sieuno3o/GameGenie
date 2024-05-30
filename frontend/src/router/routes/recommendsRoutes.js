@@ -1,11 +1,11 @@
-import MainPageDashboard from "@/layout/dashboard/MainDashboard.vue";
+import RecommendDashBoard from "@/layout/dashboard/RecommendDashBoard.vue";
 
 const RecommendPage = () => import("@/views/RecommendPage.vue");
 
 const recommendationsRoutes = [
   {
     path: "",
-    component: MainPageDashboard,
+    component: RecommendDashBoard,
     children: [
       {
         path: "",
