@@ -21,18 +21,18 @@
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
           class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
-          <router-link to="/community/create">
-            <span class="Create">글 작성</span>
+          <router-link to="/community/Create">
+            <a>글 작성</a>
           </router-link>
         </div>
       </div>
       <div>
-        <ul>
-          <li v-for="item in filteredCommunityList" :key="item?.id">
-            {{ item?.name }}
+        <ul class="communityList">
+          <li class="community" v-for="item in filteredCommunityList" :key="item.id">
+            {{ item.title }}, 작성자: {{ item.author }}
           </li>
         </ul>
-        <p v-if="!filteredCommunityList.length">There are no posts in the community.</p>
+        <p v-if="!filteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
       </div>
     </div>
   </div>
@@ -45,12 +45,15 @@ export default {
   data() {
     return {
       communityList: [],
+      query: '',
     };
   },
   computed: {
     filteredCommunityList() {
-      // null 또는 undefined 항목을 필터링
-      return this.communityList.filter(item => item && item.id);
+      // null 또는 undefined 항목을 필터링하고, 각 항목에서 id와 author만 포함하는 객체를 생성
+      return this.communityList
+        .filter(item => item && item.id)
+        .slice(0, 10);
     }
   },
   created() {
@@ -59,9 +62,9 @@ export default {
   methods: {
     async fetchCommunityList() {
       try {
-        const response = await api.get('posts/');
-        // null 값이나 잘못된 항목이 없는지 확인
-        this.communityList = response.data.filter(item => item && item.id);
+        const response = await api.get('community/');
+        // API에서 받은 데이터의 'results' 배열을 communityList에 저장
+        this.communityList = response.data.results;
       } catch (error) {
         console.error("There was an error fetching the community list:", error);
       }
@@ -71,10 +74,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.communityList{
+  list-style:none;
+}
 
 .community {
   align-items: center;
-  min-height: 100vh;
+  height: 40px;
   width: 100%;
 }
 
@@ -82,6 +88,7 @@ export default {
   width: 100%;
   height: 100px;
   font-size: 30px;
+  margin: 40px;
 }
 
 .banner {
@@ -100,6 +107,20 @@ export default {
 
 .communityRow2 {
   display: flex;
+  margin: 20px;
+}
+
+.communityCreate{
+  padding: 10px;
+  width: 80px;
+  height: 40px;
+  text-align: center;
+  border-radius: 10px;
+  background-color: beige;
+}
+.communityCreate > a {
+  text-decoration: none;
+  color: black;
 }
 
 .categorylist {

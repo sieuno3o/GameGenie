@@ -9,6 +9,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'password',
                   'email', 'introduction', 'created_at']
         read_only_fields = ['created_at']
+    
+    def get_author(self, obj):
+        return obj.username
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

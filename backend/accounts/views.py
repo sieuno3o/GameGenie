@@ -68,19 +68,19 @@ class DeleteView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, username):
-        user = get_object_or_404(User, username=username)
+    def get(self, request, id):
+        user = get_object_or_404(User, id=id)
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
 
-    def patch(self, request, username):
+    def patch(self, request, id):
         user = request.user
         serializer = UserProfileSerializer(
-            user, data=request.data, partial=True)
+            user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             email = request.data.get('email')
             if email and email != user.email:
-                if User.objects.filter(email=email).exclude(username=user.username).exists():
+                if User.objects.filter(email=email).exclude(id=user.id).exists():
                     return Response({'message': '이미 사용 중인 이메일입니다.'}, status=status.HTTP_400_BAD_REQUEST)
             old_password = request.data.get('old_password')
             new_password = request.data.get('new_password')
