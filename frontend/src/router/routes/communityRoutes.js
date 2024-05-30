@@ -1,7 +1,7 @@
 import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
 
 const CommunityMainPage = () => import("@/views/community/CommunityMainPage.vue");
-const CommunityDetailPage = () => import("@/views/community/CommunityMainPage.vue");
+const CommunityDetailPage = () => import("@/views/community/CommunityDetailPage.vue");
 const CommunityCreatePage = () => import("@/views/community/CommunityCreatePage.vue");
 
 const communityRoutes = [
