@@ -21,17 +21,53 @@
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
           class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
-          <router-link to="/login">
-            <span class="goLoginPage">로그인</span>
+          <router-link to="/communityCreate">
+            <span class="Create">글 작성</span>
           </router-link>
         </div>
       </div>
-
+      <div>
+        <ul>
+          <li v-for="item in filteredCommunityList" :key="item?.id">
+            {{ item?.name }}
+          </li>
+        </ul>
+        <p v-if="!filteredCommunityList.length">There are no posts in the community.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import api from '../../api';
+
+export default {
+  data() {
+    return {
+      communityList: [],
+    };
+  },
+  computed: {
+    filteredCommunityList() {
+      // null 또는 undefined 항목을 필터링
+      return this.communityList.filter(item => item && item.id);
+    }
+  },
+  created() {
+    this.fetchCommunityList();
+  },
+  methods: {
+    async fetchCommunityList() {
+      try {
+        const response = await api.get('posts/');
+        // null 값이나 잘못된 항목이 없는지 확인
+        this.communityList = response.data.filter(item => item && item.id);
+      } catch (error) {
+        console.error("There was an error fetching the community list:", error);
+      }
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -43,7 +79,6 @@
 }
 
 .communityTitle {
-  background-color: beige;
   width: 100%;
   height: 100px;
   font-size: 30px;
