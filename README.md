@@ -68,7 +68,7 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 - 검색창에 게임 장르 입력시 비슷한 장르를 유도 추천
 
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245277391115386910/image.png?ex=66582a72&is=6656d8f2&hm=e916dce22c17cab62bdbf786611aac82869c4d098e882ea8617ad73a30ee2963&">
+<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245277391115386910/image.png?ex=66582a72&is=6656d8f2&hm=e916dce22c17cab62bdbf786611aac82869c4d098e882ea8617ad73a30ee2963&"> 
 
 <br>
 
