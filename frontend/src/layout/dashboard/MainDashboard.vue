@@ -16,7 +16,7 @@ export default {
 <style lang="scss" scoped>
 #contents {
   max-width: 1920px;
-  min-height: calc(100vh - 130px - 70px);
+  min-height: calc(100vh - 55px);
   margin-top: 150px;
 }
 
