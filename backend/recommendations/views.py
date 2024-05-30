@@ -1,9 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django.conf import settings
-from django.contrib.sessions.models import Session
 from .steam_api import SteamAPI
 from openai import OpenAI
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from GameGenie import config
 
 client = OpenAI(
@@ -13,125 +12,91 @@ client = OpenAI(
 # Steam 클라이언트 설정
 steam_client = SteamAPI()
 
-class GameViewSet(viewsets.ViewSet):
-    genre_mapping = {
-        'sports': 'Sports',
-        'sports game': 'Sports',
-        'football game': 'Football',
-        'soccer game': 'Football',
-        'soccer games': 'Football',
-        'soccer': 'Football',
-        'action': 'Action',
-        'action game': 'Action',
-        'adventure': 'Adventure',
-        'adventure game': 'Adventure',
-        'rpg': 'RPG',
-        'role-playing game': 'RPG',
-        'strategy': 'Strategy',
-        'strategy game': 'Strategy',
-        'simulation': 'Simulation',
-        'simulation game': 'Simulation',
-        'puzzle': 'Puzzle',
-        'puzzle game': 'Puzzle',
-        'racing': 'Racing',
-        'racing game': 'Racing',
-        'casual': 'Casual',
-        'casual game': 'Casual',
-        'roguelike': 'Roguelike',
-        # 필요에 따라 추가 장르 매핑
-    }
 
-    abbreviation_mapping = {
-        '레데리': '레드 데드 리뎀션',
-        '포나': '포트나이트',
-        '라오어': '라스트 오브 어스',
-        '배그': 'PUBG',
-        '배틀그라운드': 'PUBG',
-        # 추가적인 줄임말 매핑
-    }
+class GameViewSet(viewsets.ViewSet):
+    # 대화를 위한 초기 시스템 메시지 설정
+    system_instructions = """
+    당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
+    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
+    추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 합니다.
+    게임 추천 목록은 다음과 같은 형식으로 제공하세요:
+    1. 게임 이름
+    2. 게임 이름
+    3. 게임 이름
+    4. 게임 이름
+    5. 게임 이름
+    """
+
+    # 대화 기록을 저장할 변수
+    conversation_history = [
+        {"role": "system", "content": system_instructions}
+    ]
 
     def list(self, request):
         user_input = request.query_params.get('user_input')
-        session_key = request.session.session_key
-        if not session_key:
-            request.session.create()
-            session_key = request.session.session_key
 
         print(f"받은 사용자 입력: {user_input}")
-        print(f"세션 키: {session_key}")
 
-        if user_input:
-            try:
-                # 줄임말을 원래 이름으로 변환
-                for abbreviation, full_name in self.abbreviation_mapping.items():
-                    if abbreviation in user_input.lower():
-                        user_input = user_input.lower().replace(abbreviation, full_name)
-                print(f"변환된 사용자 입력: {user_input}")
+        if not user_input:
+            return Response({"error": "No user input provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-                # 사용자 입력에서 게임 이름 또는 장르 추출
-                extracted_info, info_type = self.extract_game_name_or_genre(user_input)
-                print(f"추출된 정보: {extracted_info}, 타입: {info_type}")
-
-                if not extracted_info:
-                    return Response({"error": "Game name or genre not found in user input"}, status=status.HTTP_400_BAD_REQUEST)
-
-                request.session['last_input'] = user_input
-                request.session['last_info'] = extracted_info
-                request.session['last_info_type'] = info_type
-
-                if info_type == 'genre':
-                    # 추출된 장르를 매핑
-                    mapped_genre = self.genre_mapping.get(extracted_info.lower(), extracted_info.capitalize())
-                    print(f"매핑된 장르: {mapped_genre}")
-
-                    # 장르 기반 상위 게임 스크래핑
-                    top_games = steam_client.scrape_top_games_by_genre(mapped_genre, lang='koreana')
-                    if top_games:
-                        return Response({"similar_games": top_games})
-                    else:
-                        return Response({"error": f"No top games found for the genre {mapped_genre}"}, status=status.HTTP_404_NOT_FOUND)
-                else:
-                    # 스팀에서 게임 정보 및 비슷한 게임 검색
-                    similar_games_info = steam_client.scrape_similar_games_by_name(extracted_info, lang='koreana')
-                    if not similar_games_info:
-                        return Response({"error": "No similar games found"}, status=status.HTTP_404_NOT_FOUND)
-
-                    return Response({"similar_games": similar_games_info})
-            except Exception as e:
-                print(f"list 메서드에서 에러 발생: {e}")
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response([])
-
-    def extract_game_name_or_genre(self, query):
         try:
+            # 사용자 메시지를 대화 기록에 추가
+            self.conversation_history.append({"role": "user", "content": user_input})
+
+            # AI에게 사용자 입력을 이해하도록 요청
             response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that identifies if the user input is a game name or a genre. Respond with 'genre: <genre>' in english if it is a genre, or 'game name: <name>' if it is a game name."},
-                    {"role": "user", "content": f"Identify if the following query is a game name or a genre: '{query}'"}
-                ],
-                max_tokens=50
+                model="gpt-3.5-turbo",
+                messages=self.conversation_history,
+                max_tokens=500  # 토큰 수를 늘림
             )
 
             print('OpenAI 응답:', response)
 
-            extracted_info = response.choices[0].message.content.strip()
-            if 'genre' in extracted_info:
-                genre = extracted_info.split('genre:')[-1].strip()
-                return genre, 'genre'
-            elif 'game name' in extracted_info:
-                name = extracted_info.split('game name:')[-1].strip()
-                return name, 'name'
-            else:
-                # 추출된 정보가 없을 경우 추가 처리
-                return self.additional_processing(query)
-        except Exception as e:
-            print(f"extract_game_name_or_genre 메서드에서 에러 발생: {e}")
-            return None, None
+            ai_response = response.choices[0].message.content.strip()
+            print(f"AI 응답: {ai_response}")
 
-    def additional_processing(self, query):
-        # 추가 처리: 줄임말 매핑 시도
-        if query.lower() in self.abbreviation_mapping:
-            mapped_info = self.abbreviation_mapping[query.lower()]
-            return mapped_info, 'name'
-        return query, 'name'
+            # AI 응답을 대화 기록에 추가
+            self.conversation_history.append({"role": "assistant", "content": ai_response})
+
+            # 추천 게임 목록에서 게임 이름 추출
+            game_names = self.extract_game_names(ai_response)
+            if not game_names:
+                return Response({"error": "추천 목록에서 게임 이름을 추출할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 병렬 처리로 추천 게임 목록을 스팀에서 검색하여 첫 번째 결과 가져오기
+            similar_games_info = []
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(steam_client.get_top_search_result, game_name)
+                            for game_name in game_names[:5]]
+                for future in as_completed(futures):
+                    game = future.result()
+                    if game:
+                        similar_games_info.append(game)
+                    else:
+                        print(f"게임 정보를 가져오는 데 실패했습니다")
+
+            if not similar_games_info:
+                return Response({"error": "유사한 게임을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"similar_games": similar_games_info})
+        except Exception as e:
+            print(f"list 메서드에서 에러 발생: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def extract_game_names(self, recommendations):
+        game_names = []
+        try:
+            # 줄바꿈으로 분리된 게임 이름 추출
+            for line in recommendations.split('\n'):
+                line = line.strip()
+                if line and any(char.isdigit() for char in line):
+                    # 게임 이름 추출
+                    parts = line.split('. ')
+                    if len(parts) > 1:
+                        game_name = parts[1].strip()
+                        if game_name:
+                            game_names.append(game_name)
+        except Exception as e:
+            print(f"extract_game_names 메서드에서 에러 발생: {e}")
+        return game_names

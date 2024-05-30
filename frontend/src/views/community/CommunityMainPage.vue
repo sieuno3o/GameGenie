@@ -1,14 +1,12 @@
 <template>
-  <div class="community">
-    <div class="communityTitle">
-      <h1>커뮤니티</h1>
-    </div>
-    <img class="banner" src="">
+  <div class="community flex-col">
+    <span class="communityTitle heading1 flex-center">커뮤니티</span>
+    <img class="banner" src="" alt="배너 사진">
     <div class="communityMain">
       <div class="communityRow1">
         <div class="categoryButton">
           <div class="categorylist">
-            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"/>
+            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리" />
           </div>
           <div class="categorySelected">
             <h3 class="subtitle">액션</h3>
@@ -20,15 +18,15 @@
         </div>
       </div>
       <div class="communityRow2">
-        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1"
-          placeholder="게임 이름 또는 장르 검색"/>
+        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
+          class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
           <router-link to="communityCreate">
             <span class="Create">글 작성</span>
           </router-link>
         </div>
       </div>
-      
+
     </div>
   </div>
 </template>
@@ -37,29 +35,38 @@
 </script>
 
 <style lang="scss" scoped>
+
+.community {
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
 .communityTitle {
   background-color: beige;
   width: 100%;
   height: 100px;
-  text-align: center;
-  align-content: center;
+  font-size: 30px;
 }
+
 .banner {
   position: relative;
   width: 100%;
-  height: 100px;
   top: 10px;
   background-color: lightgray;
 }
+
 .communityRow1 {
   position: relative;
   display: flex;
   gap: 0px 14px;
   margin: 12px;
 }
+
 .communityRow2 {
   display: flex;
 }
+
 .categorylist {
   display: flex;
   justify-content: center;
@@ -69,17 +76,21 @@
   border-radius: 10px;
   background-color: beige;
 }
+
 .categoryButton {
   display: flex;
   align-items: center;
   gap: 30px;
 }
+
 .subtitle {
   font-size: 16px;
 }
+
 .categorySortButton {
   display: flex;
 }
+
 .hamburgericon {
   width: 25px;
   height: 25px;

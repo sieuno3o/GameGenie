@@ -1,5 +1,5 @@
 <template>
-  <div id="footer">
+  <div :class="{ 'main-background': isMainPage }" id="footer">
     <span>GameGenie</span>
   </div>
 </template>
@@ -7,11 +7,16 @@
 <script>
 export default {
   name: "TheFooter",
+  computed: {
+    isMainPage() {
+      return this.$route.name === 'main';
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-div {
+.main-background {
   background-color: $MAIN-COLOR-SKYBLUE;
 }
 

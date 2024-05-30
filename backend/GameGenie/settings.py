@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "accounts",
     "community",
     "recommendations",
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
@@ -176,14 +177,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-##CORS
-CORS_ORIGIN_ALLOW_ALL=True
+# CORS
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = (

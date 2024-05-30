@@ -14,20 +14,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.http import JsonResponse
 from .serializers import CategorySerializer
+from rest_framework.pagination import PageNumberPagination
 
 
-class CommunityList(APIView):
-    def get(self, request):
-        communities = Community.objects.all()
-        for community in communities:
-            community.points = community.communitylist_points()
+class CommunityList(ListAPIView):
+    queryset = Community.objects.all()
+    serializer_class = CommunitySerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = ['created_at', 'likes_count', 'views_count']
+    search_fields = ['title', 'content', 'author__username']
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 10
 
-        def get_points(community):
-            return community.points
-
-        sorted_communities = sorted(communities, key=get_points, reverse=True)
-        serializer = CommunitySerializer(sorted_communities, many=True)
-        return Response(serializer.data)
 
 class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
@@ -158,16 +156,14 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
 
 
-class CommentsList(APIView):
-    def get(self, request, pk):
-        community = get_object_or_404(Community, pk=pk)
-        comments = Comment.objects.filter(
-            community=community).order_by('created_at').values()
-        replies = Comment.objects.filter(
-            parent_comment__community=community).order_by('created_at').values()
-        community_list = list(comments) + list(replies)
-        community_list.sort(key=lambda x: x['created_at'], reverse=True)
-        return Response(community_list)
+class CommentsList(ListAPIView):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
+
+    def get_queryset(self):
+        community = get_object_or_404(Community, pk=self.kwargs['pk'])
+        return Comment.objects.filter(community=community).order_by('created_at')
 
 
 class UserCommentsList(APIView):

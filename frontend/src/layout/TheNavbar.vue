@@ -47,4 +47,9 @@ a.router-link-active {
   padding-right: 30px;
   margin-left: 30px;
 }
+
+.navCommunity:hover,
+.navLogin:hover {
+  color: $HOVER-COLOR;
+}
 </style>
