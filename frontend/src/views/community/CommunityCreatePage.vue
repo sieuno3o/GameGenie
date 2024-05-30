@@ -49,7 +49,7 @@ export default {
         });
     },
     submitForm() {
-      axios.post('/create/', this.form)
+      axios.post('http://localhost:8000/community/create/', this.form)
         .then(() => { // response 제거
           alert('글이 등록되었습니다!');
           this.$router.push({ name: 'CommunityMain' });
