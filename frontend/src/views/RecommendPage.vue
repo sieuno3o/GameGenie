@@ -2,7 +2,6 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1>게임 추천</h1>
         <v-text-field
           v-model="userInput"
           label="검색어를 입력하세요"
@@ -24,7 +23,7 @@
       <v-col cols="12" v-if="recommendedGames.length > 0">
         <h2>추천 게임</h2>
         <v-row>
-          <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="4">
+          <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="3">
             <v-card>
               <v-img :src="game.image_url" height="200px"></v-img>
               <v-card-title>{{ game.name }}</v-card-title>
@@ -113,14 +112,30 @@ export default {
 };
 </script>
 
-<style scoped>
-.chat-message {
-  margin: 10px 0;
-}
+<style lang="scss" scoped>
 .user-message {
-  text-align: right;
-  color: blue;
+  position: relative;
+  margin: 50px;
+  padding: 20px;
+  width: 200px;
+  height: 60px;
+  color: #FFF;
+  border-radius: 10px;
+  background-color: white;
+  border: 1px solid rgb(203, 203, 203);
+  color: black;
 }
+
+.user-message:after {
+  content: "";
+  position: absolute;
+  top: 21px;
+  right: -30px;
+  border-left: 30px solid rgb(255, 255, 255);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+
 .bot-message {
   text-align: left;
   color: green;
