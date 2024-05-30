@@ -163,3 +163,4 @@ class Reply(models.Model):
 
     def get_likes_count(self):
         return self.reply_likes.count()
+
