@@ -28,7 +28,6 @@
         </v-row>
       </v-col>
     </v-row>
-    <!-- 검색어 입력 부분을 화면 하단에 고정 -->
     <div class="search-bar">
       <v-row>
         <v-col cols="12">
@@ -131,15 +130,15 @@ export default {
   max-width: 60%;
   min-width: 100px;
   word-wrap: break-word;
-  border-radius: 10px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .user-message {
-  background-color: #000;
-  color: #fff;
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .user-message:after {
@@ -147,13 +146,13 @@ export default {
   position: absolute;
   top: 21px;
   right: -30px;
-  border-left: 30px solid #000;
+  border-left: 30px solid #ffffff;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
 }
 
 .bot-message {
-  background-color: #4caf50;
+  background-color: $MAIN-COLOR-NAVY;
   color: white;
 }
 
@@ -162,7 +161,7 @@ export default {
   position: absolute;
   top: 21px;
   left: -30px;
-  border-right: 30px solid #4caf50;
+  border-right: 30px solid $MAIN-COLOR-NAVY;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
 }
