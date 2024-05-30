@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="mainBox">
     <v-row>
       <v-col cols="12">
         <div v-for="(message, index) in messages" :key="index" class="chat-message"
@@ -111,6 +111,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.mainBox {
+  margin-top: 20px;
+}
+
 .user-message-container {
   display: flex;
   justify-content: flex-end;
@@ -125,6 +129,7 @@ export default {
 
 .user-message,
 .bot-message {
+  margin-top: 5px;
   position: relative;
   padding: 20px;
   max-width: 60%;
@@ -144,8 +149,8 @@ export default {
 .user-message:after {
   content: '';
   position: absolute;
-  top: 21px;
-  right: -30px;
+  top: 13px;
+  right: -23px;
   border-left: 30px solid #ffffff;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
@@ -159,8 +164,8 @@ export default {
 .bot-message:before {
   content: '';
   position: absolute;
-  top: 21px;
-  left: -30px;
+  top: 13px;
+  left: -23px;
   border-right: 30px solid $MAIN-COLOR-NAVY;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
