@@ -15,8 +15,8 @@
         <h2>추천 게임</h2>
         <v-row>
           <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="3">
-            <v-card>
-              <v-img :src="game.image_url" height="200px"></v-img>
+            <v-card class="game-card">
+              <v-img :src="game.image_url" class="game-card-img"></v-img>
               <v-card-title>{{ game.name }}</v-card-title>
               <v-card-subtitle>{{ game.review_summary }}</v-card-subtitle>
               <v-card-subtitle>{{ game.price }}</v-card-subtitle>
@@ -175,5 +175,13 @@ export default {
   background: #fff;
   padding: 10px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.game-card {
+  overflow: hidden;
+}
+
+.game-card-img {
+  object-fit: cover;
 }
 </style>
