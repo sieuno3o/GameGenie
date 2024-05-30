@@ -1,7 +1,7 @@
 import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
 
 const CommunityMainPage = () => import("@/views/community/CommunityMainPage.vue");
-const CommunityDetailPage = () => import("@/views/community/CommunityDetailPage.vue");
+const CommunityDetailPage = () => import("@/views/community/CommunityMainPage.vue");
 const CommunityCreatePage = () => import("@/views/community/CommunityCreatePage.vue");
 
 const communityRoutes = [
@@ -20,7 +20,7 @@ const communityRoutes = [
         component: CommunityDetailPage,
       },
       {
-        path: "",
+        path: "create",
         name: "communityCreate",
         component: CommunityCreatePage,
       },
