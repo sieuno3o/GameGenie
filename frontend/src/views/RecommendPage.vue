@@ -7,33 +7,18 @@
           <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
             {{ message.text }}
           </div>
+          <!-- 추천 게임 카드가 bot 메시지 밑에 나오도록 함 -->
+          <v-row v-if="message.games && message.games.length > 0" class="game-cards">
+            <game-card v-for="game in message.games" :key="game.appid" :game="game" />
+          </v-row>
         </div>
-      </v-col>
-    </v-row>
-    <v-row v-if="recommendedGames.length > 0">
-      <v-col cols="12">
-        <h2>추천 게임</h2>
-        <v-row>
-          <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="3">
-            <v-card class="game-card">
-              <v-img :src="game.image_url" class="game-card-img"></v-img>
-              <v-card-title>{{ game.name }}</v-card-title>
-              <v-card-subtitle>{{ game.review_summary }}</v-card-subtitle>
-              <v-card-subtitle>{{ game.price }}</v-card-subtitle>
-              <v-card-actions>
-                <v-btn :href="game.store_url" target="_blank">스팀 상점 페이지로 이동</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
       </v-col>
     </v-row>
     <div class="search-bar">
       <v-row>
         <v-col cols="12">
           <v-text-field v-model="userInput" label="검색어를 입력하세요" @keyup.enter="sendQuery" append-outer-icon="mdi-magnify"
-            @click:append-outer="sendQuery">
-          </v-text-field>
+            @click:append-outer="sendQuery"></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -41,12 +26,16 @@
 </template>
 
 <script>
+import GameCard from './GameCard.vue';
+
 export default {
+  components: {
+    GameCard
+  },
   data() {
     return {
       userInput: '',
       messages: [],
-      recommendedGames: [],
       error: null,
       previousInput: '',
     };
@@ -70,8 +59,8 @@ export default {
         const data = await response.json();
 
         if (data.similar_games) {
-          this.messages.push({ text: '다음은 추천 게임입니다:', isUser: false });
-          this.recommendedGames = data.similar_games.slice(0, 4);
+          const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
         } else {
           this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -96,8 +85,8 @@ export default {
         const data = await response.json();
 
         if (data.similar_games) {
-          this.messages.push({ text: '다음은 추가 추천 게임입니다:', isUser: false });
-          this.recommendedGames = data.similar_games.slice(0, 4);
+          const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
         } else {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -123,7 +112,8 @@ export default {
 
 .bot-message-container {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
   margin-bottom: 10px;
 }
 
@@ -181,11 +171,7 @@ export default {
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.game-card {
-  overflow: hidden;
-}
-
-.game-card-img {
-  object-fit: cover;
+.game-cards {
+  margin-top: 10px;
 }
 </style>
