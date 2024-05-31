@@ -53,7 +53,7 @@ export default {
       this.messages.push({ text: this.userInput, isUser: true });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.userInput)}`);
+        const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.userInput)}`);
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
         const data = await response.json();
