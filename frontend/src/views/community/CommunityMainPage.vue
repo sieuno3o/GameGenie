@@ -21,18 +21,22 @@
         <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
           class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
-          <router-link to="/communityCreate">
-            <span class="Create">글 작성</span>
+          <router-link to="/community/Create">
+            <a>글 작성</a>
           </router-link>
         </div>
       </div>
       <div>
-        <ul>
-          <li v-for="item in filteredCommunityList" :key="item?.id">
-            {{ item?.name }}
+        <ul class="communityList">
+          <li 
+            class="community" 
+            v-for="item in filteredCommunityList" 
+            :key="item.id"
+            @click="goToDetail(item.id)">
+            {{ item.title }}, 작성자: {{ item.author }}
           </li>
         </ul>
-        <p v-if="!filteredCommunityList.length">There are no posts in the community.</p>
+        <p v-if="!filteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
       </div>
     </div>
   </div>
@@ -40,48 +44,83 @@
 
 <script>
 import api from '../../api';
+import accountsAPI from '../../accountsAPI';
 
 export default {
   data() {
     return {
       communityList: [],
+      accountsUsers: [],
+      query: '',
     };
   },
   computed: {
     filteredCommunityList() {
-      // null 또는 undefined 항목을 필터링
-      return this.communityList.filter(item => item && item.id);
+      return this.communityList
+        .filter(item => item && item.id)
+        .slice(0, 10)
+        .map(item => {
+          const user = this.accountsUsers.find(user => user.id === item.author);
+          const username = user ? user.username : '알 수 없음';
+          return { ...item, author: username };
+        });
     }
   },
   created() {
     this.fetchCommunityList();
+    this.fetchAccountsUsers();
   },
   methods: {
     async fetchCommunityList() {
       try {
-        const response = await api.get('posts/');
-        // null 값이나 잘못된 항목이 없는지 확인
-        this.communityList = response.data.filter(item => item && item.id);
+        const response = await api.get('community/');
+        this.communityList = response.data.results;
       } catch (error) {
-        console.error("There was an error fetching the community list:", error);
+        console.error("커뮤니티 목록을 가져오는 중 오류가 발생했습니다 :", error);
       }
     },
+    async fetchAccountsUsers() {
+      try {
+        this.accountsUsers = await accountsAPI.getUsers();
+      } catch (error) {
+        console.error("유저 정보를 가져오는 중 오류가 발생했습니다 :", error);
+      }
+    },
+    goToDetail(id) {
+      this.$router.push({ name: 'communityDetail', params: { id } });
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.communityList{
+  list-style:none;
+}
 
 .community {
   align-items: center;
-  min-height: 100vh;
+  height: 40px;
   width: 100%;
+}
+
+.communitys {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 100%;
+  margin: 10px;
+}
+
+.communitys:hover {
+  background-color: lightgray
 }
 
 .communityTitle {
   width: 100%;
   height: 100px;
   font-size: 30px;
+  margin: 40px;
 }
 
 .banner {
@@ -100,6 +139,20 @@ export default {
 
 .communityRow2 {
   display: flex;
+  margin: 20px;
+}
+
+.communityCreate{
+  padding: 10px;
+  width: 80px;
+  height: 40px;
+  text-align: center;
+  border-radius: 10px;
+  background-color: beige;
+}
+.communityCreate > a {
+  text-decoration: none;
+  color: black;
 }
 
 .categorylist {

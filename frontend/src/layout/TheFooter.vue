@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'main-background': isMainPage }" id="footer">
+  <div v-if="shouldShowFooter" :class="{ 'main-background': isMainPage }" id="footer">
     <span>GameGenie</span>
   </div>
 </template>
@@ -10,6 +10,9 @@ export default {
   computed: {
     isMainPage() {
       return this.$route.name === 'main';
+    },
+    shouldShowFooter() {
+      return this.$route.name !== 'recommends';
     }
   }
 };

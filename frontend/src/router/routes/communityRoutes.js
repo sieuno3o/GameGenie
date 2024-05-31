@@ -15,12 +15,12 @@ const communityRoutes = [
         component: CommunityMainPage,
       },
       {
-        path: "detail",
+        path: "community/:id",
         name: "communityDetail",
         component: CommunityDetailPage,
       },
       {
-        path: "",
+        path: "create",
         name: "communityCreate",
         component: CommunityCreatePage,
       },
