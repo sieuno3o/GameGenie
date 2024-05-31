@@ -15,7 +15,7 @@ const communityRoutes = [
         component: CommunityMainPage,
       },
       {
-        path: "detail",
+        path: "community/:id",
         name: "communityDetail",
         component: CommunityDetailPage,
       },

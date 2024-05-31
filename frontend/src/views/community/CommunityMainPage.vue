@@ -28,7 +28,11 @@
       </div>
       <div>
         <ul class="communityList">
-          <li class="community" v-for="item in filteredCommunityList" :key="item.id">
+          <li 
+            class="community" 
+            v-for="item in filteredCommunityList" 
+            :key="item.id"
+            @click="goToDetail(item.id)">
             {{ item.title }}, 작성자: {{ item.author }}
           </li>
         </ul>
@@ -51,15 +55,15 @@ export default {
     };
   },
   computed: {
-  filteredCommunityList() {
-    return this.communityList
-      .filter(item => item && item.id)
-      .slice(0, 10)
-      .map(item => {
-        const user = this.accountsUsers.find(user => user.id === item.author);
-        const username = user ? user.username : '알 수 없음';
-        return { ...item, author: username };
-      });
+    filteredCommunityList() {
+      return this.communityList
+        .filter(item => item && item.id)
+        .slice(0, 10)
+        .map(item => {
+          const user = this.accountsUsers.find(user => user.id === item.author);
+          const username = user ? user.username : '알 수 없음';
+          return { ...item, author: username };
+        });
     }
   },
   created() {
@@ -71,7 +75,6 @@ export default {
       try {
         const response = await api.get('community/');
         this.communityList = response.data.results;
-        console.log(this.communityList)
       } catch (error) {
         console.error("커뮤니티 목록을 가져오는 중 오류가 발생했습니다 :", error);
       }
@@ -79,11 +82,13 @@ export default {
     async fetchAccountsUsers() {
       try {
         this.accountsUsers = await accountsAPI.getUsers();
-        console.log(this.accountsUsers)
       } catch (error) {
         console.error("유저 정보를 가져오는 중 오류가 발생했습니다 :", error);
       }
     },
+    goToDetail(id) {
+      this.$router.push({ name: 'communityDetail', params: { id } });
+    }
   },
 };
 </script>
@@ -97,6 +102,18 @@ export default {
   align-items: center;
   height: 40px;
   width: 100%;
+}
+
+.communitys {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 100%;
+  margin: 10px;
+}
+
+.communitys:hover {
+  background-color: lightgray
 }
 
 .communityTitle {
