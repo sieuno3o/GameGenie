@@ -6,8 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password',
-                  'email', 'introduction', 'created_at']
+        fields = ['id', 'username', 'email', 'introduction', 'created_at']
         read_only_fields = ['created_at']
     
     def get_author(self, obj):
