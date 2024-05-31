@@ -40,33 +40,48 @@
 
 <script>
 import api from '../../api';
+import accountsAPI from '../../accountsAPI';
 
 export default {
   data() {
     return {
       communityList: [],
+      accountsUsers: [],
       query: '',
     };
   },
   computed: {
-    filteredCommunityList() {
-      // null 또는 undefined 항목을 필터링하고, 각 항목에서 id와 author만 포함하는 객체를 생성
-      return this.communityList
-        .filter(item => item && item.id)
-        .slice(0, 10);
+  filteredCommunityList() {
+    return this.communityList
+      .filter(item => item && item.id)
+      .slice(0, 10)
+      .map(item => {
+        const user = this.accountsUsers.find(user => user.id === item.author);
+        const username = user ? user.username : '알 수 없음';
+        return { ...item, author: username };
+      });
     }
   },
   created() {
     this.fetchCommunityList();
+    this.fetchAccountsUsers();
   },
   methods: {
     async fetchCommunityList() {
       try {
         const response = await api.get('community/');
-        // API에서 받은 데이터의 'results' 배열을 communityList에 저장
         this.communityList = response.data.results;
+        console.log(this.communityList)
       } catch (error) {
-        console.error("There was an error fetching the community list:", error);
+        console.error("커뮤니티 목록을 가져오는 중 오류가 발생했습니다 :", error);
+      }
+    },
+    async fetchAccountsUsers() {
+      try {
+        this.accountsUsers = await accountsAPI.getUsers();
+        console.log(this.accountsUsers)
+      } catch (error) {
+        console.error("유저 정보를 가져오는 중 오류가 발생했습니다 :", error);
       }
     },
   },
