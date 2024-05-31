@@ -1,24 +1,25 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView  # 추가된 부분
 from .steam_api import SteamAPI
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from GameGenie import config
+from .models import Favorite
+from .serializers import FavoriteSerializer
 
-client = OpenAI(
-    api_key=config.OPENAI_API_KEY,
-)
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 # Steam 클라이언트 설정
 steam_client = SteamAPI()
 
 
 class GameViewSet(viewsets.ViewSet):
-    # 대화를 위한 초기 시스템 메시지 설정
     system_instructions = """
     당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
     사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
-    추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 합니다.
+    추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 하며 확장팩이나 DLC는 추천해주지 않습니다.
     게임 추천 목록은 다음과 같은 형식으로 제공하세요:
     1. 게임 이름
     2. 게임 이름
@@ -46,7 +47,7 @@ class GameViewSet(viewsets.ViewSet):
 
             # AI에게 사용자 입력을 이해하도록 요청
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
                 messages=self.conversation_history,
                 max_tokens=500  # 토큰 수를 늘림
             )
@@ -100,3 +101,42 @@ class GameViewSet(viewsets.ViewSet):
         except Exception as e:
             print(f"extract_game_names 메서드에서 에러 발생: {e}")
         return game_names
+
+
+class FavoriteCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        favorite, created = Favorite.objects.get_or_create(
+            user=request.user,
+            game_name=data.get('game_name'),
+            defaults={
+                'game_image': data.get('game_image'),
+                'game_review': data.get('game_review'),
+                'game_price': data.get('game_price'),
+                'game_url': data.get('game_url')
+            }
+        )
+        if not created:
+            return Response({'message': '이미 즐겨찾기에 추가되어 있습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(FavoriteSerializer(favorite).data, status=status.HTTP_201_CREATED)
+
+
+class FavoriteDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        favorite = Favorite.objects.filter(user=request.user, pk=pk).first()
+        if not favorite:
+            return Response({'message': '즐겨찾기 항목을 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteListView(generics.ListAPIView):
+    serializer_class = FavoriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)

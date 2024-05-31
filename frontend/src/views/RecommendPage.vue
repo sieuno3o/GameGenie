@@ -1,53 +1,41 @@
 <template>
-  <v-container>
+  <v-container class="mainBox">
     <v-row>
       <v-col cols="12">
-        <h1>게임 추천</h1>
-        <v-text-field
-          v-model="userInput"
-          label="검색어를 입력하세요"
-          @keyup.enter="sendQuery"
-        ></v-text-field>
-        <v-btn @click="sendQuery">검색</v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <div v-for="(message, index) in messages" :key="index" class="chat-message">
-          <div :class="{'user-message': message.isUser, 'bot-message': !message.isUser}">
+        <div v-for="(message, index) in messages" :key="index" class="chat-message"
+          :class="{ 'user-message-container': message.isUser, 'bot-message-container': !message.isUser }">
+          <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
             {{ message.text }}
           </div>
+          <!-- 추천 게임 카드가 bot 메시지 밑에 나오도록 함 -->
+          <v-row v-if="message.games && message.games.length > 0" class="game-cards">
+            <game-card v-for="game in message.games" :key="game.appid" :game="game" />
+          </v-row>
         </div>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" v-if="recommendedGames.length > 0">
-        <h2>추천 게임</h2>
-        <v-row>
-          <v-col v-for="game in recommendedGames" :key="game.appid" cols="12" md="4">
-            <v-card>
-              <v-img :src="game.image_url" height="200px"></v-img>
-              <v-card-title>{{ game.name }}</v-card-title>
-              <v-card-subtitle>{{ game.review_summary }}</v-card-subtitle>
-              <v-card-subtitle>{{ game.price }}</v-card-subtitle>
-              <v-card-actions>
-                <v-btn :href="game.store_url" target="_blank">스팀 상점 페이지로 이동</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+    <div class="search-bar">
+      <v-row>
+        <v-col cols="12">
+          <v-text-field v-model="userInput" label="검색어를 입력하세요" @keyup.enter="sendQuery" append-outer-icon="mdi-magnify"
+            @click:append-outer="sendQuery"></v-text-field>
+        </v-col>
+      </v-row>
+    </div>
   </v-container>
 </template>
 
 <script>
+import GameCard from './GameCard.vue';
+
 export default {
+  components: {
+    GameCard
+  },
   data() {
     return {
       userInput: '',
       messages: [],
-      recommendedGames: [],
       error: null,
       previousInput: '',
     };
@@ -65,15 +53,14 @@ export default {
       this.messages.push({ text: this.userInput, isUser: true });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.userInput)}`);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.userInput)}`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
         const data = await response.json();
 
         if (data.similar_games) {
-          this.messages.push({ text: '다음은 추천 게임입니다:', isUser: false });
-          this.recommendedGames = data.similar_games;
+          const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
         } else {
           this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -92,15 +79,14 @@ export default {
       this.messages.push({ text: '다른 게임은 없어?', isUser: true });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.previousInput)}`);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.previousInput)}`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
         const data = await response.json();
 
         if (data.similar_games) {
-          this.messages.push({ text: '다음은 추가 추천 게임입니다:', isUser: false });
-          this.recommendedGames = data.similar_games;
+          const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
         } else {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -109,20 +95,83 @@ export default {
         this.error = error.toString();
       }
     },
-  },
+  }
 };
 </script>
 
-<style scoped>
-.chat-message {
-  margin: 10px 0;
+<style lang="scss" scoped>
+.mainBox {
+  margin-top: 20px;
 }
-.user-message {
-  text-align: right;
-  color: blue;
+
+.user-message-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
 }
+
+.bot-message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.user-message,
 .bot-message {
-  text-align: left;
-  color: green;
+  margin-top: 5px;
+  position: relative;
+  padding: 20px;
+  max-width: 60%;
+  min-width: 100px;
+  word-wrap: break-word;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-message {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.user-message:after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  right: -23px;
+  border-left: 30px solid #ffffff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+
+.bot-message {
+  background-color: $MAIN-COLOR-NAVY;
+  color: white;
+}
+
+.bot-message:before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: -23px;
+  border-right: 30px solid $MAIN-COLOR-NAVY;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+
+.search-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.game-cards {
+  margin-top: 10px;
 }
 </style>
