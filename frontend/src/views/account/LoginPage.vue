@@ -39,12 +39,23 @@ export default {
           password: this.password
         });
         if (response.status === 200) {
-          this.$router.push({ name: 'main' })
+          const tokens = response.data;
+          localStorage.setItem('access', tokens.access);
+          localStorage.setItem('refresh', tokens.refresh);
+
+          const userResponse = await axios.get('http://localhost:8000/api/accounts/users/', {
+            headers: { 'Authorization': `Bearer ${tokens.access}` }
+          });
+
+          const user = userResponse.data.find(user => user.username === this.username);
+          if (user) {
+            localStorage.setItem('userId', user.id);
+            localStorage.setItem('username', user.username);
+            this.$router.push({ name: 'main' });
+          } else {
+            this.errorMessage = '사용자 정보를 가져오는 데 실패했습니다.';
+          }
         }
-        console.log("login-> username, password: ", response);
-        const tokens = response.data;
-        localStorage.setItem('access', tokens.access);
-        localStorage.setItem('refresh', tokens.refresh);
       } catch (error) {
         console.error('Login failed:', error);
         if (error.response && error.response.status === 401) {

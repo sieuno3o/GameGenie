@@ -8,8 +8,11 @@
         <span class="navCommunity">커뮤니티</span>
       </router-link>
       <div class="navAccount">
-        <router-link to="/login">
+        <router-link v-if="!isLoggedIn" to="/login">
           <span class="navLogin">로그인</span>
+        </router-link>
+        <router-link v-else :to="`/profile/${userId}`">
+          <span class="navLogin">{{ username }}</span>
         </router-link>
       </div>
     </div>
@@ -19,6 +22,35 @@
 <script>
 export default {
   name: "TheNavbar",
+  data() {
+    return {
+      isLoggedIn: false,
+      userId: null,
+      username: '',
+    };
+  },
+  created() {
+    this.checkLoginStatus();
+  },
+  methods: {
+    checkLoginStatus() {
+      const token = localStorage.getItem('access');
+      const userId = localStorage.getItem('userId');
+      const username = localStorage.getItem('username');
+
+      if (token && userId && username) {
+        this.isLoggedIn = true;
+        this.userId = userId;
+        this.username = username;
+      } else {
+        this.isLoggedIn = false;
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+      }
+    }
+  }
 };
 </script>
 
@@ -36,7 +68,7 @@ export default {
   padding-left: 25px;
 }
 
-a, 
+a,
 a.router-link-exact-active,
 a.router-link-active {
   text-decoration: none;

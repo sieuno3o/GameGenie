@@ -96,6 +96,7 @@ class UserProfileView(APIView):
             return Response({'message': '프로필이 업데이트 되었습니다.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserListView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
