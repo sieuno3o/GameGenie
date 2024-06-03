@@ -27,10 +27,18 @@ export default {
         return {
             isFavorite: false,
             favoriteId: null,
+            isLoggedIn: !!localStorage.getItem('access') // 로그인 상태 확인
         };
     },
     methods: {
         async toggleFavorite() {
+            if (!this.isLoggedIn) {
+                // 로그인되지 않은 경우 알림 메시지 표시 또는 로그인 페이지로 리다이렉트
+                alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                this.$router.push({ name: 'login' });
+                return;
+            }
+
             const url = this.isFavorite ? `/recommendations/favorites/${this.favoriteId}/` : `/recommendations/favorites/add/`;
             const method = this.isFavorite ? 'delete' : 'post';
             const body = this.isFavorite ? null : {
@@ -68,16 +76,18 @@ export default {
         },
     },
     async mounted() {
-        try {
-            const response = await api.get('/recommendations/favorites/');
-            const favorites = response.data;
-            const favorite = favorites.find(fav => fav.game_name === this.game.name);
-            if (favorite) {
-                this.isFavorite = true;
-                this.favoriteId = favorite.id;
+        if (this.isLoggedIn) {
+            try {
+                const response = await api.get('/recommendations/favorites/');
+                const favorites = response.data;
+                const favorite = favorites.find(fav => fav.game_name === this.game.name);
+                if (favorite) {
+                    this.isFavorite = true;
+                    this.favoriteId = favorite.id;
+                }
+            } catch (error) {
+                console.error('Error fetching favorites', error);
             }
-        } catch (error) {
-            console.error('Error fetching favorites', error);
         }
     },
 }
