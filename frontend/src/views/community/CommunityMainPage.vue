@@ -6,10 +6,13 @@
       <div class="communityRow1">
         <div class="categoryButton">
           <div class="categorylist">
-            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리" />
+            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리" @click="toggleDropdown" />
+            <ul v-if="showDropdown" class="category-dropdown">
+              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value }}</li>
+            </ul>
           </div>
           <div class="categorySelected">
-            <h3 class="subtitle">액션</h3>
+            <h3 class="subtitle">{{ selectedCategoryName }}</h3>
           </div>
           <div class="categorySortButton">
             <h3 class="subtitle">시간순</h3>
@@ -43,6 +46,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import api from '../../api';
 import accountsAPI from '../../accountsAPI';
 
@@ -51,7 +55,10 @@ export default {
     return {
       communityList: [],
       accountsUsers: [],
+      showDropdown: false,
+      categories: [],
       query: '',
+      selectedCategoryName: '카테고리를 선택하세요',
     };
   },
   computed: {
@@ -69,6 +76,7 @@ export default {
   created() {
     this.fetchCommunityList();
     this.fetchAccountsUsers();
+    this.fetchCategories();
   },
   methods: {
     async fetchCommunityList() {
@@ -88,7 +96,24 @@ export default {
     },
     goToDetail(id) {
       this.$router.push({ name: 'communityDetail', params: { id } });
-    }
+    },
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    fetchCategories() {
+      axios.get('http://localhost:8000/api/community/categories/')
+        .then(response => {
+          this.categories = response.data;
+        })
+        .catch(error => {
+          console.error('카테고리를 불러오는 중 오류가 발생했습니다:', error);
+        });
+    },
+    selectCategory(category) {
+    this.selectedCategoryName = category.value;
+    this.showDropdown = false;
+    console.log('선택한 카테고리:', category);
+    },
   },
 };
 </script>
@@ -182,5 +207,31 @@ export default {
 .hamburgericon {
   width: 25px;
   height: 25px;
+}
+
+.category-dropdown {
+  position: absolute;
+  background-color: #f9f9f9;
+  opacity: 0.9;
+  padding: 10px;
+  list-style-type: none;
+  border: 1px solid #ccc;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  transform: translateY(55%);
+}
+
+.category-dropdown li {
+  padding: 5px 0;
+  width: 100px;
+  margin: 10px;
+  text-align: center;
+  align-content: center;
+  cursor: pointer;
+}
+
+.category-dropdown li:hover {
+  background-color: #e0e0e0;
 }
 </style>
