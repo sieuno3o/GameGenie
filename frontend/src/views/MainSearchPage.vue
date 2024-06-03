@@ -5,8 +5,8 @@
     <div class="flex-col-center">
       <div :class="{ 'mainSearchbar': true, 'active': suggestions.length > 0 }" class="flex-left mainSearchbar">
         <img src="../assets/image/searchIcon.png" class="searchIcon" @click="searchGames">
-        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1"
-          placeholder="검색어를 입력하세요" />
+        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
+          class="mainSearchInput body1" placeholder="검색어를 입력하세요" />
       </div>
       <ul v-if="suggestions.length > 0" class="suggestions-list body1">
         <li v-for="suggestion in suggestions" :key="suggestion.key" @click="selectSuggestion(suggestion)">
@@ -48,7 +48,7 @@ export default {
         });
     },
     selectSuggestion(suggestion) {
-      this.query = suggestion.value; 
+      this.query = suggestion.value;
       this.suggestions = [];
     },
     searchGames() {
