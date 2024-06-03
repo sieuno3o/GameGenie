@@ -52,7 +52,7 @@ export default {
       api.post('community/create/', this.form)
         .then(() => {
           alert('글이 등록되었습니다!');
-          this.$router.push({ name: 'CommunityMain' });
+          this.$router.push({ name: 'communityMain' });
         })
         .catch(error => {
           console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
