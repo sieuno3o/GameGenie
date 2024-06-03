@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import api from '../api';
+
 export default {
     props: {
         game: {
@@ -29,34 +31,33 @@ export default {
     },
     methods: {
         async toggleFavorite() {
-            const baseUrl = 'http://localhost:8000/api/recommendations';
-            const url = this.isFavorite ? `${baseUrl}/favorites/${this.favoriteId}/` : `${baseUrl}/favorites/add/`;
-            const method = this.isFavorite ? 'DELETE' : 'POST';
-            const body = this.isFavorite ? null : JSON.stringify({
+            const url = this.isFavorite ? `/recommendations/favorites/${this.favoriteId}/` : `/recommendations/favorites/add/`;
+            const method = this.isFavorite ? 'delete' : 'post';
+            const body = this.isFavorite ? null : {
                 game_name: this.game.name,
                 game_image: this.game.image_url,
                 game_review: this.game.review_summary,
                 game_price: this.game.price,
                 game_url: this.game.store_url
-            });
+            };
 
             console.log(`Sending ${method} request to ${url} with body:`, body);
 
             try {
-                const response = await fetch(url, {
+                const response = await api({
                     method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    },
-                    body,
+                    url,
+                    data: body,
                 });
-                if (response.ok) {
-                    if (method === 'POST') {
-                        const data = await response.json();
+                if (response.status === 200 || response.status === 201 || response.status === 204) {
+                    if (method === 'post') {
+                        const data = await response.data;
                         this.favoriteId = data.id;
+                        this.isFavorite = true;
+                    } else if (method === 'delete') {
+                        this.favoriteId = null;
+                        this.isFavorite = false;
                     }
-                    this.isFavorite = !this.isFavorite;
                     console.log('Favorite toggled successfully');
                 } else {
                     console.error('Failed to toggle favorite', response.statusText);
@@ -68,12 +69,8 @@ export default {
     },
     async mounted() {
         try {
-            const response = await fetch('http://localhost:8000/api/recommendations/favorites/', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-            const favorites = await response.json();
+            const response = await api.get('/recommendations/favorites/');
+            const favorites = response.data;
             const favorite = favorites.find(fav => fav.game_name === this.game.name);
             if (favorite) {
                 this.isFavorite = true;

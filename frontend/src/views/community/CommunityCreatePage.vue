@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import axios from 'axios'; 
+import api from '../../api'; // src 폴더에서 불러오기
 
 export default {
   data() {
@@ -40,8 +40,8 @@ export default {
   },
   methods: {
     fetchCategories() {
-      axios.get('http://localhost:8000/api/community/categories')
-        .then((response) => { // response 사용
+      api.get('community/categories/')
+        .then((response) => {
           this.categories = response.data;
         })
         .catch(error => {
@@ -49,8 +49,8 @@ export default {
         });
     },
     submitForm() {
-      axios.post('http://localhost:8000/api/community/create/', this.form)
-        .then(() => { // response 제거
+      api.post('community/create/', this.form)
+        .then(() => {
           alert('글이 등록되었습니다!');
           this.$router.push({ name: 'CommunityMain' });
         })
@@ -71,22 +71,34 @@ export default {
   margin: auto;
   padding: 20px;
 }
+
 .form-group {
   margin-bottom: 20px;
 }
+
 label {
   display: block;
-  margin-bottom: 10px; /* 조금 더 여유 있는 간격 */
-  color: #333; /* 라벨 텍스트 색상 */
+  margin-bottom: 10px;
+  /* 조금 더 여유 있는 간격 */
+  color: #333;
+  /* 라벨 텍스트 색상 */
 }
-input[type="text"], textarea, select {
+
+input[type="text"],
+textarea,
+select {
   width: 100%;
-  padding: 12px 10px; /* 패딩 수정 */
-  border: 2px solid #ccc; /* 테두리 스타일 */
-  border-radius: 4px; /* 둥근 모서리 */
+  padding: 12px 10px;
+  /* 패딩 수정 */
+  border: 2px solid #ccc;
+  /* 테두리 스타일 */
+  border-radius: 4px;
+  /* 둥근 모서리 */
   box-sizing: border-box;
-  background-color: #f8f8f8; /* 배경색 변경 */
+  background-color: #f8f8f8;
+  /* 배경색 변경 */
 }
+
 button {
   padding: 12px 20px;
   background-color: #007BFF;
@@ -94,9 +106,10 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s; /* 부드러운 색상 전환 효과 */
+  transition: background-color 0.3s;
+  /* 부드러운 색상 전환 효과 */
 }
+
 button:hover {
   background-color: #0056b3;
-}
-</style>
+}</style>
