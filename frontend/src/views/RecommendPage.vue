@@ -237,5 +237,14 @@ body {
 
 .game-cards {
   margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.game-card-col {
+  flex: 0 0 300px;
+  /* Fixed width */
+  max-width: 300px;
+  /* Ensure max width */
 }
 </style>
