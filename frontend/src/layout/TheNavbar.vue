@@ -70,7 +70,7 @@ export default {
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
       this.isLoggedIn = false;
-      this.$router.push('/login');
+      this.$router.go(); // 현재 페이지 새로고침
     },
     handleOutsideClick(event) {
       if (!event.target.closest('.dropdown')) {
