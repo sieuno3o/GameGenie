@@ -1,13 +1,12 @@
 <template>
   <v-container class="mainBox">
-    <v-row>
-      <v-col cols="12">
+    <v-row class="chat-content" ref="chatContent">
+      <v-col cols="12" class="chatBox">
         <div v-for="(message, index) in messages" :key="index" class="chat-message"
           :class="{ 'user-message-container': message.isUser, 'bot-message-container': !message.isUser }">
           <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
             {{ message.text }}
           </div>
-          <!-- 추천 게임 카드가 bot 메시지 밑에 나오도록 함 -->
           <v-row v-if="message.games && message.games.length > 0" class="game-cards">
             <game-card v-for="game in message.games" :key="game.appid" :game="game" />
           </v-row>
@@ -46,6 +45,9 @@ export default {
       this.sendQuery();
     }
   },
+  updated() {
+    this.scrollToBottom();
+  },
   methods: {
     async sendQuery() {
       if (this.userInput.trim() === '') return;
@@ -72,6 +74,7 @@ export default {
       }
 
       this.userInput = '';
+      this.scrollToBottom(); // Scroll after bot response
     },
     async getMoreRecommendations() {
       if (this.previousInput.trim() === '') return;
@@ -94,14 +97,40 @@ export default {
         this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
       }
+
+      this.scrollToBottom();
     },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatContent = this.$refs.chatContent;
+        if (chatContent) {
+          chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
+        }
+      });
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
 .mainBox {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 55px);
+}
+
+.chat-content {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 100px;
+  overflow-x: hidden;
 }
 
 .user-message-container {
@@ -119,12 +148,11 @@ export default {
 
 .user-message,
 .bot-message {
-  margin-top: 5px;
+  margin-top: 15px;
   position: relative;
   padding: 20px;
   max-width: 60%;
   min-width: 100px;
-  word-wrap: break-word;
   border-radius: 15px;
   display: flex;
   align-items: center;
@@ -134,6 +162,7 @@ export default {
 .user-message {
   background-color: #ffffff;
   color: #000000;
+  margin-right: 10px;
 }
 
 .user-message:after {
@@ -149,6 +178,7 @@ export default {
 .bot-message {
   background-color: $MAIN-COLOR-NAVY;
   color: white;
+  margin-left: 10px;
 }
 
 .bot-message:before {
