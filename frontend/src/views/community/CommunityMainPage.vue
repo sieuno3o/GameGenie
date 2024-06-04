@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="communityRow2">
-        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" @input="fetchSuggestions" class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
           <router-link to="/community/Create">
             <a>글 작성</a>
@@ -35,7 +35,7 @@
       <div>
         <ul class="communityList">
           <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id" @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author }}
+            {{ item.title }}, 작성자: {{ item.author }}, 좋아요: {{ item.likes_count }}
           </li>
         </ul>
         <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import api from '../../api';
 import accountsAPI from '../../accountsAPI';
 
@@ -65,7 +64,7 @@ export default {
   },
   computed: {
     sortedAndFilteredCommunityList() {
-      let filteredList = this.communityList;
+      let filteredList = [...this.communityList];
 
       if (this.selectedCategory !== 'all') {
         filteredList = filteredList.filter(item => item.category === this.selectedCategory);
@@ -79,9 +78,9 @@ export default {
         });
 
       if (this.sortOption === 'time') {
-        filteredList.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       } else if (this.sortOption === 'likes') {
-        filteredList.sort((a, b) => b.likes - a.likes);
+        filteredList.sort((a, b) => b.likes_count - a.likes_count);
       }
 
       return filteredList;
@@ -97,6 +96,7 @@ export default {
       try {
         const response = await api.get('community/');
         this.communityList = response.data.results;
+        
       } catch (error) {
         console.error("커뮤니티 목록을 가져오는 중 오류가 발생했습니다 :", error);
       }
@@ -115,7 +115,7 @@ export default {
       this.showDropdown = !this.showDropdown;
     },
     fetchCategories() {
-      axios.get('http://localhost:8000/api/community/categories/')
+      api.get('community/categories/')
         .then(response => {
           this.categories = response.data;
         })
@@ -133,16 +133,12 @@ export default {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
-      this.sortOption = option;
-      this.sortCommunityList();
-      this.showSortDropdown = false;
+    this.sortOption = option;
+    this.showSortDropdown = false;
     },
-    sortCommunityList() {
-      if (this.sortOption === 'time') {
-        this.communityList.sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (this.sortOption === 'likes') {
-        this.communityList.sort((a, b) => b.likes - a.likes);
-      }
+    selectSuggestion(suggestion) {
+      this.query = suggestion.value;
+      this.suggestions = [];
     },
   }
 };

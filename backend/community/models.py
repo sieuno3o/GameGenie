@@ -1,6 +1,5 @@
 from django.db import models
 from accounts.models import User
-from django.utils import timezone
 
 
 class Community(models.Model):
@@ -107,16 +106,14 @@ class Community(models.Model):
         return self.community_like.count()
 
     def communitylist_points(self):
-        after_day = (timezone.now() - self.created_at).days
-        after_day_point = -5 * after_day
 
         comments_count = self.comments.count()
-        comments_count_point = 3 * comments_count
+        comments_count_point = 1 * comments_count
 
         likes_count = self.community_like.count()
         likes_count_point = 1 * likes_count
 
-        return after_day_point + comments_count_point + likes_count_point
+        return comments_count_point + likes_count_point
 
 
 class Comment(models.Model):
