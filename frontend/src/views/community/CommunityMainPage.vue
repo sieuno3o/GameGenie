@@ -6,9 +6,11 @@
       <div class="communityRow1">
         <div class="categoryButton">
           <div class="categorylist">
-            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리" @click="toggleDropdown" />
+            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
+              @click="toggleDropdown" />
             <ul v-if="showDropdown" class="categoryDropdown">
-              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value }}</li>
+              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value
+              }}</li>
             </ul>
           </div>
           <div class="categorySelected">
@@ -25,16 +27,16 @@
         </div>
       </div>
       <div class="communityRow2">
-        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames" class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
+          class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
-          <router-link to="/community/Create">
-            <a>글 작성</a>
-          </router-link>
+          <a @click.prevent="checkLogin">글 작성</a>
         </div>
       </div>
       <div>
         <ul class="communityList">
-          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id" @click="goToDetail(item.id)">
+          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
+            @click="goToDetail(item.id)">
             {{ item.title }}, 작성자: {{ item.author }}
           </li>
         </ul>
@@ -144,13 +146,21 @@ export default {
         this.communityList.sort((a, b) => b.likes - a.likes);
       }
     },
+    checkLogin() {
+      if (!localStorage.getItem('access')) {
+        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+        this.$router.push({ name: 'login' });
+      } else {
+        this.$router.push({ name: 'communityCreate' });
+      }
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.communityList{
-  list-style:none;
+.communityList {
+  list-style: none;
 }
 
 .community {
@@ -200,15 +210,17 @@ export default {
   margin: 20px;
 }
 
-.communityCreate{
+.communityCreate {
   padding: 10px;
   width: 80px;
   height: 40px;
   text-align: center;
   border-radius: 10px;
   background-color: beige;
+  cursor : pointer;
 }
-.communityCreate > a {
+
+.communityCreate>a {
   text-decoration: none;
   color: black;
 }
@@ -275,7 +287,7 @@ export default {
   right: -100px;
   background-color: #f9f9f9;
   min-width: 100px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
@@ -289,5 +301,4 @@ export default {
 
 .sortDropdown p:hover {
   background-color: #f1f1f1
-}
-</style>
+}</style>
