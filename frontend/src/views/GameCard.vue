@@ -1,13 +1,13 @@
 <template>
     <v-col cols="12" md="3" class="game-card-col">
         <v-card class="game-card">
-            <v-img :src="game.image_url" class="game-card-img"></v-img>
+            <v-img :src="game.image_url" class="game-card-img" contain></v-img>
             <v-card-title class="game-card-title">{{ game.name }}</v-card-title>
             <v-card-subtitle class="game-card-subtitle">{{ game.review_summary }}</v-card-subtitle>
             <v-card-subtitle class="game-card-subtitle">{{ game.price }}</v-card-subtitle>
             <v-card-actions>
                 <v-btn :href="game.store_url" target="_blank">스팀 상점 페이지로 이동</v-btn>
-                <v-btn @click="toggleFavorite">{{ isFavorite ? '즐겨찾기 제거' : '즐겨찾기 추가' }}</v-btn>
+                <v-btn @click="toggleFavorite">{{ isFavorite ? '★' : '☆' }}</v-btn>
             </v-card-actions>
         </v-card>
     </v-col>
@@ -100,17 +100,13 @@ export default {
 
 .game-card {
     overflow: hidden;
-    height: 350px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
 }
 
 .game-card-img {
-    object-fit: cover;
-    height: 150px;
-    width: 100%;
+    object-fit: contain;
 }
 
 .game-card-title {
