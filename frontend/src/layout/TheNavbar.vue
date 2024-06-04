@@ -14,8 +14,8 @@
         <div v-else class="dropdown">
           <span class="navLogin" @click="toggleDropdown">{{ username }}</span>
           <div v-if="isDropdownOpen" class="dropdown-content">
-            <router-link :to="`/profile/${userId}`">내 프로필</router-link>
-            <a @click="logout">로그아웃</a>
+            <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
+            <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
           </div>
         </div>
       </div>
@@ -133,12 +133,11 @@ a.router-link-active {
   z-index: 1;
   margin-top: 10px;
   margin-left: 13px;
-  text-align: center;
 }
 
 .dropdown-content a {
   color: black;
-  padding: 12px 16px;
+  padding: 12px 18px;
   text-decoration: none;
   display: block;
 }
