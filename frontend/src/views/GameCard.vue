@@ -95,12 +95,11 @@ export default {
 
 <style scoped>
 .game-card-col {
-    max-width: 300px;
-    min-width: 300px;
+    width: 300px;
 }
 
 .game-card {
-    height: 100%;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
