@@ -2,13 +2,13 @@
   <v-container class="mainBox">
     <v-row class="chat-content" ref="chatContent">
       <v-col cols="12" class="chatBox">
-        <div v-for="(message, index) in messages" :key="index" class="chat-message"
+        <div v-for="(message, index) in messages" :key="index" ref="message" class="chat-message"
           :class="{ 'user-message-container': message.isUser, 'bot-message-container': !message.isUser }">
           <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
             {{ message.text }}
           </div>
-          <v-row v-if="message.games && message.games.length > 0" class="game-cards">
-            <game-card v-for="game in message.games" :key="game.appid" :game="game" />
+          <v-row v-if="message.games && message.games.length > 0" class="game-cards" align="start">
+            <game-card v-for="game in message.games" :key="game.appid || game.name" :game="game" />
           </v-row>
         </div>
       </v-col>
@@ -44,6 +44,7 @@ export default {
       this.userInput = this.$route.query.user_input;
       this.sendQuery();
     }
+    this.scrollToBottom(); // Ensure we start at the bottom
   },
   updated() {
     this.scrollToBottom();
@@ -53,6 +54,9 @@ export default {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
 
       try {
         const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.userInput)}`);
@@ -63,6 +67,11 @@ export default {
         if (data.similar_games) {
           const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
           this.messages.push(botMessage);
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 500); // Delay to ensure all elements are fully rendered
+          });
         } else {
           this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -74,12 +83,17 @@ export default {
       }
 
       this.userInput = '';
-      this.scrollToBottom(); // Scroll after bot response
+      this.$nextTick(() => {
+        this.scrollToBottom(); // Scroll after bot response
+      });
     },
     async getMoreRecommendations() {
       if (this.previousInput.trim() === '') return;
 
       this.messages.push({ text: '다른 게임은 없어?', isUser: true });
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
 
       try {
         const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.previousInput)}`);
@@ -90,6 +104,11 @@ export default {
         if (data.similar_games) {
           const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
           this.messages.push(botMessage);
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 500); // Delay to ensure all elements are fully rendered
+          });
         } else {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
@@ -98,17 +117,32 @@ export default {
         this.error = error.toString();
       }
 
-      this.scrollToBottom();
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
     },
     scrollToBottom() {
       this.$nextTick(() => {
         const chatContent = this.$refs.chatContent;
-        if (chatContent) {
-          chatContent.$el.scrollTop = chatContent.$el.scrollHeight;
+        if (chatContent && chatContent.$el) {
+          const messages = this.$refs.message;
+          if (messages && messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          }
         }
       });
     }
   },
+  watch: {
+    messages() {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 500); // Delay to ensure all elements are fully rendered
+      });
+    },
+  }
 };
 </script>
 
