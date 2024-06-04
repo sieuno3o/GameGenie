@@ -11,9 +11,13 @@
         <router-link v-if="!isLoggedIn" to="/login">
           <span class="navLogin">로그인</span>
         </router-link>
-        <router-link v-else :to="`/profile/${userId}`">
-          <span class="navLogin">{{ username }}</span>
-        </router-link>
+        <div v-else class="dropdown">
+          <span class="navLogin" @click="toggleDropdown">{{ username }}</span>
+          <div v-if="isDropdownOpen" class="dropdown-content">
+            <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
+            <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -27,10 +31,17 @@ export default {
       isLoggedIn: false,
       userId: null,
       username: '',
+      isDropdownOpen: false
     };
   },
   created() {
     this.checkLoginStatus();
+  },
+  mounted() {
+    document.addEventListener('click', this.handleOutsideClick);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleOutsideClick);
   },
   methods: {
     checkLoginStatus() {
@@ -49,6 +60,22 @@ export default {
         localStorage.removeItem('userId');
         localStorage.removeItem('username');
       }
+    },
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
+    },
+    logout() {
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      this.isLoggedIn = false;
+      this.$router.go(); // 현재 페이지 새로고침
+    },
+    handleOutsideClick(event) {
+      if (!event.target.closest('.dropdown')) {
+        this.isDropdownOpen = false;
+      }
     }
   }
 };
@@ -60,6 +87,13 @@ export default {
   height: 55px;
   background-color: $MAIN-COLOR-SKYBLUE;
   justify-content: space-between;
+  display: flex;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
 }
 
 .navLogoImg {
@@ -78,10 +112,41 @@ a.router-link-active {
 .navLogin {
   padding-right: 30px;
   margin-left: 30px;
+  cursor: pointer;
 }
 
 .navCommunity:hover,
 .navLogin:hover {
   color: $HOVER-COLOR;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  position: absolute;
+  background-color: #f9f9f9;
+  max-width: 120px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  margin-top: 10px;
+  margin-left: 13px;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 18px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown .dropdown-content {
+  display: block;
 }
 </style>
