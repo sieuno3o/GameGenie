@@ -7,16 +7,20 @@
         <div class="categoryButton">
           <div class="categorylist">
             <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리" @click="toggleDropdown" />
-            <ul v-if="showDropdown" class="category-dropdown">
+            <ul v-if="showDropdown" class="categoryDropdown">
               <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value }}</li>
             </ul>
           </div>
           <div class="categorySelected">
             <h3 class="subtitle">{{ selectedCategoryName }}</h3>
           </div>
-          <div class="categorySortButton">
-            <h3 class="subtitle">시간순</h3>
+          <div class="categorySortButton" @click="toggleSortDropdown">
+            <h3 class="subtitle">{{ sortOption === 'time' ? '시간순' : '좋아요 순' }}</h3>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
+            <div v-if="showSortDropdown" class="sortDropdown">
+              <p @click="selectSortOption('time')">시간순</p>
+              <p @click="selectSortOption('likes')">좋아요 순</p>
+            </div>
           </div>
         </div>
       </div>
@@ -32,7 +36,7 @@
       <div>
         <ul class="communityList">
           <li 
-            class="community" 
+            class="communitys" 
             v-for="item in filteredCommunityList" 
             :key="item.id"
             @click="goToDetail(item.id)">
@@ -59,13 +63,15 @@ export default {
       categories: [],
       query: '',
       selectedCategoryName: '카테고리를 선택하세요',
+      showSortDropdown: false,
+      sortOption: 'time',
     };
   },
   computed: {
     filteredCommunityList() {
       return this.communityList
         .filter(item => item && item.id)
-        .slice(0, 10)
+        .slice(0, 20)
         .map(item => {
           const user = this.accountsUsers.find(user => user.id === item.author);
           const username = user ? user.username : '알 수 없음';
@@ -114,7 +120,22 @@ export default {
     this.showDropdown = false;
     console.log('선택한 카테고리:', category);
     },
-  },
+    toggleSortDropdown() {
+    this.showSortDropdown = !this.showSortDropdown;
+    },
+    selectSortOption(option) {
+      this.sortOption = option;
+      this.sortCommunityList();
+      this.showSortDropdown = false;
+    },
+    sortCommunityList() {
+      if (this.sortOption === 'time') {
+        this.communityList.sort((a, b) => new Date(a.date) - new Date(b.date));
+      } else if (this.sortOption === 'likes') {
+        this.communityList.sort((a, b) => b.likes - a.likes);
+      }
+    },
+  }
 };
 </script>
 
@@ -135,6 +156,9 @@ export default {
   height: 40px;
   width: 100%;
   margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
 .communitys:hover {
@@ -202,6 +226,7 @@ export default {
 
 .categorySortButton {
   display: flex;
+  cursor: pointer;
 }
 
 .hamburgericon {
@@ -209,7 +234,7 @@ export default {
   height: 25px;
 }
 
-.category-dropdown {
+.categoryDropdown {
   position: absolute;
   background-color: #f9f9f9;
   opacity: 0.9;
@@ -222,7 +247,7 @@ export default {
   transform: translateY(55%);
 }
 
-.category-dropdown li {
+.categoryDropdown li {
   padding: 5px 0;
   width: 100px;
   margin: 10px;
@@ -231,7 +256,29 @@ export default {
   cursor: pointer;
 }
 
-.category-dropdown li:hover {
+.categoryDropdown li:hover {
   background-color: #e0e0e0;
+}
+
+.sortDropdown {
+  display: block;
+  position: absolute;
+  right: -100px;
+  background-color: #f9f9f9;
+  min-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.sortDropdown p {
+  color: black;
+  margin: 10px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.sortDropdown p:hover {
+  background-color: #f1f1f1
 }
 </style>
