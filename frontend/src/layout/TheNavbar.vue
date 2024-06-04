@@ -37,6 +37,12 @@ export default {
   created() {
     this.checkLoginStatus();
   },
+  mounted() {
+    document.addEventListener('click', this.handleOutsideClick);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleOutsideClick);
+  },
   methods: {
     checkLoginStatus() {
       const token = localStorage.getItem('access');
@@ -65,6 +71,11 @@ export default {
       localStorage.removeItem('username');
       this.isLoggedIn = false;
       this.$router.push('/login');
+    },
+    handleOutsideClick(event) {
+      if (!event.target.closest('.dropdown')) {
+        this.isDropdownOpen = false;
+      }
     }
   }
 };
