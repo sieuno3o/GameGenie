@@ -17,6 +17,7 @@
             <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
             <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
           </div>
+        </div>
         <div v-else>
           <router-link :to="`/profile/${userId}`">
             <span class="navLogin">{{ username }}</span>
