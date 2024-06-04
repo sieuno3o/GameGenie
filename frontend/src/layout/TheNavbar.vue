@@ -17,6 +17,11 @@
             <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
             <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
           </div>
+        <div v-else>
+          <router-link :to="`/profile/${userId}`">
+            <span class="navLogin">{{ username }}</span>
+          </router-link>
+          <span class="navLogout" @click="logout">로그아웃</span>
         </div>
       </div>
     </div>
@@ -76,6 +81,9 @@ export default {
       if (!event.target.closest('.dropdown')) {
         this.isDropdownOpen = false;
       }
+      this.userId = null;
+      this.username = '';
+      this.$router.push('/');
     }
   }
 };
@@ -115,8 +123,15 @@ a.router-link-active {
   cursor: pointer;
 }
 
+.navLogout {
+  padding-right: 30px;
+  cursor: pointer;
+  color: inherit;
+}
+
 .navCommunity:hover,
-.navLogin:hover {
+.navLogin:hover,
+.navLogout:hover {
   color: $HOVER-COLOR;
 }
 
