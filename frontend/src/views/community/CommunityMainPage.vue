@@ -35,8 +35,9 @@
       </div>
       <div>
         <ul class="communityList">
-          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id" @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author }}, 좋아요: {{ item.community_like.length }}
+          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
+            @click="goToDetail(item.id)">
+            {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}
           </li>
         </ul>
         <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
@@ -53,7 +54,6 @@
 
 <script>
 import api from '../../api';
-import accountsAPI from '../../accountsAPI';
 
 export default {
   data() {
@@ -78,21 +78,18 @@ export default {
       let filteredList = [...this.communityList];
 
       if (this.query) {
-        filteredList = filteredList.filter(item =>
-          item.title.toLowerCase().includes(this.query.toLowerCase())
-        );
+        filteredList = filteredList.filter(item => item.title.toLowerCase().includes(this.query.toLowerCase()));
       }
 
       if (this.selectedCategory !== 'all') {
         filteredList = filteredList.filter(item => item.category === this.selectedCategory);
       }
 
-      filteredList = filteredList.filter(item => item && item.id)
-        .map(item => {
-          const user = this.accountsUsers.find(user => user.id === item.author);
-          const username = user ? user.username : '알 수 없음';
-          return { ...item, author: username };
-        });
+      filteredList = filteredList.map(item => {
+        const user = this.accountsUsers.find(user => user.id === item.author);
+        const author_nickname = user ? user.nickname : '알 수 없음';
+        return { ...item, author_nickname };
+      });
 
       if (this.sortOption === 'time') {
         filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -105,45 +102,46 @@ export default {
       return filteredList;
     },
     currentPageCommunities() {
-      const start = (this.currentPage - 1) * this.pageSize
-      const end = start + this.pageSize
-      return this.communityList.slice(start, end)
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.sortedAndFilteredCommunityList.slice(start, end);
     },
   },
-  created() {
-    this.fetchCommunityList();
+  mounted() {
     this.fetchAccountsUsers();
+    this.fetchCommunityList();
     this.fetchCategories();
   },
   methods: {
     formatDate(dateString) {
-      return new Date(dateString).toLocaleString()
+      return new Date(dateString).toLocaleString();
     },
     prevPage() {
-      this.currentPage = Math.max(this.currentPage - 1, 1)
-      this.fetchCommunityList()
+      this.currentPage = Math.max(this.currentPage - 1, 1);
+      this.fetchCommunityList();
     },
     nextPage() {
-      this.currentPage = Math.min(this.currentPage + 1, this.totalPages)
-      this.fetchCommunityList()
+      this.currentPage = Math.min(this.currentPage + 1, this.totalPages);
+      this.fetchCommunityList();
     },
     goToPage(page) {
-      this.currentPage = page
-      this.fetchCommunityList()
+      this.currentPage = page;
+      this.fetchCommunityList();
     },
     async fetchCommunityList() {
       api.get(`community/?page=${this.currentPage}`)
         .then(response => {
-          this.communityList = response.data.results
-          this.totalPages = Math.ceil(response.data.count / this.pageSize)
+          this.communityList = response.data.results;
+          this.totalPages = Math.ceil(response.data.count / this.pageSize);
         })
         .catch(error => {
-          console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error)
-        })
+          console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error);
+        });
     },
     async fetchAccountsUsers() {
       try {
-        this.accountsUsers = await accountsAPI.getUsers();
+        const response = await api.get('/accounts/users/');
+        this.accountsUsers = response.data;
       } catch (error) {
         console.error("유저 정보를 가져오는 중 오류가 발생했습니다 :", error);
       }
@@ -173,8 +171,8 @@ export default {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
-    this.sortOption = option;
-    this.showSortDropdown = false;
+      this.sortOption = option;
+      this.showSortDropdown = false;
     },
     checkLogin() {
       if (!localStorage.getItem('access')) {
@@ -211,7 +209,7 @@ export default {
 }
 
 .communitys:hover {
-  background-color: lightgray
+  background-color: lightgray;
 }
 
 .communityTitle {
@@ -247,7 +245,7 @@ export default {
   text-align: center;
   border-radius: 10px;
   background-color: beige;
-  cursor : pointer;
+  cursor: pointer;
 }
 
 .communityCreate>a {
@@ -330,7 +328,7 @@ export default {
 }
 
 .sortDropdown p:hover {
-  background-color: #f1f1f1
+  background-color: #f1f1f1;
 }
 
 .pagination {
@@ -345,5 +343,4 @@ export default {
 
 .pagination .active {
   font-weight: bold;
-}
-</style>
+}</style>
