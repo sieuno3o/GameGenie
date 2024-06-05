@@ -3,11 +3,13 @@
     <span class="loginTitle heading3">로그인</span>
     <div id="id" class="loginInputBox flex-row-left">
       <img src="../../assets/image/account/idIcon.png" class="loginIconImg">
-      <input v-model="username" type="text" class="loginInput button2" id="inputId" placeholder="아이디">
+      <input v-model="username" @keydown.enter="login" type="text" class="loginInput button2" id="inputId"
+        placeholder="아이디">
     </div>
     <div id="password" class="loginInputBox flex-row-left">
       <img src="../../assets/image/account/passwordIcon.png" class="loginIconImg">
-      <input v-model="password" type="password" class="loginInput button2" id="inputPassword" placeholder="비밀번호">
+      <input v-model="password" @keydown.enter="login" type="password" class="loginInput button2" id="inputPassword"
+        placeholder="비밀번호">
     </div>
     <button @click="login" type="submit" class="loginInputBox" id="loginButton">로그인</button>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
