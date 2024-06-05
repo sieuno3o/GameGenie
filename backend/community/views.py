@@ -11,7 +11,7 @@ from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
@@ -25,6 +25,14 @@ class CommunityList(ListAPIView):
     search_fields = ['title', 'content', 'author__username']
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        queryset = Community.objects.annotate(community_like_count=Count('community_like'))
+        ordering = self.request.query_params.get('ordering', 'created_at')
+        if ordering == 'community_like_count':
+            queryset = queryset.order_by('-community_like_count')
+        return queryset
 
 
 class CommunityCreate(APIView):

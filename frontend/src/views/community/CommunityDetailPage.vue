@@ -8,7 +8,7 @@
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
-      <h3>{{ communityItem.community_like.length }}</h3>
+      <h3>{{ communityItem.community_like?.length }}</h3>
     </div>
     <div class="detailButtonList">
       <router-link to="/community/">
@@ -33,7 +33,7 @@ export default {
       isLiked: false,
       isLoggedIn: false,
       userId: null,
-      newComment: '' // 새로운 댓글을 위한 데이터 속성 추가
+      newComment: ''
     };
   },
   async created() {
@@ -79,8 +79,8 @@ export default {
     async toggleLike() {
       try {
         const response = await api.patch(`community/${this.communityItem.id}/like/`);
-        this.communityItem.community_like = response.data.community_like;
         this.isLiked = response.data.is_liked;
+        this.communityItem.community_like = [...response.data.community_like];
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
         this.isLiked = !this.isLiked;
