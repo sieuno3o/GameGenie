@@ -3,12 +3,12 @@
     <h1>{{ communityItem.title }}</h1>
     <h3>카테고리 : {{ communityItem.category }}</h3>
     <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
-    <h3>작성자 : {{ communityItem.author }}</h3>
+    <h3>작성자 : {{ communityItem.author_nickname }}</h3>
     <div>{{ communityItem.image }}</div>
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
-      <h3>{{ communityItem.community_like?.length }}</h3>
+      <h3>{{ communityItem.community_like ? communityItem.community_like.length : 0 }}</h3>
     </div>
     <div class="detailButtonList">
       <router-link to="/community/">
@@ -22,14 +22,11 @@
 
 <script>
 import api from '../../api';
-import accountsAPI from '../../accountsAPI';
 
 export default {
   data() {
     return {
-      communityItem: {
-        community_like: []
-      },
+      communityItem: null,
       isLiked: false,
       isLoggedIn: false,
       userId: null,
@@ -61,10 +58,10 @@ export default {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     async checkLoginStatus() {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('access');
       if (token) {
         try {
-          const response = await accountsAPI.get('profile/', {
+          const response = await api.get('accounts/profile/', {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -120,11 +117,9 @@ export default {
 };
 </script>
 
-
 <style>
 .communityProfile {
   width: 100%;
-  height: 100px;
   font-size: 30px;
   margin: 40px;
   text-align: center;
@@ -168,37 +163,45 @@ h3 {
   font-size: 25px;
   text-align: center;
 }
+
 .content {
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 8px;
 }
+
 .actions {
   display: flex;
   gap: 10px;
   margin: 20px 0;
 }
+
 .like-section {
   font-size: 1.5em;
   cursor: pointer;
 }
+
 .comments-section {
   margin-top: 40px;
 }
+
 .comment {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 10px 0;
 }
+
 .comment img {
   height: 40px;
   width: 40px;
   border-radius: 50%;
 }
+
 .add-comment {
   margin-top: 20px;
 }
+
 .add-comment textarea {
   width: 100%;
   height: 80px;
@@ -207,6 +210,7 @@ h3 {
   padding: 10px;
   margin-bottom: 10px;
 }
+
 .add-comment button {
   padding: 10px 20px;
   background-color: #007BFF;

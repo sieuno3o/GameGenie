@@ -87,9 +87,8 @@ export default {
         try {
             const accessToken = localStorage.getItem('access');
             if (accessToken) {
-                const userId = localStorage.getItem('userId');
                 console.log('Fetching user data...');
-                const userResponse = await axios.get(`http://localhost:8000/api/accounts/profile/${userId}/`, {
+                const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 this.user = userResponse.data;
@@ -120,8 +119,7 @@ export default {
 
             try {
                 const accessToken = localStorage.getItem('access');
-                const userId = localStorage.getItem('userId');
-                const response = await axios.patch(`http://localhost:8000/api/accounts/profile/${userId}/`, {
+                const response = await axios.patch('http://localhost:8000/api/accounts/profile/', {
                     nickname, // 닉네임 추가
                     old_password: currentPassword,
                     new_password: newPassword
