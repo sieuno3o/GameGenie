@@ -17,10 +17,11 @@
             <h3 class="subtitle">{{ selectedCategoryName }}</h3>
           </div>
           <div class="categorySortButton" @click="toggleSortDropdown">
-            <h3 class="subtitle">{{ sortOption === 'time' ? '시간순' : '좋아요 순' }}</h3>
+            <h3 class="subtitle">{{ sortOption === 'time' ? '최신 순' : sortOption === 'oldest' ? '오래된 순' : '좋아요 순' }}</h3>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
-              <p @click="selectSortOption('time')">시간순</p>
+              <p @click="selectSortOption('time')">최신 순</p>
+              <p @click="selectSortOption('oldest')">오래된 순</p>
               <p @click="selectSortOption('likes')">좋아요 순</p>
             </div>
           </div>
@@ -95,6 +96,8 @@ export default {
 
       if (this.sortOption === 'time') {
         filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      } else if (this.sortOption === 'oldest') {
+        filteredList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       } else if (this.sortOption === 'likes') {
         filteredList.sort((a, b) => b.community_like.length - a.community_like.length);
       }
