@@ -15,7 +15,7 @@
     </div>
     <div id="nickname" class="signupInputBox flex-row-left">
       <img src="../../assets/image/account/nicknameIcon.png" class="signupIconImg">
-      <input v-model="introduction" type="text" class="signupInput button2" id="inputNickname" placeholder="닉네임">
+      <input v-model="nickname" type="text" class="signupInput button2" id="inputNickname" placeholder="닉네임">
     </div>
     <div class="profileImageBox flex-col-center">
       <img :src="profileImage || defaultImage" class="profileImagePreview" />
@@ -35,7 +35,7 @@ export default {
       username: '',
       password: '',
       email: '',
-      introduction: '',
+      nickname: '',
       profileImage: null,
       defaultImage: require('../../assets/image/account/profileImgIcon.png'),
     };
@@ -60,7 +60,7 @@ export default {
           username: this.username,
           password: this.password,
           email: this.email,
-          introduction: this.introduction
+          nickname: this.nickname  // 수정된 부분
         });
         alert('회원가입이 완료되었습니다.');
         if (response.status === 201) {
