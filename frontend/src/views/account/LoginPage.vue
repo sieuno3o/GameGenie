@@ -53,6 +53,7 @@ export default {
           if (user) {
             localStorage.setItem('userId', user.id);
             localStorage.setItem('username', user.username);
+            localStorage.setItem('nickname', user.nickname); // nickname 추가
             this.$router.push({ name: 'main' });
           } else {
             this.errorMessage = '사용자 정보를 가져오는 데 실패했습니다.';
