@@ -1,12 +1,12 @@
-from .models import User
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'created_at']
+        fields = ['id', 'username', 'email', 'password', 'created_at', 'nickname']
         read_only_fields = ['created_at']
 
     def get_author(self, obj):
@@ -20,5 +20,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'introduction']
+        fields = ['username', 'email', 'password', 'nickname']
         read_only_fields = ['username']
