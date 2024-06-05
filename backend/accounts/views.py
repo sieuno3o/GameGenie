@@ -73,12 +73,15 @@ class DeleteView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id):
-        user = get_object_or_404(User, id=id)
+    def get(self, request, id=None):
+        if id:
+            user = get_object_or_404(User, id=id)
+        else:
+            user = request.user
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
 
-    def patch(self, request, id):
+    def patch(self, request, id=None):
         user = request.user
         serializer = UserProfileSerializer(
             user, data=request.data, partial=True, context={'request': request})

@@ -3,7 +3,7 @@
     <router-link to="/">
       <img src="../assets/image/logo.png" class="navLogoImg">
     </router-link>
-    <div class="flex-center">
+    <div class="flex-center navLinks">
       <router-link to="/community">
         <span class="navCommunity">커뮤니티</span>
       </router-link>
@@ -12,10 +12,14 @@
           <span class="navLogin">로그인</span>
         </router-link>
         <div v-else class="dropdown">
-          <span class="navLogin" @click="toggleDropdown">{{ nickname }}</span> <!-- nickname 표시 -->
+          <span class="navLogin" @click="toggleDropdown">{{ nickname }}</span>
           <div v-if="isDropdownOpen" class="dropdown-content">
-            <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
-            <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
+            <router-link :to="`/profile/${userId}`" class="dropdown-item">
+              <span class="dropdown-font button2">내 프로필</span>
+            </router-link>
+            <a @click="logout" class="dropdown-item">
+              <span class="dropdown-font button2">로그아웃</span>
+            </a>
           </div>
         </div>
       </div>
@@ -24,13 +28,15 @@
 </template>
 
 <script>
+import api from '@/api';
+
 export default {
   name: "TheNavbar",
   data() {
     return {
       isLoggedIn: false,
       userId: null,
-      nickname: '', // nickname 데이터 바인딩
+      nickname: '',
       isDropdownOpen: false
     };
   },
@@ -44,33 +50,36 @@ export default {
     document.removeEventListener('click', this.handleOutsideClick);
   },
   methods: {
-    checkLoginStatus() {
-      const token = localStorage.getItem('access');
-      const userId = localStorage.getItem('userId');
-      const nickname = localStorage.getItem('nickname'); // nickname 가져오기
-
-      if (token && userId && nickname) {
-        this.isLoggedIn = true;
-        this.userId = userId;
-        this.nickname = nickname;
-      } else {
+    async checkLoginStatus() {
+      try {
+        const response = await api.get('accounts/profile/');
+        if (response.data) {
+          this.isLoggedIn = true;
+          this.userId = response.data.id;
+          this.nickname = response.data.nickname;
+        } else {
+          this.isLoggedIn = false;
+        }
+      } catch (error) {
         this.isLoggedIn = false;
+      }
+    },
+    async logout() {
+      try {
+        const refreshToken = localStorage.getItem('refresh');
+        await api.post('accounts/logout/', { refresh: refreshToken });
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('nickname');
+        this.isLoggedIn = false;
+        this.userId = null;
+        this.nickname = '';
+        this.$router.push({ name: 'main' });
+      } catch (error) {
+        console.error('Logout failed:', error);
       }
     },
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
-    },
-    logout() {
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('nickname');
-      this.isLoggedIn = false;
-      this.$router.go(); // 현재 페이지 새로고침
     },
     handleOutsideClick(event) {
       if (!event.target.closest('.dropdown')) {
@@ -83,7 +92,8 @@ export default {
 
 <style lang="scss" scoped>
 #navbar {
-  width: auto;
+  width: 100%;
+  /* 전체 너비를 차지하도록 설정 */
   height: 55px;
   background-color: $MAIN-COLOR-SKYBLUE;
   justify-content: space-between;
@@ -102,6 +112,15 @@ export default {
   padding-left: 25px;
 }
 
+.navLinks {
+  margin-left: 15px;
+  /* navLinks 요소에 왼쪽 마진 추가 */
+  display: flex;
+  /* Flexbox 사용 */
+  align-items: center;
+  /* 세로 정렬 */
+}
+
 a,
 a.router-link-exact-active,
 a.router-link-active {
@@ -111,7 +130,7 @@ a.router-link-active {
 
 .navLogin {
   padding-right: 30px;
-  margin-left: 30px;
+  margin-left: 15px;
   cursor: pointer;
 }
 
@@ -128,25 +147,32 @@ a.router-link-active {
 .dropdown-content {
   position: absolute;
   background-color: #f9f9f9;
-  max-width: 120px;
+  width: 150px;
+  /* 너비를 고정하여 글자가 일직선으로 정렬되도록 함 */
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   margin-top: 10px;
-  margin-left: 13px;
+  margin-left: -25px;
+  /* 드롭다운 위치 조정 */
 }
 
-.dropdown-content a {
+.dropdown-content .dropdown-item {
+  display: flex;
+  /* Flexbox 사용 */
+  align-items: center;
+  /* 세로 정렬 */
+  padding: 8px 12px;
+  /* padding 조정 */
   color: black;
-  padding: 12px 18px;
   text-decoration: none;
-  display: block;
+  cursor: pointer;
+  /* 마우스를 올렸을 때 클릭 가능한 모양 */
 }
 
-.dropdown-content a:hover {
+.dropdown-content .dropdown-item:hover {
   background-color: #f1f1f1;
 }
 
-.dropdown .dropdown-content {
-  display: block;
-}
-</style>
+.logout-button {
+  cursor: pointer;
+}</style>

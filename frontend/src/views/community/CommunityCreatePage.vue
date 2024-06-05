@@ -56,6 +56,7 @@ export default {
         })
         .catch(error => {
           console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
+          alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
         });
     }
   },
@@ -79,9 +80,7 @@ export default {
 label {
   display: block;
   margin-bottom: 10px;
-  /* 조금 더 여유 있는 간격 */
   color: #333;
-  /* 라벨 텍스트 색상 */
 }
 
 input[type="text"],
@@ -89,14 +88,10 @@ textarea,
 select {
   width: 100%;
   padding: 12px 10px;
-  /* 패딩 수정 */
   border: 2px solid #ccc;
-  /* 테두리 스타일 */
   border-radius: 4px;
-  /* 둥근 모서리 */
   box-sizing: border-box;
   background-color: #f8f8f8;
-  /* 배경색 변경 */
 }
 
 button {
@@ -107,9 +102,9 @@ button {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  /* 부드러운 색상 전환 효과 */
 }
 
 button:hover {
   background-color: #0056b3;
-}</style>
+}
+</style>
