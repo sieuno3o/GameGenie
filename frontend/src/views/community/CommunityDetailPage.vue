@@ -1,62 +1,64 @@
 <template>
-  <div class="communityProfile">
-    <div v-if="communityItem">
-      <h1>{{ communityItem.title }}</h1>
-      <p>작성자: {{ communityItem.author }}</p>
-      <img :src="communityItem.image" alt="Community Image">
-      <div class="content">{{ communityItem.content }}</div>
-      <div class="actions">
-        <button @click="goBack">목록으로</button>
-        <button v-if="isAuthor" @click="editPost">수정하기</button>
-        <button v-if="isAuthor" @click="deletePost">삭제하기</button>
-      </div>
-      <div class="like-section">
-        <span @click="toggleLike">❤️ {{ communityItem.likes }}</span>
-      </div>
-      <div class="comments-section">
-        <h2>댓글</h2>
-        <div v-for="comment in communityItem.comments" :key="comment.id" class="comment">
-          <img :src="comment.user.avatar" alt="User Avatar">
-          <p>{{ comment.user.username }}: {{ comment.content }}</p>
-          <span @click="toggleCommentLike(comment.id)">❤️ {{ comment.likes }}</span>
-        </div>
-        <div v-if="isLoggedIn" class="add-comment">
-          <textarea v-model="newComment" placeholder="댓글을 입력하세요..."></textarea>
-          <button @click="addComment">댓글 작성</button>
-        </div>
-      </div>
+  <div class="communityProfile" v-if="communityItem">
+    <h1>{{ communityItem.title }}</h1>
+    <h3>카테고리 : {{ communityItem.category }}</h3>
+    <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
+    <h3>작성자 : {{ communityItem.author }}</h3>
+    <div>{{ communityItem.image }}</div>
+    <p>{{ communityItem.content }}</p>
+    <div class="likeRow">
+      <button class="likeButton" @click="toggleLike">♥</button>
+      <h3>{{ communityItem.community_like.length }}</h3>
+    </div>
+    <div class="detailButtonList">
+      <router-link to="/community/">
+        <button class="detailButton">목록으로</button>
+      </router-link>
+      <button class="detailButton" @click="editPost">수정하기</button>
+      <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
   </div>
 </template>
 
 <script>
-import api from '@/api';  
-import accountsAPI from '@/accountsAPI';  
+import api from '../../api';
+import accountsAPI from '../../accountsAPI';
 
 export default {
   data() {
     return {
-      communityItem: null,
+      communityItem: {
+        community_like: []
+      },
+      isLiked: false,
       isLoggedIn: false,
-      userId: '',
-      isAuthor: false,
-      newComment: '',
+      userId: null,
+      newComment: '' // 새로운 댓글을 위한 데이터 속성 추가
     };
   },
   async created() {
+    await this.checkLoginStatus();
     const id = this.$route.params.id;
     await this.fetchCommunityItem(id);
-    this.checkLoginStatus();
   },
   methods: {
     async fetchCommunityItem(id) {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
-        this.isAuthor = this.communityItem.author === this.userId;
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = ('0' + (date.getMonth() + 1)).slice(-2);
+      const day = ('0' + date.getDate()).slice(-2);
+      const hours = ('0' + date.getHours()).slice(-2);
+      const minutes = ('0' + date.getMinutes()).slice(-2);
+      const seconds = ('0' + date.getSeconds()).slice(-2);
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     async checkLoginStatus() {
       const token = localStorage.getItem('accessToken');
@@ -75,23 +77,13 @@ export default {
       }
     },
     async toggleLike() {
-      const id = this.$route.params.id;
       try {
-        const response = await api.post(`community/${id}/like/`);
-        this.communityItem.likes = response.data.likes;
+        const response = await api.patch(`community/${this.communityItem.id}/like/`);
+        this.communityItem.community_like = response.data.community_like;
+        this.isLiked = response.data.is_liked;
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
-      }
-    },
-    async toggleCommentLike(commentId) {
-      try {
-        const response = await api.post(`community/comments/${commentId}/like/`);
-        const comment = this.communityItem.comments.find(comment => comment.id === commentId);
-        if (comment) {
-          comment.likes = response.data.likes;
-        }
-      } catch (error) {
-        console.error("댓글 좋아요 처리 중 오류가 발생했습니다:", error);
+        this.isLiked = !this.isLiked;
       }
     },
     async addComment() {
@@ -113,22 +105,68 @@ export default {
     editPost() {
       // 수정하기 기능 구현
     },
-    deletePost() {
-      // 삭제하기 기능 구현
+    async deletePost() {
+      if (confirm('정말 삭제하시겠습니까?')) {
+        try {
+          await api.delete(`community/${this.communityItem.id}/`);
+          this.$router.push({ name: 'communityMain' });
+        } catch (error) {
+          console.error('게시글 삭제 중 오류가 발생했습니다:', error);
+          alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+        }
+      }
     }
   }
 };
 </script>
 
+
 <style>
 .communityProfile {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
+  width: 100%;
+  height: 100px;
+  font-size: 30px;
+  margin: 40px;
+  text-align: center;
 }
+
+.detailButtonList {
+  display: flex;
+  margin: 10px;
+  gap: 10px;
+  justify-content: center;
+}
+
+.detailButton {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 0.3px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: black;
+}
+
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 14px;
+  text-align: center;
+}
+
+.likeRow {
+  display: flex;
+  justify-content: center;
+}
+
+.likeButton {
+  color: red;
+  height: 30px;
+  font-size: 25px;
+  text-align: center;
 }
 .content {
   background-color: #f4f4f4;

@@ -27,27 +27,30 @@
         </div>
       </div>
       <div class="communityRow2">
-        <input type="text" v-model="query" @input="fetchSuggestions" @keyup.enter="searchGames"
-          class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
           <a @click.prevent="checkLogin">글 작성</a>
         </div>
       </div>
       <div>
         <ul class="communityList">
-          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
-            @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author }}
+          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id" @click="goToDetail(item.id)">
+            {{ item.title }}, 작성자: {{ item.author }}, 좋아요: {{ item.community_like.length }}
           </li>
         </ul>
         <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
+        <div class="pagination">
+          <button @click="prevPage" :disabled="currentPage === 1">이전</button>
+          <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+            :class="{ active: currentPage === page }">{{ page }}</button>
+          <button @click="nextPage" :disabled="currentPage === totalPages">다음</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
 import api from '../../api';
 import accountsAPI from '../../accountsAPI';
 
@@ -56,18 +59,28 @@ export default {
     return {
       communityList: [],
       accountsUsers: [],
-      showDropdown: false,
+      likedCommunities: [],
       categories: [],
+      showDropdown: false,
       query: '',
       selectedCategory: 'all',
       selectedCategoryName: '카테고리를 선택하세요',
       showSortDropdown: false,
       sortOption: 'time',
+      currentPage: 1,
+      totalPages: 0,
+      pageSize: 10,
     };
   },
   computed: {
     sortedAndFilteredCommunityList() {
-      let filteredList = this.communityList;
+      let filteredList = [...this.communityList];
+
+      if (this.query) {
+        filteredList = filteredList.filter(item =>
+          item.title.toLowerCase().includes(this.query.toLowerCase())
+        );
+      }
 
       if (this.selectedCategory !== 'all') {
         filteredList = filteredList.filter(item => item.category === this.selectedCategory);
@@ -81,13 +94,18 @@ export default {
         });
 
       if (this.sortOption === 'time') {
-        filteredList.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       } else if (this.sortOption === 'likes') {
-        filteredList.sort((a, b) => b.likes - a.likes);
+        filteredList.sort((a, b) => b.community_like.length - a.community_like.length);
       }
 
       return filteredList;
-    }
+    },
+    currentPageCommunities() {
+      const start = (this.currentPage - 1) * this.pageSize
+      const end = start + this.pageSize
+      return this.communityList.slice(start, end)
+    },
   },
   created() {
     this.fetchCommunityList();
@@ -95,13 +113,30 @@ export default {
     this.fetchCategories();
   },
   methods: {
+    formatDate(dateString) {
+      return new Date(dateString).toLocaleString()
+    },
+    prevPage() {
+      this.currentPage = Math.max(this.currentPage - 1, 1)
+      this.fetchCommunityList()
+    },
+    nextPage() {
+      this.currentPage = Math.min(this.currentPage + 1, this.totalPages)
+      this.fetchCommunityList()
+    },
+    goToPage(page) {
+      this.currentPage = page
+      this.fetchCommunityList()
+    },
     async fetchCommunityList() {
-      try {
-        const response = await api.get('community/');
-        this.communityList = response.data.results;
-      } catch (error) {
-        console.error("커뮤니티 목록을 가져오는 중 오류가 발생했습니다 :", error);
-      }
+      api.get(`community/?page=${this.currentPage}`)
+        .then(response => {
+          this.communityList = response.data.results
+          this.totalPages = Math.ceil(response.data.count / this.pageSize)
+        })
+        .catch(error => {
+          console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error)
+        })
     },
     async fetchAccountsUsers() {
       try {
@@ -117,7 +152,7 @@ export default {
       this.showDropdown = !this.showDropdown;
     },
     fetchCategories() {
-      axios.get('http://localhost:8000/api/community/categories/')
+      api.get('community/categories/')
         .then(response => {
           this.categories = response.data;
         })
@@ -135,16 +170,8 @@ export default {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
-      this.sortOption = option;
-      this.sortCommunityList();
-      this.showSortDropdown = false;
-    },
-    sortCommunityList() {
-      if (this.sortOption === 'time') {
-        this.communityList.sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (this.sortOption === 'likes') {
-        this.communityList.sort((a, b) => b.likes - a.likes);
-      }
+    this.sortOption = option;
+    this.showSortDropdown = false;
     },
     checkLogin() {
       if (!localStorage.getItem('access')) {
@@ -301,4 +328,19 @@ export default {
 
 .sortDropdown p:hover {
   background-color: #f1f1f1
-}</style>
+}
+
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination button {
+  margin: 10px;
+}
+
+.pagination .active {
+  font-weight: bold;
+}
+</style>
