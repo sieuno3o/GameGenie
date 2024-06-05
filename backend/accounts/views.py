@@ -25,6 +25,10 @@ class CreateView(APIView):
             if User.objects.filter(email=email).exists():  # 이메일 중복 확인
                 return Response({'message': '중복된 email입니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
+            nickname = serializer.validated_data.get('nickname')
+            if User.objects.filter(nickname=nickname).exists():
+                return Response({'message': '중복된 닉네임입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
             user = serializer.save()
             user.set_password(password)
             user.save()
