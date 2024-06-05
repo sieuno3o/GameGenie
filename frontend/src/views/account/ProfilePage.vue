@@ -3,6 +3,7 @@
         <h1>프로필</h1>
         <div v-if="user">
             <p>사용자 이름: {{ user.username }}</p>
+            <p>닉네임: {{ user.nickname }}</p> <!-- 닉네임 추가 -->
             <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
         </div>
         <div v-if="favorites && favorites.length">
@@ -24,7 +25,7 @@
                     <v-container>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field v-model="editData.username" label="닉네임" />
+                                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />
@@ -62,7 +63,7 @@ export default {
             favorites: [],
             showEditModal: false,
             editData: {
-                username: '',
+                nickname: '',
                 currentPassword: '',
                 newPassword: '',
                 confirmPassword: ''
@@ -92,6 +93,7 @@ export default {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 this.user = userResponse.data;
+                this.editData.nickname = this.user.nickname; // 닉네임 설정
                 console.log('User data:', this.user);
 
                 console.log('Fetching favorite games...');
@@ -110,7 +112,7 @@ export default {
     },
     methods: {
         async updateProfile() {
-            const { username, currentPassword, newPassword, confirmPassword } = this.editData;
+            const { nickname, currentPassword, newPassword, confirmPassword } = this.editData;
             if (newPassword !== confirmPassword) {
                 alert('새 비밀번호가 일치하지 않습니다.');
                 return;
@@ -120,7 +122,7 @@ export default {
                 const accessToken = localStorage.getItem('access');
                 const userId = localStorage.getItem('userId');
                 const response = await axios.patch(`http://localhost:8000/api/accounts/profile/${userId}/`, {
-                    username,
+                    nickname, // 닉네임 추가
                     old_password: currentPassword,
                     new_password: newPassword
                 }, {
@@ -128,7 +130,7 @@ export default {
                 });
 
                 if (response.status === 200) {
-                    this.user.username = username;
+                    this.user.nickname = nickname;
                     this.showEditModal = false;
                     alert('프로필이 성공적으로 업데이트되었습니다.');
                 } else {

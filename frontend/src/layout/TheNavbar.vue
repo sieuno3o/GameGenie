@@ -12,7 +12,7 @@
           <span class="navLogin">로그인</span>
         </router-link>
         <div v-else class="dropdown">
-          <span class="navLogin" @click="toggleDropdown">{{ username }}</span>
+          <span class="navLogin" @click="toggleDropdown">{{ nickname }}</span> <!-- nickname 표시 -->
           <div v-if="isDropdownOpen" class="dropdown-content">
             <router-link :to="`/profile/${userId}`"><span class="dropdown-font button2">내 프로필</span></router-link>
             <a @click="logout"><span class="dropdown-font button2">로그아웃</span></a>
@@ -30,7 +30,7 @@ export default {
     return {
       isLoggedIn: false,
       userId: null,
-      username: '',
+      nickname: '', // nickname 데이터 바인딩
       isDropdownOpen: false
     };
   },
@@ -47,18 +47,18 @@ export default {
     checkLoginStatus() {
       const token = localStorage.getItem('access');
       const userId = localStorage.getItem('userId');
-      const username = localStorage.getItem('username');
+      const nickname = localStorage.getItem('nickname'); // nickname 가져오기
 
-      if (token && userId && username) {
+      if (token && userId && nickname) {
         this.isLoggedIn = true;
         this.userId = userId;
-        this.username = username;
+        this.nickname = nickname;
       } else {
         this.isLoggedIn = false;
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('userId');
-        localStorage.removeItem('username');
+        localStorage.removeItem('nickname');
       }
     },
     toggleDropdown() {
@@ -68,7 +68,7 @@ export default {
       localStorage.removeItem('access');
       localStorage.removeItem('refresh');
       localStorage.removeItem('userId');
-      localStorage.removeItem('username');
+      localStorage.removeItem('nickname');
       this.isLoggedIn = false;
       this.$router.go(); // 현재 페이지 새로고침
     },
