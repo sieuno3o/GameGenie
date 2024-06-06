@@ -14,9 +14,33 @@
       <router-link to="/community/">
         <button class="detailButton">목록으로</button>
       </router-link>
-      <button class="detailButton" @click="editPost">수정하기</button>
+      <v-btn class="detailButton" color="primary" @click="showEditModal = true">게시글 수정</v-btn>
       <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
+    <v-dialog v-model="showEditModal" persistent max-width="600px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">게시글 수정</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="editData.title" label="제목" />
+                            </v-col>
+                            <v-col cols="12">
+                                <v-textarea v-model="editData.content" label="내용" />
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="showEditModal = false">취소</v-btn>
+                    <v-btn color="blue darken-1" text @click="updatePost">저장</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
   </div>
 </template>
 
@@ -30,7 +54,14 @@ export default {
       isLiked: false,
       isLoggedIn: false,
       userId: null,
-      newComment: '' // 새로운 댓글을 위한 데이터 속성 추가
+      newComment: '',
+      post: null,
+      showEditModal: false,
+      editData: {
+        title: '',
+        content: '',
+      },
+      errorMessage: ''
     };
   },
   async created() {
@@ -76,8 +107,8 @@ export default {
     async toggleLike() {
       try {
         const response = await api.patch(`community/${this.communityItem.id}/like/`);
-        this.communityItem.community_like = response.data.community_like;
         this.isLiked = response.data.is_liked;
+        this.communityItem.community_like = [...response.data.community_like];
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
         this.isLiked = !this.isLiked;
@@ -99,8 +130,54 @@ export default {
     goBack() {
       this.$router.push({ name: 'communityMain' });
     },
-    editPost() {
-      // 수정하기 기능 구현
+    async fetchData() {
+      try {
+        const communityId = this.$route.params.id;
+        const accessToken = this.getAccessToken();
+        if (!accessToken) {
+          this.errorMessage = '로그인이 필요합니다.';
+          return;
+        }
+        const response = await api.get(`community/${communityId}/`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
+        this.communityItem = response.data;
+        this.editData.title = this.communityItem.title;
+        this.editData.content = this.communityItem.content;
+      } catch (error) {
+        console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
+        this.errorMessage = '게시글을 가져오는 중 오류가 발생했습니다.';
+      }
+    },
+    getAccessToken() {
+      // 이 함수는 예시입니다. 실제로는 HttpOnly 쿠키를 사용하는 것이 좋습니다.
+      return localStorage.getItem('access');
+    },
+    closeEditModal() {
+      this.showEditModal = false;
+    },
+    async updatePost() {
+      const { title, content } = this.editData;
+      try {
+        const communityId = this.$route.params.id;
+        const accessToken = this.getAccessToken();
+        const response = await api.patch(`community/${communityId}/`, {
+          title,
+          content,
+        }, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
+
+        if (response.status === 200) {
+          this.communityItem.title = title;
+          this.communityItem.content = content;
+          this.closeEditModal();
+          alert('게시글이 성공적으로 업데이트되었습니다.');
+        }
+      } catch (error) {
+        console.error('Error updating post:', error);
+        alert('게시글 업데이트 중 오류가 발생했습니다.');
+      }
     },
     async deletePost() {
       if (confirm('정말 삭제하시겠습니까?')) {
@@ -136,6 +213,7 @@ export default {
   padding: 10px;
   font-size: 16px;
   border-radius: 10px;
+  background-color: white;
   border: 0.3px solid rgba(0, 0, 0, 0.3);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   text-decoration: none;
