@@ -13,10 +13,8 @@
       <h3>{{ communityItem.community_like ? communityItem.community_like.length : 0 }}</h3>
     </div>
     <div class="detailButtonList">
-      <router-link to="/community/">
-        <button class="detailButton">목록으로</button>
-      </router-link>
-      <v-btn class="detailButton" color="primary" @click="showEditModal = true">게시글 수정</v-btn>
+      <button class="detailButton" @click="goToCommunity">목록으로</button>
+      <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
       <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
     <v-dialog v-model="showEditModal" persistent max-width="600px">
@@ -110,10 +108,19 @@ export default {
       }
     },
     async toggleLike() {
+      if (!this.isLoggedIn) {
+        console.error("로그인이 필요합니다.");
+        return;
+      }
+
       try {
-        const response = await api.patch(`community/${this.communityItem.id}/like/`);
-        this.isLiked = response.data.is_liked;
-        this.communityItem.community_like = [...response.data.community_like];
+        const response = await api.patch(`community/${this.communityItem.id}/like/`, null, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
+          }
+        });
+        this.$set(this.communityItem, 'likes', response.data.likes);
+        this.$set(this.communityItem, 'is_liked', response.data.is_liked);
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
         this.isLiked = !this.isLiked;
@@ -155,7 +162,6 @@ export default {
       }
     },
     getAccessToken() {
-      // 이 함수는 예시입니다. 실제로는 HttpOnly 쿠키를 사용하는 것이 좋습니다.
       return localStorage.getItem('access');
     },
     closeEditModal() {
@@ -194,7 +200,10 @@ export default {
           alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
         }
       }
-    }
+    },
+    goToCommunity() {
+      this.$router.push('/community/');
+    },
   }
 };
 </script>
@@ -215,6 +224,8 @@ export default {
 }
 
 .detailButton {
+  width: 110px;
+  height: 50px;
   padding: 10px;
   font-size: 16px;
   border-radius: 10px;
@@ -225,6 +236,18 @@ export default {
   color: black;
 }
 
+.detailvButton {
+  width: 110px !important; 
+  height: 50px !important;
+  padding: 10px !important;
+  font-size: 16px !important;
+  border-radius: 10px !important;
+  background-color: white !important;
+  border: 0.3px solid rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3) !important;
+  text-decoration: none !important;
+  color: black !important;
+}
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
