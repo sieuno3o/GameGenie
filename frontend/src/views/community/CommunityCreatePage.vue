@@ -61,7 +61,7 @@ export default {
     handleFileUpload(event) {
       this.form.image = event.target.files[0];
     },
-    submitForm() {
+    async submitForm() {
       const formData = new FormData();
       formData.append('title', this.form.title);
       formData.append('category', this.form.category);
@@ -71,19 +71,20 @@ export default {
         formData.append('image', this.form.image);
       }
 
-      api.post('community/create/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-        .then(() => {
-          alert('글이 등록되었습니다!');
-          this.$router.push({ name: 'communityMain' });
-        })
-        .catch(error => {
-          console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
-          alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
+      try {
+        const token = localStorage.getItem('access');
+        await api.post('community/create/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
         });
+        alert('글이 등록되었습니다!');
+        this.$router.push({ name: 'communityMain' });
+      } catch (error) {
+        console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
+        alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
+      }
     }
   },
   created() {

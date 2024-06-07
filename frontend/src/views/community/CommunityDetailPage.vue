@@ -4,7 +4,9 @@
     <h3>카테고리 : {{ communityItem.category }}</h3>
     <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
     <h3>작성자 : {{ communityItem.author_nickname }}</h3>
-    <div>{{ communityItem.image }}</div>
+    <div v-if="communityItem.image">
+      <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지">
+    </div>
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
@@ -18,29 +20,29 @@
       <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
     <v-dialog v-model="showEditModal" persistent max-width="600px">
-            <v-card>
-                <v-card-title>
-                    <span class="headline">게시글 수정</span>
-                </v-card-title>
-                <v-card-text>
-                    <v-container>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-text-field v-model="editData.title" label="제목" />
-                            </v-col>
-                            <v-col cols="12">
-                                <v-textarea v-model="editData.content" label="내용" />
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="showEditModal = false">취소</v-btn>
-                    <v-btn color="blue darken-1" text @click="updatePost">저장</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+      <v-card>
+        <v-card-title>
+          <span class="headline">게시글 수정</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field v-model="editData.title" label="제목" />
+              </v-col>
+              <v-col cols="12">
+                <v-textarea v-model="editData.content" label="내용" />
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="showEditModal = false">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="updatePost">저장</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -87,6 +89,9 @@ export default {
       const minutes = ('0' + date.getMinutes()).slice(-2);
       const seconds = ('0' + date.getSeconds()).slice(-2);
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+    getImageUrl(imagePath) {
+      return `http://localhost:8000${imagePath}`;
     },
     async checkLoginStatus() {
       const token = localStorage.getItem('access');
