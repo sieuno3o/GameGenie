@@ -20,8 +20,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Community
-        fields = ['id', 'title', 'content', 'category', 'created_at', 'author_nickname', 'image', 'image_url', 'url', 'community_like']
-
+        fields = '__all__'
+        
     def get_replies(self, obj):
         replies = Comment.objects.filter(parent_comment_id=obj.id)
         serializer = CommentSerializer(replies, many=True)
