@@ -1,6 +1,6 @@
 # 🎮 GameGenie 🎮
 
-<img src="https://media.discordapp.net/attachments/1245260060024635464/1245260081365385216/image.png?ex=66581a53&is=6656c8d3&hm=0f74ae0ede53688516ea4641ebf8d574b79cdaf41f1cbb79361eb072383c9f50&=&format=webp&quality=lossless&width=2160&height=980">
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/2eef9f38-9665-4518-b797-e23d010c741b">
 
 SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최종 프로젝트 팀 GG이 제작한 웹 페이지입니다. 선호하는 게임이나 게임 장르를 입력하면 AI를 이용하여 비슷한 게임을 추천해주는 사이트를 제작 했습니다.
 
@@ -28,7 +28,7 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 #### 1. 회원가입
 
-<img src="https://media.discordapp.net/attachments/1245260060024635464/1245265002135420948/image.png?ex=66581ee8&is=6656cd68&hm=24345489a5c5afdebb967dacbd7372d730de7922aefa29966124894ccd83567c&=&format=webp&quality=lossless&width=2160&height=958">
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/8216b8b3-13e9-43f3-8be0-bf77819870cb">
 
 - 아이디, 비밀번호, 이메일, 닉네임 (필수) / 프로필 사진 (선택)
 - 비밀번호를 제외한 모든 사항 중복체크
@@ -36,7 +36,7 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 #### 2. 로그인
 
-<img src="https://media.discordapp.net/attachments/1245260060024635464/1245264222288482305/image.png?ex=66581e2e&is=6656ccae&hm=e316da53d8d01b8a632bc9bc76a48172d7dd5014773834ff77f33df2e5bd6efe&=&format=webp&quality=lossless&width=2160&height=964">
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/f7503157-bc72-49ff-90c1-7b0d480698ef">
 
 - 아이디, 비밀번호 입력
 - DB 값 검증
@@ -53,22 +53,20 @@ SPARTA와 고용노동부에서 진행하는 내일배움캠프의 AI 6기 최�
 
 #### 1. 메인 페이지의 입력창에 게임 추천 텍스트 입력 가능
 
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245268855765467167/2024-05-29_155208.png?ex=6658227f&is=6656d0ff&hm=79683030f3a64fdb1786fea369572b40128ae49bea717dfc23841051635c72f3&">
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/2d86d461-22f4-4605-a0f4-efc7f3c6726e">
 
 #### 2. openai의 GPT를 이용해 게임 추천 받기 가능
 
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245271631174176768/2024-05-29_160419.png?ex=66582514&is=6656d394&hm=488a6a06250e3382f4a48f55a2353de325d195553e9957fbc2d541baa42be67d&">
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/110f0e30-2e0b-4de4-9cd1-94a0bbe8d470">
 
 - 추천 받은 게임들의 정보를 BeautifulSoup를 이용해 가져온 후 사용자에게 카드형태로 표시
-
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245271630721056798/2024-05-29_160357.png?ex=66582514&is=6656d394&hm=b4fa96040128d2b92dd264a1f671f0466f16e9488cc2ff60878d527384b2b7be&">
 
 
 #### 3. 검색어 추천 기능
 
 - 검색창에 게임 장르 입력시 비슷한 장르를 유도 추천
 
-<img src="https://cdn.discordapp.com/attachments/1245260060024635464/1245277391115386910/image.png?ex=66582a72&is=6656d8f2&hm=e916dce22c17cab62bdbf786611aac82869c4d098e882ea8617ad73a30ee2963&"> 
+<img src="https://github.com/sieuno3o/GameGenie/assets/160442750/683b4487-89d9-42ec-9978-ed367735d6e3"> 
 
 <br>
 
