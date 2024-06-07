@@ -56,6 +56,7 @@ export default {
                     method,
                     url,
                     data: body,
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
                 });
                 if (response.status === 200 || response.status === 201 || response.status === 204) {
                     if (method === 'post') {
@@ -78,7 +79,9 @@ export default {
     async mounted() {
         if (this.isLoggedIn) {
             try {
-                const response = await api.get('/recommendations/favorites/');
+                const response = await api.get('/recommendations/favorites/', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
+                });
                 const favorites = response.data;
                 const favorite = favorites.find(fav => fav.game_name === this.game.name);
                 if (favorite) {
