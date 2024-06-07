@@ -24,6 +24,7 @@
 
 <script>
 import axios from 'axios';
+import { ElMessage } from 'element-plus'; // ElementPlus의 메시지 박스 임포트
 
 export default {
   data() {
@@ -45,6 +46,19 @@ export default {
           localStorage.setItem('access', tokens.access);
           localStorage.setItem('refresh', tokens.refresh);
 
+          const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
+            headers: { 'Authorization': `Bearer ${tokens.access}` }
+          });
+          const user = userResponse.data;
+          localStorage.setItem('nickname', user.nickname);
+
+          // 로그인 성공 메시지 표시
+          ElMessage({
+            message: '로그인에 성공했습니다!',
+            type: 'success',
+          });
+
+          // 메인 페이지로 이동
           this.$router.push({ name: 'main' });
         }
       } catch (error) {
@@ -103,5 +117,10 @@ export default {
 
 .goSignup {
   padding-left: 5px;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
 }
 </style>

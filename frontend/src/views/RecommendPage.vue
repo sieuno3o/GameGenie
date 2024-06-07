@@ -37,6 +37,7 @@ export default {
       messages: [],
       error: null,
       previousInput: '',
+      loading: false, // 로딩 상태 추가
     };
   },
   mounted() {
@@ -54,6 +55,8 @@ export default {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
+      this.loading = true; // 로딩 시작
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
       this.$nextTick(() => {
         this.scrollToBottom();
       });
@@ -63,6 +66,9 @@ export default {
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
         const data = await response.json();
+
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
           const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
@@ -78,8 +84,12 @@ export default {
 
         this.previousInput = this.userInput;
       } catch (error) {
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
+      } finally {
+        this.loading = false; // 로딩 종료
       }
 
       this.userInput = '';
@@ -91,6 +101,8 @@ export default {
       if (this.previousInput.trim() === '') return;
 
       this.messages.push({ text: '다른 게임은 없어?', isUser: true });
+      this.loading = true; // 로딩 시작
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
       this.$nextTick(() => {
         this.scrollToBottom();
       });
@@ -100,6 +112,9 @@ export default {
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
         const data = await response.json();
+
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
           const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
@@ -113,8 +128,12 @@ export default {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
       } catch (error) {
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
+      } finally {
+        this.loading = false; // 로딩 종료
       }
 
       this.$nextTick(() => {
@@ -243,8 +262,6 @@ body {
 
 .game-card-col {
   flex: 0 0 300px;
-  /* Fixed width */
   max-width: 300px;
-  /* Ensure max width */
 }
 </style>
