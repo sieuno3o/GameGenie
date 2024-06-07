@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import api from '../api';
+import axios from 'axios';
 
 export default {
   data() {
@@ -33,8 +33,8 @@ export default {
         this.suggestions = [];
         return;
       }
-      api
-        .get(`community/categories/?query=${this.query}`)
+      axios
+        .get(`http://localhost:8000/api/community/categories/?query=${this.query}`)
         .then((response) => {
           this.suggestions = response.data.filter(item =>
             item.value.toLowerCase().includes(this.query.toLowerCase())
