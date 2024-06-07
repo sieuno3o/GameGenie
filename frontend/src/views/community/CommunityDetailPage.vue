@@ -41,6 +41,26 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <div class="commentsList">
+      <h2>댓글</h2>
+      <div v-if="comments && comments.length > 0" class="commentBox">
+        <div v-for="comment in comments" :key="comment.id" class="comment">
+          <h2><strong>{{ comment.author }}</strong></h2>
+          <h3>{{ formatDate(comment.created_at) }}</h3>
+          <h2>{{ comment.comments }}</h2>
+        </div>
+      </div>
+      <div v-if="isLoggedIn">
+        <v-textarea
+          v-model="newComment"
+          label="댓글 작성"
+        ></v-textarea>
+        <v-btn @click="addComment">댓글 달기</v-btn>
+      </div>
+      <div v-else>
+        <p>로그인 후 댓글을 작성할 수 있습니다.</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -51,6 +71,7 @@ export default {
   data() {
     return {
       communityItem: null,
+      comments: [],
       isLiked: false,
       isLoggedIn: false,
       userId: null,
@@ -68,6 +89,7 @@ export default {
     await this.checkLoginStatus();
     const id = this.$route.params.id;
     await this.fetchCommunityItem(id);
+    await this.fetchComments(id);
   },
   methods: {
     async fetchCommunityItem(id) {
@@ -126,17 +148,31 @@ export default {
         this.isLiked = !this.isLiked;
       }
     },
+    async fetchComments(id) {
+      try {
+        const response = await api.get(`community/comments/${id}`);
+        this.comments = response.data.results;
+      } catch (error) {
+        console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
+        this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
+      }
+    },
     async addComment() {
       if (this.newComment.trim() === '') return;
       const id = this.$route.params.id;
       try {
         const response = await api.post(`community/comments/${id}/create/`, {
-          content: this.newComment
+          comments: this.newComment
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
+          }
         });
-        this.communityItem.comments.push(response.data);
+        this.comments = [response.data]
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
+        this.errorMessage = "댓글 작성 중 오류가 발생했습니다.";
       }
     },
     goBack() {
@@ -287,42 +323,24 @@ h3 {
   cursor: pointer;
 }
 
-.comments-section {
-  margin-top: 40px;
+.commentsList{
+  margin: 10px;
+}
+
+.commentsList > h2 {
+  margin: 50px;
+}
+
+.commentBox {
+  display: grid;
+  justify-content: center;
 }
 
 .comment {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.comment img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-}
-
-.add-comment {
-  margin-top: 20px;
-}
-
-.add-comment textarea {
-  width: 100%;
-  height: 80px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.add-comment button {
-  padding: 10px 20px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  display: grid;
+  background-color: #EEF1F6;
+  border-radius: 15px;
+  margin: 15px;
+  width: 600px;
 }
 </style>
