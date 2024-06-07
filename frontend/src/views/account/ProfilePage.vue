@@ -29,7 +29,7 @@
                                 <v-text-field v-model="editData.email" label="이메일" /> <!-- 이메일 필드 추가 -->
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field v-model="editData.nickname" label="닉네임" />
+                                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />

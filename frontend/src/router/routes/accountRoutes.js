@@ -28,7 +28,7 @@ const accountRoutes = [
     ],
   },
   {
-    path: "profile/:id",
+    path: "profile/:nickname",
     component: defaultDashboard,
     children: [
       {

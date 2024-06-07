@@ -14,7 +14,7 @@
         <div v-else class="dropdown">
           <span class="navLogin" @click="toggleDropdown">{{ nickname }}</span>
           <div v-if="isDropdownOpen" class="dropdown-content">
-            <router-link :to="`/profile/${userId}`" class="dropdown-item">
+            <router-link :to="{ name: 'profile', params: { nickname: nickname } }" class="dropdown-item">
               <span class="dropdown-font button2">내 프로필</span>
             </router-link>
             <a @click="logout" class="dropdown-item">
@@ -28,14 +28,13 @@
 </template>
 
 <script>
-import api from '@/api';
+import axios from 'axios';
 
 export default {
   name: "TheNavbar",
   data() {
     return {
       isLoggedIn: false,
-      userId: null,
       nickname: '',
       isDropdownOpen: false
     };
@@ -52,13 +51,17 @@ export default {
   methods: {
     async checkLoginStatus() {
       try {
-        const response = await api.get('accounts/profile/');
-        if (response.data) {
-          this.isLoggedIn = true;
-          this.userId = response.data.id;
-          this.nickname = response.data.nickname;
-        } else {
-          this.isLoggedIn = false;
+        const token = localStorage.getItem('access');
+        if (token) {
+          const response = await axios.get('http://localhost:8000/api/accounts/profile/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.data) {
+            this.isLoggedIn = true;
+            this.nickname = response.data.nickname;
+          } else {
+            this.isLoggedIn = false;
+          }
         }
       } catch (error) {
         this.isLoggedIn = false;
@@ -67,11 +70,13 @@ export default {
     async logout() {
       try {
         const refreshToken = localStorage.getItem('refresh');
-        await api.post('accounts/logout/', { refresh: refreshToken });
+        await axios.post('http://localhost:8000/api/accounts/logout/', { refresh: refreshToken }, {
+          headers: {} // 인증 헤더를 비웁니다.
+        });
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
+        localStorage.removeItem('nickname');
         this.isLoggedIn = false;
-        this.userId = null;
         this.nickname = '';
         this.$router.push({ name: 'main' });
       } catch (error) {
@@ -93,7 +98,6 @@ export default {
 <style lang="scss" scoped>
 #navbar {
   width: 100%;
-  /* 전체 너비를 차지하도록 설정 */
   height: 55px;
   background-color: $MAIN-COLOR-SKYBLUE;
   justify-content: space-between;
@@ -114,11 +118,8 @@ export default {
 
 .navLinks {
   margin-left: 15px;
-  /* navLinks 요소에 왼쪽 마진 추가 */
   display: flex;
-  /* Flexbox 사용 */
   align-items: center;
-  /* 세로 정렬 */
 }
 
 a,
@@ -148,25 +149,19 @@ a.router-link-active {
   position: absolute;
   background-color: #f9f9f9;
   width: 150px;
-  /* 너비를 고정하여 글자가 일직선으로 정렬되도록 함 */
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   margin-top: 10px;
   margin-left: -25px;
-  /* 드롭다운 위치 조정 */
 }
 
 .dropdown-content .dropdown-item {
   display: flex;
-  /* Flexbox 사용 */
   align-items: center;
-  /* 세로 정렬 */
   padding: 8px 12px;
-  /* padding 조정 */
   color: black;
   text-decoration: none;
   cursor: pointer;
-  /* 마우스를 올렸을 때 클릭 가능한 모양 */
 }
 
 .dropdown-content .dropdown-item:hover {
@@ -175,4 +170,5 @@ a.router-link-active {
 
 .logout-button {
   cursor: pointer;
-}</style>
+}
+</style>
