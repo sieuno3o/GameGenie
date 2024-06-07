@@ -3,7 +3,8 @@
         <h1>프로필</h1>
         <div v-if="user">
             <p>사용자 이름: {{ user.username }}</p>
-            <p>닉네임: {{ user.nickname }}</p> <!-- 닉네임 추가 -->
+            <p>닉네임: {{ user.nickname }}</p>
+            <p>이메일: {{ user.email }}</p> <!-- 이메일 표시 추가 -->
             <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
         </div>
         <div v-if="favorites && favorites.length">
@@ -25,7 +26,10 @@
                     <v-container>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
+                                <v-text-field v-model="editData.email" label="이메일" /> <!-- 이메일 필드 추가 -->
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field v-model="editData.nickname" label="닉네임" />
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />
@@ -35,6 +39,11 @@
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editData.confirmPassword" label="새 비밀번호 확인" type="password" />
+                            </v-col>
+                        </v-row>
+                        <v-row v-if="updateError">
+                            <v-col cols="12">
+                                <p class="error-message">{{ updateError }}</p>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -63,11 +72,13 @@ export default {
             favorites: [],
             showEditModal: false,
             editData: {
+                email: '',
                 nickname: '',
                 currentPassword: '',
                 newPassword: '',
                 confirmPassword: ''
             },
+            updateError: '',
             errorMessage: ''
         };
     },
@@ -92,6 +103,7 @@ export default {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 this.user = userResponse.data;
+                this.editData.email = this.user.email; // 이메일 설정
                 this.editData.nickname = this.user.nickname; // 닉네임 설정
                 console.log('User data:', this.user);
 
@@ -105,22 +117,28 @@ export default {
                 this.errorMessage = '로그인이 필요합니다.';
             }
         } catch (error) {
-            console.error('Error fetching user or favorites:', error);
-            this.errorMessage = '정보를 가져오는 중 오류가 발생했습니다.';
+            if (error.response && error.response.status === 401) {
+                this.errorMessage = '인증되지 않았습니다. 다시 로그인해주세요.';
+                this.$router.push({ name: 'login' });
+            } else {
+                console.error('Error fetching user or favorites:', error);
+                this.errorMessage = '정보를 가져오는 중 오류가 발생했습니다.';
+            }
         }
     },
     methods: {
         async updateProfile() {
-            const { nickname, currentPassword, newPassword, confirmPassword } = this.editData;
+            const { email, nickname, currentPassword, newPassword, confirmPassword } = this.editData;
             if (newPassword !== confirmPassword) {
-                alert('새 비밀번호가 일치하지 않습니다.');
+                this.updateError = '새 비밀번호가 일치하지 않습니다.';
                 return;
             }
 
             try {
                 const accessToken = localStorage.getItem('access');
                 const response = await axios.patch('http://localhost:8000/api/accounts/profile/', {
-                    nickname, // 닉네임 추가
+                    email, // 이메일 추가
+                    nickname,
                     old_password: currentPassword,
                     new_password: newPassword
                 }, {
@@ -128,15 +146,16 @@ export default {
                 });
 
                 if (response.status === 200) {
+                    this.user.email = email; // 업데이트된 이메일 반영
                     this.user.nickname = nickname;
                     this.showEditModal = false;
                     alert('프로필이 성공적으로 업데이트되었습니다.');
                 } else {
-                    alert('프로필 업데이트에 실패했습니다.');
+                    this.updateError = response.data.message || '프로필 업데이트에 실패했습니다.';
                 }
             } catch (error) {
                 console.error('Error updating profile:', error);
-                alert('프로필 업데이트 중 오류가 발생했습니다.');
+                this.updateError = error.response.data.message || '프로필 업데이트 중 오류가 발생했습니다.';
             }
         }
     }
@@ -157,5 +176,10 @@ export default {
     flex: 0 0 300px;
     max-width: 300px;
     margin-bottom: 20px;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
 }
 </style>
