@@ -19,6 +19,14 @@
         <label for="content">내용</label>
         <textarea id="content" v-model="form.content" rows="10" required></textarea>
       </div>
+      <div class="form-group">
+        <label for="url">URL</label>
+        <input type="url" id="url" v-model="form.url">
+      </div>
+      <div class="form-group">
+        <label for="image">이미지 파일</label>
+        <input type="file" id="image" @change="handleFileUpload">
+      </div>
       <button type="submit">글 작성</button>
     </form>
   </div>
@@ -33,7 +41,9 @@ export default {
       form: {
         title: '',
         category: '',
-        content: ''
+        content: '',
+        url: '',
+        image: null
       },
       categories: []
     };
@@ -48,8 +58,24 @@ export default {
           console.error("카테고리를 불러오는 중 에러가 발생했습니다:", error);
         });
     },
+    handleFileUpload(event) {
+      this.form.image = event.target.files[0];
+    },
     submitForm() {
-      api.post('community/create/', this.form)
+      const formData = new FormData();
+      formData.append('title', this.form.title);
+      formData.append('category', this.form.category);
+      formData.append('content', this.form.content);
+      formData.append('url', this.form.url);
+      if (this.form.image) {
+        formData.append('image', this.form.image);
+      }
+
+      api.post('community/create/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
         .then(() => {
           alert('글이 등록되었습니다!');
           this.$router.push({ name: 'communityMain' });
@@ -84,10 +110,19 @@ label {
 }
 
 input[type="text"],
+input[type="url"],
 textarea,
 select {
   width: 100%;
   padding: 12px 10px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+}
+
+input[type="file"] {
+  padding: 10px;
   border: 2px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
