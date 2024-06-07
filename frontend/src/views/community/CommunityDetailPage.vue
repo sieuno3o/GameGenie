@@ -9,8 +9,11 @@
     </div>
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
-      <button class="likeButton" @click="toggleLike">♥</button>
-      <h3>{{ communityItem.community_like ? communityItem.community_like.length : 0 }}</h3>
+      <button class="likeButton" :class="{ liked: isLiked }" @click="toggleLike">
+        <span v-if="isLiked">♥</span>
+        <span v-else>♡</span>
+      </button>
+      <h3>{{ likeCount }}</h3>
     </div>
     <div class="detailButtonList">
       <router-link to="/community/">
@@ -54,6 +57,7 @@ export default {
     return {
       communityItem: null,
       isLiked: false,
+      likeCount: 0,
       isLoggedIn: false,
       userId: null,
       newComment: '',
@@ -76,6 +80,8 @@ export default {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
+        this.isLiked = this.communityItem.is_liked;
+        this.likeCount = this.communityItem.community_like_count;
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -103,20 +109,28 @@ export default {
             }
           });
           this.isLoggedIn = true;
-          this.userId = response.data.username;
+          this.userId = response.data.id;
+          this.fetchCommunityItem(this.$route.params.id);
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
       }
     },
     async toggleLike() {
+      if (!this.isLoggedIn) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
       try {
-        const response = await api.patch(`community/${this.communityItem.id}/like/`);
-        this.isLiked = response.data.is_liked;
-        this.communityItem.community_like = [...response.data.community_like];
+        const response = await api.patch(`community/${this.communityItem.id}/like/`, null, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
+          }
+        });
+        this.isLiked = response.data.liked;
+        this.likeCount = response.data.likes_count;
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
-        this.isLiked = !this.isLiked;
       }
     },
     async addComment() {
@@ -125,6 +139,10 @@ export default {
       try {
         const response = await api.post(`community/comments/${id}/create/`, {
           content: this.newComment
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
+          }
         });
         this.communityItem.comments.push(response.data);
         this.newComment = '';
@@ -155,7 +173,6 @@ export default {
       }
     },
     getAccessToken() {
-      // 이 함수는 예시입니다. 실제로는 HttpOnly 쿠키를 사용하는 것이 좋습니다.
       return localStorage.getItem('access');
     },
     closeEditModal() {
@@ -187,7 +204,9 @@ export default {
     async deletePost() {
       if (confirm('정말 삭제하시겠습니까?')) {
         try {
-          await api.delete(`community/${this.communityItem.id}/`);
+          await api.delete(`community/${this.communityItem.id}/`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
+          });
           this.$router.push({ name: 'communityMain' });
         } catch (error) {
           console.error('게시글 삭제 중 오류가 발생했습니다:', error);
@@ -238,6 +257,7 @@ h3 {
 .likeRow {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .likeButton {
@@ -245,6 +265,13 @@ h3 {
   height: 30px;
   font-size: 25px;
   text-align: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.likeButton.liked {
+  color: red;
 }
 
 .content {
