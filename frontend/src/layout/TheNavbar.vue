@@ -5,19 +5,19 @@
     </router-link>
     <div class="flex-center navLinks">
       <router-link to="/community">
-        <span class="navCommunity">커뮤니티</span>
+        <span class="navCommunity NAV">커뮤니티</span>
       </router-link>
       <div class="navAccount">
         <router-link v-if="!isLoggedIn" to="/login">
-          <span class="navLogin">로그인</span>
+          <span class="navLogin NAV">로그인</span>
         </router-link>
         <div v-else class="dropdown">
-          <span class="navLogin" @click="toggleDropdown">{{ nickname }}</span>
+          <span class="navLogin NAV" @click="toggleDropdown">{{ nickname }}</span>
           <div v-if="isDropdownOpen" class="dropdown-content">
-            <router-link :to="{ name: 'profile', params: { nickname: nickname } }" class="dropdown-item">
+            <router-link :to="{ name: 'profile', params: { nickname: nickname } }" class="dropdown-item flex-center">
               <span class="dropdown-font button2">내 프로필</span>
             </router-link>
-            <a @click="logout" class="dropdown-item">
+            <a @click="logout" class="dropdown-item flex-center">
               <span class="dropdown-font button2">로그아웃</span>
             </a>
           </div>
@@ -130,9 +130,11 @@ a.router-link-active {
 }
 
 .navLogin {
-  padding-right: 30px;
-  margin-left: 15px;
   cursor: pointer;
+}
+
+.NAV {
+  margin-right: 30px;
 }
 
 .navCommunity:hover,
@@ -148,17 +150,17 @@ a.router-link-active {
 .dropdown-content {
   position: absolute;
   background-color: #f9f9f9;
-  width: 150px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  width: 110px;
+  box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.1);
   z-index: 1;
   margin-top: 10px;
-  margin-left: -25px;
+  margin-left: -40px;
 }
 
 .dropdown-content .dropdown-item {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: 14px 12px;
   color: black;
   text-decoration: none;
   cursor: pointer;
