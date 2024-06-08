@@ -134,7 +134,7 @@ a.router-link-active {
 }
 
 .NAV {
-  margin-right: 30px;
+  margin-right: 35px;
 }
 
 .navCommunity:hover,
