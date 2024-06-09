@@ -5,10 +5,6 @@
 </template>
 
 <script>
-export default {
-  name: "DefaultDashboard",
-  components: {},
-};
 </script>
 
 <style lang="scss" scoped>
