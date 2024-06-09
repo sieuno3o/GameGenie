@@ -1,5 +1,5 @@
 <template>
-  <v-container class="mainBox flex-conter">
+  <v-container class="mainBox">
     <v-row class="chat-content" ref="chatContent">
       <v-col cols="12" class="chatBox">
         <div v-for="(message, index) in messages" :key="index" class="chat-message" :class="messageClass(message)">
@@ -15,8 +15,16 @@
     <div class="search-bar">
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="userInput" label="검색어를 입력하세요" @keyup.enter="sendQuery" append-outer-icon="mdi-magnify"
-            @click:append-outer="sendQuery"></v-text-field>
+          <v-text-field 
+            v-model="userInput" 
+            label="검색어를 입력하세요" 
+            @keyup.enter="sendQuery" 
+            append-outer-icon="mdi-magnify"
+            @click:append-outer="sendQuery"
+            hide-details
+            dense
+            outlined
+          ></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -213,13 +221,13 @@ body {
 .search-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  max-width: 800px;
-  background: #fff;
-  padding: 10px;
+  max-width: 1000px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  margin: 0 auto;
+  margin-bottom: 20px;
+  background-color: #ffffff;
 }
 
 .game-cards {
