@@ -154,7 +154,7 @@ a.router-link-active {
   box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.1);
   z-index: 1;
   margin-top: 10px;
-  margin-left: -40px;
+  margin-left: -35px;
 }
 
 .dropdown-content .dropdown-item {
