@@ -32,10 +32,11 @@ export default {
     },
     methods: {
         async toggleFavorite() {
+            console.log('toggleFavorite 호출됨');
             if (!this.isLoggedIn) {
-                // 로그인되지 않은 경우 알림 메시지 표시 또는 로그인 페이지로 리다이렉트
+                console.log('로그인이 필요합니다.');
                 alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
-                this.$router.push({ name: 'login' });
+                this.$router.push('/login'); // 로그인 페이지로 이동
                 return;
             }
 
@@ -56,7 +57,9 @@ export default {
                     method,
                     url,
                     data: body,
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access')}`
+                    }
                 });
                 if (response.status === 200 || response.status === 201 || response.status === 204) {
                     if (method === 'post') {
@@ -77,10 +80,13 @@ export default {
         },
     },
     async mounted() {
+        console.log('mounted 호출됨');
         if (this.isLoggedIn) {
             try {
                 const response = await api.get('/recommendations/favorites/', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('access')}`
+                    }
                 });
                 const favorites = response.data;
                 const favorite = favorites.find(fav => fav.game_name === this.game.name);
@@ -93,6 +99,11 @@ export default {
             }
         }
     },
+    watch: {
+        $route() {
+            this.isLoggedIn = !!localStorage.getItem('access');
+        }
+    }
 }
 </script>
 
