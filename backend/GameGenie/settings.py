@@ -13,10 +13,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "3.39.235.206",  # EC2 인스턴스의 퍼블릭 IP 주소
+    "13.125.200.223",  # EC2 인스턴스의 퍼블릭 IP 주소
     "127.0.0.1",
     "localhost",
     "*.compute.amazonaws.com",
+    "dajh1c5z39wei.cloudfront.net",  # CloudFront 도메인
 ]
 
 # Application definition
@@ -53,7 +54,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080',  # Vue.js 개발 서버 주소
-    'https://dajh1c5z39wei.cloudfront.net'  # 프론트 도메인
+    'https://dajh1c5z39wei.cloudfront.net',  # 프론트 도메인
 ]
 
 ROOT_URLCONF = 'GameGenie.urls'
