@@ -4,7 +4,7 @@
         <div v-if="user">
             <p>사용자 이름: {{ user.username }}</p>
             <p>닉네임: {{ user.nickname }}</p>
-            <p>이메일: {{ user.email }}</p> <!-- 이메일 표시 추가 -->
+            <p>이메일: {{ user.email }}</p>
             <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
         </div>
         <div v-if="favorites && favorites.length">
@@ -26,10 +26,10 @@
                     <v-container>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field v-model="editData.email" label="이메일" /> <!-- 이메일 필드 추가 -->
+                                <v-text-field v-model="editData.email" label="이메일" />
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
+                                <v-text-field v-model="editData.nickname" label="닉네임" />
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../../api';
 import GameCard from '@/views/GameCard.vue';
 
 export default {
@@ -99,16 +99,16 @@ export default {
             const accessToken = localStorage.getItem('access');
             if (accessToken) {
                 console.log('Fetching user data...');
-                const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
+                const userResponse = await api.get('accounts/profile/', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 this.user = userResponse.data;
-                this.editData.email = this.user.email; // 이메일 설정
-                this.editData.nickname = this.user.nickname; // 닉네임 설정
+                this.editData.email = this.user.email;
+                this.editData.nickname = this.user.nickname;
                 console.log('User data:', this.user);
 
                 console.log('Fetching favorite games...');
-                const favoritesResponse = await axios.get('http://localhost:8000/api/recommendations/favorites/', {
+                const favoritesResponse = await api.get('recommendations/favorites/', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 this.favorites = favoritesResponse.data;
@@ -136,8 +136,8 @@ export default {
 
             try {
                 const accessToken = localStorage.getItem('access');
-                const response = await axios.patch('http://localhost:8000/api/accounts/profile/', {
-                    email, // 이메일 추가
+                const response = await api.patch('accounts/profile/', {
+                    email,
                     nickname,
                     old_password: currentPassword,
                     new_password: newPassword
@@ -146,7 +146,7 @@ export default {
                 });
 
                 if (response.status === 200) {
-                    this.user.email = email; // 업데이트된 이메일 반영
+                    this.user.email = email;
                     this.user.nickname = nickname;
                     this.showEditModal = false;
                     alert('프로필이 성공적으로 업데이트되었습니다.');

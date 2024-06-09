@@ -26,6 +26,7 @@
 
 <script>
 import GameCard from './GameCard.vue';
+import api from '../api';  // `api.js`에서 가져온 인스턴스 사용
 
 export default {
   components: {
@@ -62,10 +63,14 @@ export default {
       });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.userInput)}`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.userInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
-        const data = await response.json();
+        const data = response.data;
 
         // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
@@ -108,10 +113,14 @@ export default {
       });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.previousInput)}`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.previousInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
-        const data = await response.json();
+        const data = response.data;
 
         // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');

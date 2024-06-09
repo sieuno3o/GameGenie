@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 
 export default {
   name: "TheNavbar",
@@ -53,9 +53,7 @@ export default {
       try {
         const token = localStorage.getItem('access');
         if (token) {
-          const response = await axios.get('http://localhost:8000/api/accounts/profile/', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const response = await api.get('accounts/profile/');
           if (response.data) {
             this.isLoggedIn = true;
             this.nickname = response.data.nickname;
@@ -70,9 +68,7 @@ export default {
     async logout() {
       try {
         const refreshToken = localStorage.getItem('refresh');
-        await axios.post('http://localhost:8000/api/accounts/logout/', { refresh: refreshToken }, {
-          headers: {} // 인증 헤더를 비웁니다.
-        });
+        await api.post('accounts/logout/', { refresh: refreshToken });
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('nickname');

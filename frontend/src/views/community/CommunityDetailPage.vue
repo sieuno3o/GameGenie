@@ -51,10 +51,7 @@
         </div>
       </div>
       <div v-if="isLoggedIn">
-        <v-textarea
-          v-model="newComment"
-          label="댓글 작성"
-        ></v-textarea>
+        <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
         <v-btn @click="addComment">댓글 달기</v-btn>
       </div>
       <div v-else>
@@ -111,7 +108,7 @@ export default {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     getImageUrl(imagePath) {
-      return `http://localhost:8000${imagePath}`;
+      return `http://13.125.200.223${imagePath}`;
     },
     async checkLoginStatus() {
       const token = localStorage.getItem('access');
@@ -168,7 +165,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.comments = [response.data]
+        this.comments = [response.data];
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
@@ -273,7 +270,7 @@ export default {
 }
 
 .detailvButton {
-  width: 110px !important; 
+  width: 110px !important;
   height: 50px !important;
   padding: 10px !important;
   font-size: 16px !important;
@@ -284,6 +281,7 @@ export default {
   text-decoration: none !important;
   color: black !important;
 }
+
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
@@ -323,11 +321,11 @@ h3 {
   cursor: pointer;
 }
 
-.commentsList{
+.commentsList {
   margin: 10px;
 }
 
-.commentsList > h2 {
+.commentsList>h2 {
   margin: 50px;
 }
 
