@@ -24,6 +24,4 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     path('api/community/', include('community.urls')),
     path('api/recommendations/', include('recommendations.urls')),
-]
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

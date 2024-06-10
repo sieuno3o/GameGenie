@@ -45,9 +45,10 @@
       <h2>댓글</h2>
       <div v-if="comments && comments.length > 0" class="commentBox">
         <div v-for="comment in comments" :key="comment.id" class="comment">
-          <h2><strong>{{ comment.author }}</strong></h2>
+          <h2><strong>{{ comment.author_nickname }}</strong></h2>
           <h3>{{ formatDate(comment.created_at) }}</h3>
           <h2>{{ comment.comments }}</h2>
+          <v-btn v-if="isLoggedIn && comment.author === userId" @click="deleteComment(comment.id)">댓글 삭제</v-btn>
         </div>
       </div>
       <div v-if="isLoggedIn">
@@ -120,7 +121,7 @@ export default {
             }
           });
           this.isLoggedIn = true;
-          this.userId = response.data.username;
+          this.userId = response.data.id; // 로그인된 유저 ID 저장
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
@@ -148,7 +149,10 @@ export default {
     async fetchComments(id) {
       try {
         const response = await api.get(`community/comments/${id}`);
-        this.comments = response.data.results;
+        this.comments = response.data.results.map(comment => {
+          comment.author_nickname = comment.author.nickname; // 작성자 닉네임 추가
+          return comment;
+        });
       } catch (error) {
         console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
         this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
@@ -165,11 +169,27 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.comments = [response.data];
+        response.data.author_nickname = response.data.author.nickname; // 작성자 닉네임 추가
+        this.comments.push(response.data);
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
         this.errorMessage = "댓글 작성 중 오류가 발생했습니다.";
+      }
+    },
+    async deleteComment(commentId) {
+      if (confirm('정말 삭제하시겠습니까?')) {
+        try {
+          await api.delete(`community/comments/${commentId}/delete/`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access')}`
+            }
+          });
+          this.comments = this.comments.filter(comment => comment.id !== commentId);
+        } catch (error) {
+          console.error("댓글 삭제 중 오류가 발생했습니다:", error);
+          this.errorMessage = "댓글 삭제 중 오류가 발생했습니다.";
+        }
       }
     },
     goBack() {
