@@ -195,13 +195,12 @@ export default {
 }
 
 .profileInfoBox {
-  width: calc(25% - 15px);
-  box-sizing: border-box;
+  width: 300px;
+  margin-right: 40px;
 }
 
 .bookmarkGamebox {
-  width: calc(75% - 15px);
-  box-sizing: border-box;
+  width: 1200px;
 }
 
 .titleText {
@@ -220,8 +219,8 @@ export default {
   border-radius: 0px 10px 10px 10px;
 }
 
-.gameCards {
-  margin-bottom: 20px;
+.bookmarkGameList {
+  padding: 60px 70px;
 }
 
 .error-message {
@@ -231,6 +230,7 @@ export default {
 
 .pagination {
   padding-right: 32px;
+  margin-bottom: -40px;
 }
 
 .body1 {
