@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "13.125.200.223",  # EC2 인스턴스의 퍼블릭 IP 주소
+    "3.34.94.230",  # EC2 인스턴스의 퍼블릭 IP 주소
     "127.0.0.1",
     "localhost",
     "*.compute.amazonaws.com",
