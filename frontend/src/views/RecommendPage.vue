@@ -15,16 +15,8 @@
     <div class="search-bar">
       <v-row>
         <v-col cols="12">
-          <v-text-field 
-            v-model="userInput" 
-            label="검색어를 입력하세요" 
-            @keyup.enter="sendQuery" 
-            append-outer-icon="mdi-magnify"
-            @click:append-outer="sendQuery"
-            hide-details
-            dense
-            outlined
-          ></v-text-field>
+          <v-text-field v-model="userInput" label="검색어를 입력하세요" @keyup.enter="sendQuery" append-outer-icon="mdi-magnify"
+            @click:append-outer="sendQuery" hide-details dense outlined></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -59,6 +51,13 @@ export default {
     this.scrollToBottom();
   },
   methods: {
+    messageClass(message, inner = false) {
+      if (message.isUser) {
+        return inner ? 'user-message' : 'user-message-container';
+      } else {
+        return inner ? 'bot-message' : 'bot-message-container';
+      }
+    },
     async sendQuery() {
       if (this.userInput.trim() === '') return;
 
@@ -160,8 +159,8 @@ export default {
       this.$nextTick(() => {
         const chatContent = this.$refs.chatContent;
         if (chatContent && chatContent.$el) {
-          const messages = this.$refs.message;
-          if (messages && messages.length > 0) {
+          const messages = chatContent.$el.querySelectorAll('.chat-message');
+          if (messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
             lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
           }
