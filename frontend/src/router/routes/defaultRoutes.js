@@ -1,6 +1,7 @@
 import MainPageDashboard from "@/layout/dashboard/MainDashboard.vue";
 
 const MainSearchPage = () => import("@/views/MainSearchPage.vue");
+const ProfilePage = () => import("@/views/account/ProfilePage.vue");
 
 const defaultRoutes = [
   {
@@ -13,6 +14,17 @@ const defaultRoutes = [
         component: MainSearchPage,
       },
     ]
+  },
+  {
+    path: "profile/:nickname",
+    component: MainPageDashboard,
+    children: [
+      {
+        path: "",
+        name: "profile",
+        component: ProfilePage,
+      },
+    ],
   },
 ]
 
