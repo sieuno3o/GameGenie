@@ -115,7 +115,7 @@ export default {
 .game-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-width: 230px;
 }
 
 .game-card-img {
@@ -147,6 +147,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 .favorite-button {
