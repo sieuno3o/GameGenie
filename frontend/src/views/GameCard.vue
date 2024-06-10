@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12" md="3" class="game-card-col">
+  <v-col cols="12" md="6" lg="4" xl="3" class="game-card-col">
     <v-card class="game-card">
       <v-img :src="game.image_url" class="game-card-img" contain></v-img>
       <v-card-title class="game-card-title">{{ game.name }}</v-card-title>
@@ -27,7 +27,7 @@ export default {
     return {
       isFavorite: false,
       favoriteId: null,
-      isLoggedIn: !!localStorage.getItem('access') 
+      isLoggedIn: !!localStorage.getItem('access')
     };
   },
   methods: {
@@ -109,14 +109,13 @@ export default {
 
 <style scoped>
 .game-card-col {
-  width: 300px;
+  margin-bottom: 20px;
 }
 
 .game-card {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  height: 100%;
 }
 
 .game-card-img {
