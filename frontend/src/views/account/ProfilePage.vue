@@ -195,12 +195,12 @@ export default {
 }
 
 .profileInfoBox {
-  width: 300px;
+  max-width: 300px;
   margin-right: 40px;
 }
 
 .bookmarkGamebox {
-  width: 1200px;
+  max-width: 1200px;
 }
 
 .titleText {
@@ -231,6 +231,7 @@ export default {
 .pagination {
   padding-right: 32px;
   margin-bottom: -40px;
+  margin-top: 10px;
 }
 
 .body1 {
