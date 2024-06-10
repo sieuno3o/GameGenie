@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12" md="6" lg="4" xl="3" class="game-card-col">
+  <v-col cols="12" md="6" lg="3" xl="3" class="game-card-col">
     <v-card class="game-card">
       <v-img :src="game.image_url" class="game-card-img" contain></v-img>
       <v-card-title class="game-card-title">{{ game.name }}</v-card-title>
