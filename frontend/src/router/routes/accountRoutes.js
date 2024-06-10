@@ -27,17 +27,6 @@ const accountRoutes = [
       },
     ],
   },
-  {
-    path: "profile/:nickname",
-    component: defaultDashboard,
-    children: [
-      {
-        path: "",
-        name: "profile",
-        component: ProfilePage,
-      },
-    ],
-  },
 ];
 
 export default accountRoutes;
