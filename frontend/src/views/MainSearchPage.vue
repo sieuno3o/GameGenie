@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';  // `api.js`에서 가져온 인스턴스 사용
 
 export default {
   data() {
@@ -33,8 +33,8 @@ export default {
         this.suggestions = [];
         return;
       }
-      axios
-        .get(`http://localhost:8000/api/community/categories/?query=${this.query}`)
+      api
+        .get(`community/categories/?query=${this.query}`)
         .then((response) => {
           this.suggestions = response.data.filter(item =>
             item.value.toLowerCase().includes(this.query.toLowerCase())

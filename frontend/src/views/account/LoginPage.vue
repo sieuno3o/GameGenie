@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../../api';
 import { ElMessage } from 'element-plus'; // ElementPlus의 메시지 박스 임포트
 
 export default {
@@ -37,7 +37,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post('http://localhost:8000/api/accounts/login/', {
+        const response = await api.post('accounts/login/', {
           username: this.username,
           password: this.password
         });
@@ -46,7 +46,7 @@ export default {
           localStorage.setItem('access', tokens.access);
           localStorage.setItem('refresh', tokens.refresh);
 
-          const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
+          const userResponse = await api.get('accounts/profile/', {
             headers: { 'Authorization': `Bearer ${tokens.access}` }
           });
           const user = userResponse.data;

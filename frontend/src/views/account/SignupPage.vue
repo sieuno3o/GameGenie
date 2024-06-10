@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../../api'; // api.js를 사용하여 요청을 처리합니다.
 
 export default {
   data() {
@@ -56,14 +56,23 @@ export default {
     },
     async signup() {
       try {
-        const response = await axios.post('http://localhost:8000/api/accounts/create/', {
-          username: this.username,
-          password: this.password,
-          email: this.email,
-          nickname: this.nickname  // 수정된 부분
+        const formData = new FormData();
+        formData.append('username', this.username);
+        formData.append('password', this.password);
+        formData.append('email', this.email);
+        formData.append('nickname', this.nickname);
+        if (this.profileImage) {
+          formData.append('profile_image', this.profileImage);
+        }
+
+        const response = await api.post('accounts/create/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         });
-        alert('회원가입이 완료되었습니다.');
+
         if (response.status === 201) {
+          alert('회원가입이 완료되었습니다.');
           this.$router.push({ name: 'login' });
         }
       } catch (error) {
