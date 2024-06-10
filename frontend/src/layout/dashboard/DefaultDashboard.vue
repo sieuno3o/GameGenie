@@ -9,7 +9,6 @@
 
 <style lang="scss" scoped>
 #contents {
-  max-width: 1920px;
   min-height: calc(100vh - 55px);
 }
 </style>
