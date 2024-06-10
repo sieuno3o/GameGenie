@@ -45,16 +45,13 @@
       <h2>댓글</h2>
       <div v-if="comments && comments.length > 0" class="commentBox">
         <div v-for="comment in comments" :key="comment.id" class="comment">
-          <h2><strong>{{ comment.author }}</strong></h2>
+          <h2><strong>{{ comment.author_nickname }}</strong></h2>
           <h3>{{ formatDate(comment.created_at) }}</h3>
           <h2>{{ comment.comments }}</h2>
         </div>
       </div>
       <div v-if="isLoggedIn">
-        <v-textarea
-          v-model="newComment"
-          label="댓글 작성"
-        ></v-textarea>
+        <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
         <v-btn @click="addComment">댓글 달기</v-btn>
       </div>
       <div v-else>
@@ -273,7 +270,7 @@ export default {
 }
 
 .detailvButton {
-  width: 110px !important; 
+  width: 110px !important;
   height: 50px !important;
   padding: 10px !important;
   font-size: 16px !important;
@@ -284,6 +281,7 @@ export default {
   text-decoration: none !important;
   color: black !important;
 }
+
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
@@ -323,11 +321,11 @@ h3 {
   cursor: pointer;
 }
 
-.commentsList{
+.commentsList {
   margin: 10px;
 }
 
-.commentsList > h2 {
+.commentsList>h2 {
   margin: 50px;
 }
 

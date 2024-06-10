@@ -17,6 +17,7 @@ class CommentSerializer(serializers.ModelSerializer):
     comments_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     replies = serializers.SerializerMethodField()
+    author_nickname = serializers.CharField(source='author.nickname', read_only=True)  # 작성자 닉네임 추가
 
     class Meta:
         model = Comment

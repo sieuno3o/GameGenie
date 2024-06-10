@@ -12,13 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [
-    "13.125.200.223",  # EC2 인스턴스의 퍼블릭 IP 주소
-    "127.0.0.1",
-    "localhost",
-    "*.compute.amazonaws.com",
-    "dajh1c5z39wei.cloudfront.net",  # CloudFront 도메인
-]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
