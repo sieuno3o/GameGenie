@@ -14,6 +14,17 @@ const defaultRoutes = [
       },
     ]
   },
+  {
+    path: "profile/:nickname",
+    component: MainPageDashboard,
+    children: [
+      {
+        path: "",
+        name: "profile",
+        component: ProfilePage,
+      },
+    ],
+  },
 ]
 
 export default defaultRoutes;
