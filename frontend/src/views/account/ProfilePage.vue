@@ -4,6 +4,7 @@
     <div class="profileInfoBox">
       <span class="titleText">프로필</span>
       <div class="userInfo" v-if="user">
+        <img :src="user.profile_image" alt="프로필 이미지" class="profile-image"/>
         <span class="body1">사용자 이름: {{ user.username }}</span>
         <span class="body1">닉네임: {{ user.nickname }}</span>
         <span class="body1">이메일: {{ user.email }}</span>
@@ -37,10 +38,13 @@
           <v-container>
             <v-row>
               <v-col cols="12">
-                <v-text-field v-model="editData.email" label="이메일" /> <!-- 이메일 필드 추가 -->
+                <v-text-field v-model="editData.email" label="이메일" />
               </v-col>
               <v-col cols="12">
-                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
+                <v-text-field v-model="editData.nickname" label="닉네임" />
+              </v-col>
+              <v-col cols="12">
+                <v-file-input v-model="editData.profile_image" label="프로필 이미지" accept="image/*" />
               </v-col>
               <v-col cols="12">
                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />
@@ -69,6 +73,7 @@
   </div>
 </template>
 
+
 <script>
 import api from '../../api';
 import GameCard from '@/views/GameCard.vue';
@@ -85,6 +90,7 @@ export default {
       editData: {
         email: '',
         nickname: '',
+        profile_image: '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -117,21 +123,17 @@ export default {
     try {
       const accessToken = localStorage.getItem('access');
       if (accessToken) {
-        console.log('Fetching user data...');
         const userResponse = await api.get('accounts/profile/', {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         this.user = userResponse.data;
         this.editData.email = this.user.email;
         this.editData.nickname = this.user.nickname;
-        console.log('User data:', this.user);
 
-        console.log('Fetching favorite games...');
         const favoritesResponse = await api.get('recommendations/favorites/', {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         this.favorites = favoritesResponse.data;
-        console.log('Favorite games:', this.favorites); // 로그 추가
       } else {
         this.errorMessage = '로그인이 필요합니다.';
       }
@@ -140,33 +142,38 @@ export default {
         this.errorMessage = '인증되지 않았습니다. 다시 로그인해주세요.';
         this.$router.push({ name: 'login' });
       } else {
-        console.error('Error fetching user or favorites:', error);
         this.errorMessage = '정보를 가져오는 중 오류가 발생했습니다.';
       }
     }
   },
   methods: {
     async updateProfile() {
-      const { email, nickname, currentPassword, newPassword, confirmPassword } = this.editData;
+      const { email, nickname, profile_image, currentPassword, newPassword, confirmPassword } = this.editData;
       if (newPassword !== confirmPassword) {
         this.updateError = '새 비밀번호가 일치하지 않습니다.';
         return;
       }
 
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('nickname', nickname);
+      if (profile_image) formData.append('profile_image', profile_image);
+      formData.append('old_password', currentPassword);
+      formData.append('new_password', newPassword);
+
       try {
         const accessToken = localStorage.getItem('access');
-        const response = await api.patch('accounts/profile/', {
-          email,
-          nickname,
-          old_password: currentPassword,
-          new_password: newPassword
-        }, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
+        const response = await api.patch('accounts/profile/', formData, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
         if (response.status === 200) {
           this.user.email = email;
           this.user.nickname = nickname;
+          this.user.profile_image = URL.createObjectURL(profile_image);
           this.showEditModal = false;
           this.editData.currentPassword = '';
           this.editData.newPassword = '';
@@ -176,7 +183,6 @@ export default {
           this.updateError = response.data.message || '프로필 업데이트에 실패했습니다.';
         }
       } catch (error) {
-        console.error('Error updating profile:', error);
         this.updateError = error.response.data.message || '프로필 업데이트 중 오류가 발생했습니다.';
       }
     },
@@ -186,6 +192,7 @@ export default {
   }
 };
 </script>
+
 
 <style lang="scss" scoped>
 .profile-page {
@@ -218,6 +225,13 @@ export default {
   background-color: white;
   padding: 30px 50px;
   border-radius: 0px 10px 10px 10px;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 20px;
 }
 
 .gameCards {
