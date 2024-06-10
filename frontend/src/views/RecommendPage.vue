@@ -25,7 +25,7 @@
 
 <script>
 import GameCard from './GameCard.vue';
-import api from '../api';  // `api.js`에서 가져온 인스턴스 사용
+import api from '../api';
 
 export default {
   components: {
@@ -37,7 +37,7 @@ export default {
       messages: [],
       error: null,
       previousInput: '',
-      loading: false, // 로딩 상태 추가
+      loading: false,
     };
   },
   mounted() {
@@ -45,7 +45,7 @@ export default {
       this.userInput = this.$route.query.user_input;
       this.sendQuery();
     }
-    this.scrollToBottom(); // Ensure we start at the bottom
+    this.scrollToBottom();
   },
   updated() {
     this.scrollToBottom();
@@ -62,8 +62,8 @@ export default {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
-      this.loading = true; // 로딩 시작
-      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.loading = true;
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
       this.$nextTick(() => {
         this.scrollToBottom();
       });
@@ -78,7 +78,6 @@ export default {
 
         const data = response.data;
 
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
@@ -87,7 +86,7 @@ export default {
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToBottom();
-            }, 500); // Delay to ensure all elements are fully rendered
+            }, 500);
           });
         } else {
           this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
@@ -95,25 +94,24 @@ export default {
 
         this.previousInput = this.userInput;
       } catch (error) {
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
       } finally {
-        this.loading = false; // 로딩 종료
+        this.loading = false;
       }
 
       this.userInput = '';
       this.$nextTick(() => {
-        this.scrollToBottom(); // Scroll after bot response
+        this.scrollToBottom();
       });
     },
     async getMoreRecommendations() {
       if (this.previousInput.trim() === '') return;
 
       this.messages.push({ text: '다른 게임은 없어?', isUser: true });
-      this.loading = true; // 로딩 시작
-      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.loading = true;
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
       this.$nextTick(() => {
         this.scrollToBottom();
       });
@@ -128,7 +126,6 @@ export default {
 
         const data = response.data;
 
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
@@ -137,18 +134,17 @@ export default {
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToBottom();
-            }, 500); // Delay to ensure all elements are fully rendered
+            }, 500);
           });
         } else {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
       } catch (error) {
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
       } finally {
-        this.loading = false; // 로딩 종료
+        this.loading = false;
       }
 
       this.$nextTick(() => {
@@ -173,7 +169,7 @@ export default {
       this.$nextTick(() => {
         setTimeout(() => {
           this.scrollToBottom();
-        }, 500); // Delay to ensure all elements are fully rendered
+        }, 500);
       });
     },
   }
@@ -201,6 +197,10 @@ body {
   overflow-y: auto;
   margin-bottom: 100px;
   overflow-x: hidden;
+}
+
+.chat-content::-webkit-scrollbar {
+  display: none;
 }
 
 .user-message-container,
