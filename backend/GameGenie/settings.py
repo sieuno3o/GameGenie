@@ -55,7 +55,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080',  # Vue.js 개발 서버 주소
     'http://dajh1c5z39wei.cloudfront.net',  # 프론트 도메인
-    'http://3.34.94.230',
 ]
 
 ROOT_URLCONF = 'GameGenie.urls'
