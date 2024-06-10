@@ -33,17 +33,19 @@
 
 <script>
 import GameCard from './GameCard.vue';
+import api from '../api';  // `api.js`에서 가져온 인스턴스 사용
 
 export default {
   components: {
-    GameCard,
+    GameCard
   },
   data() {
     return {
       userInput: '',
       messages: [],
+      error: null,
       previousInput: '',
-      loading: false,
+      loading: false, // 로딩 상태 추가
     };
   },
   mounted() {
@@ -51,69 +53,108 @@ export default {
       this.userInput = this.$route.query.user_input;
       this.sendQuery();
     }
+    this.scrollToBottom(); // Ensure we start at the bottom
+  },
+  updated() {
     this.scrollToBottom();
   },
   methods: {
     async sendQuery() {
-      if (!this.userInput.trim()) return;
+      if (this.userInput.trim() === '') return;
 
-      this.addMessage(this.userInput, true);
-      this.setLoading(true);
+      this.messages.push({ text: this.userInput, isUser: true });
+      this.loading = true; // 로딩 시작
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
 
       try {
-        const data = await this.fetchRecommendations(this.userInput);
-        this.handleResponse(data, '다음은 추천 게임입니다:');
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.userInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
+
+        const data = response.data;
+
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
+
+        if (data.similar_games) {
+          const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 500); // Delay to ensure all elements are fully rendered
+          });
+        } else {
+          this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
+        }
+
         this.previousInput = this.userInput;
-      } catch {
-        this.addMessage('추천 게임을 가져오는 중 오류가 발생했습니다.', false);
+      } catch (error) {
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
+        this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
+        this.error = error.toString();
       } finally {
-        this.setLoading(false);
-        this.userInput = '';
-        this.scrollToBottom();
+        this.loading = false; // 로딩 종료
       }
+
+      this.userInput = '';
+      this.$nextTick(() => {
+        this.scrollToBottom(); // Scroll after bot response
+      });
     },
     async getMoreRecommendations() {
-      if (!this.previousInput.trim()) return;
+      if (this.previousInput.trim() === '') return;
 
-      this.addMessage('다른 게임은 없어?', true);
-      this.setLoading(true);
+      this.messages.push({ text: '다른 게임은 없어?', isUser: true });
+      this.loading = true; // 로딩 시작
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
 
       try {
-        const data = await this.fetchRecommendations(this.previousInput);
-        this.handleResponse(data, '다음은 추가 추천 게임입니다:');
-      } catch {
-        this.addMessage('추가 추천 게임을 가져오는 중 오류가 발생했습니다.', false);
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.previousInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
+
+        const data = response.data;
+
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
+
+        if (data.similar_games) {
+          const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
+          this.messages.push(botMessage);
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 500); // Delay to ensure all elements are fully rendered
+          });
+        } else {
+          this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
+        }
+      } catch (error) {
+        // 로딩 메시지 제거
+        this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
+        this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
+        this.error = error.toString();
       } finally {
-        this.setLoading(false);
+        this.loading = false; // 로딩 종료
+      }
+
+      this.$nextTick(() => {
         this.scrollToBottom();
-      }
-    },
-    async fetchRecommendations(input) {
-      const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(input)}`);
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-      return response.json();
-    },
-    handleResponse(data, botText) {
-      this.removeLoadingMessage();
-      if (data.similar_games) {
-        this.addMessage(botText, false, data.similar_games.slice(0, 4));
-      } else {
-        this.addMessage(data.error || '추천 게임을 찾을 수 없습니다.', false);
-      }
-    },
-    addMessage(text, isUser, games = []) {
-      this.messages.push({ text, isUser, games });
-    },
-    setLoading(isLoading) {
-      this.loading = isLoading;
-      if (isLoading) {
-        this.addMessage('게임 추천 중입니다...', false);
-      } else {
-        this.removeLoadingMessage();
-      }
-    },
-    removeLoadingMessage() {
-      this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
+      });
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -126,12 +167,17 @@ export default {
           }
         }
       });
-    },
-    messageClass(message, isInner = false) {
-      const baseClass = message.isUser ? 'user-message' : 'bot-message';
-      return isInner ? baseClass : `${baseClass}-container`;
-    },
+    }
   },
+  watch: {
+    messages() {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 500); // Delay to ensure all elements are fully rendered
+      });
+    },
+  }
 };
 </script>
 
