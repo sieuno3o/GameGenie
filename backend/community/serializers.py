@@ -16,6 +16,7 @@ class CommunitySerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     comments_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    author_nickname = serializers.CharField(source='author.nickname', read_only=True)  # 추가된 부분
     replies = serializers.SerializerMethodField()
 
     class Meta:
