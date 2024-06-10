@@ -16,9 +16,9 @@
       <span class="titleText">즐겨찾기한 게임</span>
       <div class="bookmarkGameList">
         <v-row class="game-cards flex-row-center">
-          <game-card v-for=" game in paginatedFavorites" :key="game.id" :game="game" class="gameCards" />
+          <game-card v-for="game in paginatedFormattedFavorites" :key="game.id" :game="game" class="gameCards" />
         </v-row>
-        <v-pagination v-model="currentPage" :length="pageCount" :total-visible="4"
+        <v-pagination class="pagination" v-model="currentPage" :length="pageCount" :total-visible="3"
           @input="handlePageChange"></v-pagination>
       </div>
     </div>
@@ -92,63 +92,15 @@ export default {
       updateError: '',
       errorMessage: '',
       currentPage: 1,
-      itemsPerPage: 8
+      itemsPerPage: 8,
     };
   },
   computed: {
-    formattedFavorites() {
-      return this.favorites.map(favorite => ({
-        image_url: favorite.game_image,
-        name: favorite.game_name,
-        review_summary: favorite.game_review,
-        price: favorite.game_price,
-        store_url: favorite.game_url,
-        id: favorite.id
-      }));
-    },
-    paginatedFavorites() {
+    paginatedFormattedFavorites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.formattedFavorites.slice(start, end);
-    },
-    pageCount() {
-      return Math.ceil(this.formattedFavorites.length / this.itemsPerPage);
-    }
-  },
-  async mounted() {
-    try {
-      const accessToken = localStorage.getItem('access');
-      if (accessToken) {
-        console.log('Fetching user data...');
-        const userResponse = await axios.get('http://localhost:8000/api/accounts/profile/', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        this.user = userResponse.data;
-        this.editData.email = this.user.email; // 이메일 설정
-        this.editData.nickname = this.user.nickname; // 닉네임 설정
-        console.log('User data:', this.user);
-  components: {
-    GameCard
-  },
-  data() {
-    return {
-      user: null,
-      favorites: [],
-      showEditModal: false,
-      editData: {
-        email: '',
-        nickname: '',
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      },
-      updateError: '',
-      errorMessage: ''
-    };
-  },
-  computed: {
-    formattedFavorites() {
-      return this.favorites.map(favorite => ({
+      const paginatedFavorites = this.favorites.slice(start, end);
+      return paginatedFavorites.map(favorite => ({
         image_url: favorite.game_image,
         name: favorite.game_name,
         review_summary: favorite.game_review,
@@ -156,6 +108,9 @@ export default {
         store_url: favorite.game_url,
         id: favorite.id
       }));
+    },
+    pageCount() {
+      return Math.ceil(this.favorites.length / this.itemsPerPage);
     }
   },
   async mounted() {
@@ -176,7 +131,7 @@ export default {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         this.favorites = favoritesResponse.data;
-        console.log('Favorite games:', this.favorites);
+        console.log('Favorite games:', this.favorites); // 로그 추가
       } else {
         this.errorMessage = '로그인이 필요합니다.';
       }
@@ -191,35 +146,6 @@ export default {
     }
   },
   methods: {
-    async updateProfile() {
-      const { email, nickname, currentPassword, newPassword, confirmPassword } = this.editData;
-      if (newPassword !== confirmPassword) {
-        this.updateError = '새 비밀번호가 일치하지 않습니다.';
-        return;
-      }
-        console.log('Fetching favorite games...');
-        const favoritesResponse = await axios.get('http://localhost:8000/api/recommendations/favorites/', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        this.favorites = favoritesResponse.data;
-        console.log('Favorite games:', this.favorites);
-      } else {
-        this.errorMessage = '로그인이 필요합니다.';
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        this.errorMessage = '인증되지 않았습니다. 다시 로그인해주세요.';
-        this.$router.push({ name: 'login' });
-      } else {
-        console.error('Error fetching user or favorites:', error);
-        this.errorMessage = '정보를 가져오는 중 오류가 발생했습니다.';
-      }
-    }
-  },
-  methods: {
-    handlePageChange(page) {
-      this.currentPage = page;
-    },
     async updateProfile() {
       const { email, nickname, currentPassword, newPassword, confirmPassword } = this.editData;
       if (newPassword !== confirmPassword) {
@@ -231,16 +157,6 @@ export default {
         const accessToken = localStorage.getItem('access');
         const response = await api.patch('accounts/profile/', {
           email,
-          nickname,
-          old_password: currentPassword,
-          new_password: newPassword
-        }, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-      try {
-        const accessToken = localStorage.getItem('access');
-        const response = await axios.patch('http://localhost:8000/api/accounts/profile/', {
-          email, // 이메일 추가
           nickname,
           old_password: currentPassword,
           new_password: newPassword
@@ -263,27 +179,15 @@ export default {
         console.error('Error updating profile:', error);
         this.updateError = error.response.data.message || '프로필 업데이트 중 오류가 발생했습니다.';
       }
-    }
-  }
-        if (response.status === 200) {
-          this.user.email = email; // 업데이트된 이메일 반영
-          this.user.nickname = nickname;
-          this.showEditModal = false;
-          alert('프로필이 성공적으로 업데이트되었습니다.');
-        } else {
-          this.updateError = response.data.message || '프로필 업데이트에 실패했습니다.';
-        }
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        this.updateError = error.response.data.message || '프로필 업데이트 중 오류가 발생했습니다.';
-      }
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-<style scoped>
 .profile-page {
   display: flex;
   justify-content: space-between;
@@ -319,9 +223,13 @@ export default {
 .gameCards {
   margin-bottom: 20px;
 }
-  
+
 .error-message {
   color: red;
   font-size: 14px;
+}
+
+.pagination {
+  padding-right: 32px;
 }
 </style>
