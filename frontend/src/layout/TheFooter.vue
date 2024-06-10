@@ -9,7 +9,7 @@ export default {
   name: "TheFooter",
   computed: {
     isMainPage() {
-      return this.$route.name === 'main';
+      return this.$route.name === 'main' || this.$route.name === 'profile';
     },
     shouldShowFooter() {
       return this.$route.name !== 'recommends';
