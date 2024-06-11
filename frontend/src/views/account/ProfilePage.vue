@@ -247,7 +247,7 @@ export default {
 }
 
 .profileInfoBox {
-  width: 300px;
+  width: 250px;
   margin-right: 40px;
 }
 
@@ -259,8 +259,9 @@ export default {
   cursor: pointer;
 }
 
-.bookmarkGamebox {
-  width: 1100px;
+.bookmarkGameList {
+  width: 100%;
+  max-width: 1100px;
 }
 
 .titleText {
