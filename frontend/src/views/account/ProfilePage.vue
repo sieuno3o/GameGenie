@@ -247,7 +247,7 @@ export default {
 }
 
 .profileInfoBox {
-  width: 300px;
+  width: 250px;
   margin-right: 40px;
 }
 
