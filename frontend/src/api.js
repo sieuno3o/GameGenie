@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'http://52.79.116.122/api/',
 });
 
 api.interceptors.request.use(
@@ -13,6 +13,31 @@ api.interceptors.request.use(
     return config;
   },
   error => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error.response && error.response.status === 401) {
+      const originalRequest = error.config;
+      const refreshToken = localStorage.getItem('refresh');
+      if (refreshToken && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          const response = await axios.post('http://52.79.116.122/api/accounts/refresh/', { refresh: refreshToken });
+          localStorage.setItem('access', response.data.access);
+          originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem('access');
+          localStorage.removeItem('refresh');
+          localStorage.removeItem('nickname');
+        }
+      }
+    }
     return Promise.reject(error);
   }
 );
