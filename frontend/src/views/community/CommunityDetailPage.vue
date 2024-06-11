@@ -14,8 +14,8 @@
     </div>
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
-      <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
-      <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
+      <v-btn v-if="isAuthor" class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
+      <button v-if="isAuthor" class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
     <v-dialog v-model="showEditModal" persistent max-width="600px">
       <v-card>
@@ -82,7 +82,8 @@ export default {
         content: '',
       },
       errorMessage: '',
-      defaultProfileImage: defaultProfileImage // Default profile image
+      defaultProfileImage: defaultProfileImage, // Default profile image
+      isAuthor: false, // New state to check if the user is the author
     };
   },
   async created() {
@@ -96,6 +97,8 @@ export default {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
+        console.log('Fetched community item:', this.communityItem); // 로그 추가
+        this.checkAuthor();
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -123,11 +126,21 @@ export default {
             }
           });
           this.isLoggedIn = true;
-          this.userId = response.data.username;
+          this.userId = response.data.id; // userId를 user의 ID로 변경
+          console.log('Logged in user ID:', this.userId); // 로그 추가
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
       }
+    },
+    checkAuthor() {
+      console.log('Checking author with community item:', this.communityItem); // 로그 추가
+      if (this.communityItem && this.communityItem.author_id === this.userId) { // author_nickname 대신 author_id 사용
+        this.isAuthor = true;
+      } else {
+        this.isAuthor = false;
+      }
+      console.log('Is Author:', this.isAuthor); // 로그 추가
     },
     async toggleLike() {
       if (!this.isLoggedIn) {
