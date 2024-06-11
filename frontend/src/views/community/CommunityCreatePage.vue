@@ -30,9 +30,11 @@
       <!-- 이미지 파일 -->
       <div class="form-group">
         <label for="image">이미지 파일</label>
-        <input type="file" id="image" @change="handleFileUpload">
+        <div class="flex-between">
+          <input type="file" id="image" @change="handleFileUpload">
+          <button type="submit" class="createButton">글 작성</button>
+        </div>
       </div>
-      <button type="submit">글 작성</button>
     </form>
   </div>
 </template>
@@ -132,6 +134,7 @@ select {
 }
 
 input[type="file"] {
+  width: 100%;
   padding: 10px;
   border: 2px solid #ccc;
   border-radius: 4px;
@@ -139,17 +142,18 @@ input[type="file"] {
   background-color: #f8f8f8;
 }
 
-button {
-  padding: 12px 20px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
+.createButton {
+  border: 2px solid #ccc;
+  border-radius: 5px; 
   cursor: pointer;
-  transition: background-color 0.3s;
+  width: 120px;
+  height: 53px;
+  background-color: $MAIN-COLOR-SKYBLUE;
+  color: #000;
+  margin-left: 20px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: $HOVER-COLOR;
 }
 </style>
