@@ -14,8 +14,10 @@
     </div>
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
-      <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
-      <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
+      <div v-if="communityItem.author_id === userId" class="editDeleteButtons">
+        <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
+        <button class="deleteButton" @click="deletePost">삭제하기</button>
+      </div>
     </div>
     <v-dialog v-model="showEditModal" persistent max-width="600px">
       <v-card>
@@ -46,11 +48,13 @@
       <div v-if="comments && comments.length > 0" class="commentBox">
         <div v-for="comment in comments" :key="comment.id" class="comment">
           <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
-          <h2><strong>{{ comment.author_nickname }}</strong></h2>
-          <h3>{{ formatDate(comment.created_at) }}</h3>
-          <h2>{{ comment.comments }}</h2>
-          <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
-          <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
+          <div>
+            <h2><strong>{{ comment.author_nickname }}</strong></h2>
+            <h3>{{ formatDate(comment.created_at) }}</h3>
+            <p>{{ comment.comments }}</p>
+            <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
+            <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
+          </div>
         </div>
       </div>
       <div v-if="isLoggedIn">
@@ -194,18 +198,14 @@ export default {
       if (this.newComment.trim() === '') return;
       const id = this.$route.params.id;
       try {
-        const response = await api.post(`community/${id}/comments/create/`, {
+        await api.post(`community/${id}/comments/create/`, {
           comments: this.newComment
         }, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.comments.push(response.data); // 새 댓글을 맨 아래로 추가
-        this.$nextTick(() => {
-          const commentBox = this.$el.querySelector('.commentBox');
-          commentBox.scrollTop = commentBox.scrollHeight; // 댓글이 추가되면 자동으로 스크롤
-        });
+        await this.fetchComments(id);  // 댓글 목록을 다시 가져옴
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
@@ -339,6 +339,11 @@ export default {
   justify-content: center;
 }
 
+.editDeleteButtons {
+  display: flex;
+  gap: 10px;
+}
+
 .detailButton {
   width: 110px;
   height: 50px;
@@ -363,6 +368,19 @@ export default {
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3) !important;
   text-decoration: none !important;
   color: black !important;
+}
+
+.deleteButton {
+  width: 110px;
+  height: 50px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  background-color: #FF9393;
+  border: 0.3px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: black;
 }
 
 h1 {
