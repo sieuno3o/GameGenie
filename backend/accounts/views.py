@@ -10,31 +10,42 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import ListAPIView
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class CreateView(APIView):
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            if email and not re.match(r"[^@]+@[^@]+\.[^@]+", email):  # 이메일 형식 검증
-                return Response({'message': '올바른 이메일 형식이 아닙니다.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                email = serializer.validated_data.get('email')
+                if email and not re.match(r"[^@]+@[^@]+\.[^@]+", email):  # 이메일 형식 검증
+                    return Response({'message': '올바른 이메일 형식이 아닙니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            password = serializer.validated_data.get('password')
-            if not password:
-                return Response({'message': '비밀번호를 입력해야 합니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                password = serializer.validated_data.get('password')
+                if not password:
+                    return Response({'message': '비밀번호를 입력해야 합니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if User.objects.filter(email=email).exists():  # 이메일 중복 확인
-                return Response({'message': '중복된 email입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                if User.objects.filter(email=email).exists():  # 이메일 중복 확인
+                    return Response({'message': '중복된 email입니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            nickname = serializer.validated_data.get('nickname')
-            if User.objects.filter(nickname=nickname).exists():
-                return Response({'message': '중복된 닉네임입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                nickname = serializer.validated_data.get('nickname')
+                if User.objects.filter(nickname=nickname).exists():
+                    return Response({'message': '중복된 닉네임입니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = serializer.save()
-            user.set_password(password)
-            user.save()
-            return Response({"message": "저장되었습니다", "userId": user.id}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                user = serializer.save()
+                user.set_password(password)
+                if 'profile_image' in request.FILES:
+                    user.profile_image = request.FILES['profile_image']
+                user.save()
+                return Response({"message": "저장되었습니다", "userId": user.id}, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f'Error during user creation: {str(e)}')
+            return Response({'message': '서버 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LogoutView(APIView):
@@ -73,17 +84,22 @@ class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None):
-        if id:
-            user = get_object_or_404(User, id=id)
-        else:
-            user = request.user
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data)
+        try:
+            if id:
+                user = get_object_or_404(User, id=id)
+            else:
+                user = request.user
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error: {e}")  # 예외 메시지를 로그로 출력
+            return Response({'message': '프로필을 불러오는 중 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def patch(self, request, id=None):
         user = request.user
         serializer = UserProfileSerializer(
             user, data=request.data, partial=True, context={'request': request})
+
         if serializer.is_valid():
             email = request.data.get('email')
             if email and email != user.email:
