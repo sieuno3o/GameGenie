@@ -4,10 +4,12 @@
     <div class="profileInfoBox">
       <span class="titleText">프로필</span>
       <div class="userInfo" v-if="user">
+        <img :src="user.profileImage || defaultProfileImage" alt="Profile Image" class="profileImage" />
         <span class="body1 userInfoText">사용자 이름: {{ user.username }}</span>
         <span class="body1 userInfoText">닉네임: {{ user.nickname }}</span>
         <span class="body1 userInfoText">{{ user.email }}</span>
         <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
+        <p v-if="!user.profileImage">등록한 사진이 없습니다.</p>
       </div>
     </div>
 
@@ -51,6 +53,9 @@
               <v-col cols="12">
                 <v-text-field v-model="editData.confirmPassword" label="새 비밀번호 확인" type="password" />
               </v-col>
+              <v-col cols="12">
+                <v-file-input v-model="editData.profileImage" label="프로필 이미지" accept="image/*" />
+              </v-col>
             </v-row>
             <v-row v-if="updateError">
               <v-col cols="12">
@@ -72,6 +77,7 @@
 <script>
 import api from '../../api';
 import GameCard from '@/views/GameCard.vue';
+import defaultProfileImage from '@/assets/image/account/profileImgIcon.png'; // Corrected import path
 
 export default {
   components: {
@@ -87,12 +93,14 @@ export default {
         nickname: '',
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        profileImage: null
       },
       updateError: '',
       errorMessage: '',
       currentPage: 1,
       itemsPerPage: 8,
+      defaultProfileImage: defaultProfileImage
     };
   },
   computed: {
@@ -147,7 +155,7 @@ export default {
   },
   methods: {
     async updateProfile() {
-      const { email, nickname, currentPassword, newPassword, confirmPassword } = this.editData;
+      const { email, nickname, currentPassword, newPassword, confirmPassword, profileImage } = this.editData;
       if (newPassword !== confirmPassword) {
         this.updateError = '새 비밀번호가 일치하지 않습니다.';
         return;
@@ -155,18 +163,28 @@ export default {
 
       try {
         const accessToken = localStorage.getItem('access');
-        const response = await api.patch('accounts/profile/', {
-          email,
-          nickname,
-          old_password: currentPassword,
-          new_password: newPassword
-        }, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('nickname', nickname);
+        formData.append('old_password', currentPassword);
+        formData.append('new_password', newPassword);
+        if (profileImage) {
+          formData.append('profile_image', profileImage);
+        }
+
+        const response = await api.patch('accounts/profile/', formData, {
+          headers: { 
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data'
+          }
         });
 
         if (response.status === 200) {
           this.user.email = email;
           this.user.nickname = nickname;
+          if (profileImage) {
+            this.user.profileImage = URL.createObjectURL(profileImage);
+          }
           this.showEditModal = false;
           this.editData.currentPassword = '';
           this.editData.newPassword = '';
@@ -197,6 +215,16 @@ export default {
 .profileInfoBox {
   width: 300px;
   margin-right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profileImage {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  margin-bottom: 20px;
 }
 
 .bookmarkGamebox {
