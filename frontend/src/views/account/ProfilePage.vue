@@ -1,8 +1,8 @@
 <template>
   <div class="profile-page">
-    <div class="bookmarkBox">
+    <!-- 프로필 영역 -->
+    <div class="profileInfoBox">
       <span class="titleText">프로필</span>
-      <span class="titleText">즐겨찾기한 게임</span>
       <div class="userInfo" v-if="user">
         <img :src="user.profileImage || defaultProfileImage" alt="Profile Image" class="profileImage"
           @click="triggerProfileImageUpload" />
@@ -13,18 +13,22 @@
         <span class="body1 userEmail">{{ user.email }}</span>
         <v-btn @click="showEditModal = true" class="editButton">정보 수정</v-btn>
       </div>
+    </div>
+
+    <!-- 즐겨찾기한 게임 목록 영역 -->
+    <div v-if="favorites && favorites.length" class="bookmarkGamebox">
+      <span class="titleText">즐겨찾기한 게임</span>
       <div class="bookmarkGameList">
-        <div v-if="favorites && favorites.length" class="bookmarkGamebox">
-          <v-row class="game-cards flex-row-center">
-            <game-card v-for="game in paginatedFormattedFavorites" :key="game.id" :game="game" class="gameCards" />
-          </v-row>
-          <v-pagination class="pagination" v-model="currentPage" :length="pageCount" :total-visible="3"
-            @input="handlePageChange"></v-pagination>
-        </div>
-        <div v-else>
-          <p>즐겨찾기한 게임이 없습니다.</p>
-        </div>
+        <v-row class="game-cards flex-row-center">
+          <game-card v-for="game in paginatedFormattedFavorites" :key="game.id" :game="game" class="gameCards" />
+        </v-row>
+        <v-pagination class="pagination" v-model="currentPage" :length="pageCount" :total-visible="3"
+          @input="handlePageChange"></v-pagination>
       </div>
+    </div>
+
+    <div v-else>
+      <p>즐겨찾기한 게임이 없습니다.</p>
     </div>
 
     <!-- 프로필 수정 모달 -->
@@ -133,7 +137,7 @@ export default {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         this.favorites = favoritesResponse.data;
-        console.log('Favorite games:', this.favorites);
+        console.log('Favorite games:', this.favorites); // 로그 추가
       } else {
         this.errorMessage = '로그인이 필요합니다.';
       }
@@ -235,14 +239,14 @@ export default {
 
 <style lang="scss" scoped>
 .profile-page {
-  flex-direction: column;
+  display: flex;
   justify-content: space-between;
   padding: 50px;
 }
 
 .profileInfoBox {
-  width: 250px;
-  margin-bottom: 40px;
+  width: 300px;
+  margin-right: 40px;
 }
 
 .profileImage {
@@ -253,15 +257,8 @@ export default {
   cursor: pointer;
 }
 
-.bookmarkGameList {
-  width: 100%;
-  max-width: 1100px;
-}
-
-.bookmarkBox, 
-.profileInfoBox {
-  flex-direction: column;
-  align-items: left;
+.bookmarkGamebox {
+  width: 1100px;
 }
 
 .titleText {
@@ -281,7 +278,7 @@ export default {
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.bookmarkGamebox {
+.bookmarkGameList {
   padding: 60px 70px;
 }
 

@@ -10,7 +10,7 @@
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
-      <h3>{{ communityItem.community_like ? communityItem.community_like.length : 0 }}</h3>
+      <h3>{{ likesCount }}</h3>
     </div>
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
@@ -84,6 +84,7 @@ export default {
       errorMessage: '',
       defaultProfileImage: defaultProfileImage, // Default profile image
       isAuthor: false, // New state to check if the user is the author
+      likesCount: 0, // New state to store likes count
     };
   },
   async created() {
@@ -97,6 +98,10 @@ export default {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
+        if (!this.communityItem.community_like) {
+          this.communityItem.community_like = [];
+        }
+        this.likesCount = this.communityItem.community_like.length;
         console.log('Fetched community item:', this.communityItem); // 로그 추가
         this.checkAuthor();
       } catch (error) {
@@ -114,7 +119,7 @@ export default {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     getImageUrl(imagePath) {
-      return `http://localhost:8000${imagePath}`;
+      return `http://52.79.116.122${imagePath}`;
     },
     async checkLoginStatus() {
       const token = localStorage.getItem('access');
@@ -154,11 +159,15 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.$set(this.communityItem, 'likes', response.data.likes);
-        this.$set(this.communityItem, 'is_liked', response.data.is_liked);
+        if (response.data && typeof response.data.likes_count !== 'undefined') {
+          this.likesCount = response.data.likes_count;
+          this.isLiked = response.data.liked;
+          console.log('Updated likes:', this.likesCount);
+        } else {
+          console.error("Invalid response data", response.data);
+        }
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
-        this.isLiked = !this.isLiked;
       }
     },
     async fetchComments(id) {
