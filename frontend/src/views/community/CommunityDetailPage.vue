@@ -45,6 +45,7 @@
       <h2>댓글</h2>
       <div v-if="comments && comments.length > 0" class="commentBox">
         <div v-for="comment in comments" :key="comment.id" class="comment">
+          <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
           <h2><strong>{{ comment.author_nickname }}</strong></h2>
           <h3>{{ formatDate(comment.created_at) }}</h3>
           <h2>{{ comment.comments }}</h2>
@@ -63,6 +64,7 @@
 
 <script>
 import api from '../../api';
+import defaultProfileImage from '@/assets/image/account/profileImgIcon.png'; // Corrected import path
 
 export default {
   data() {
@@ -79,7 +81,8 @@ export default {
         title: '',
         content: '',
       },
-      errorMessage: ''
+      errorMessage: '',
+      defaultProfileImage: defaultProfileImage // Default profile image
     };
   },
   async created() {
@@ -165,7 +168,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.comments = [response.data]
+        this.comments = [response.data, ...this.comments];
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
@@ -335,10 +338,19 @@ h3 {
 }
 
 .comment {
-  display: grid;
+  display: flex;
   background-color: #EEF1F6;
   border-radius: 15px;
   margin: 15px;
   width: 600px;
+  align-items: center;
+  padding: 10px;
+}
+
+.commentProfileImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 </style>
