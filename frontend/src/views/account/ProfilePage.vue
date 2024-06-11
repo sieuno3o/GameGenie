@@ -11,7 +11,7 @@
         <div> <span class="body1 userName">아이디</span> <span class="body1">{{ user.username }}</span> </div>
         <div> <span class="body1 userNickName">닉네임</span> <span class="body1">{{ user.nickname }}</span> </div>
         <span class="body1 userEmail">{{ user.email }}</span>
-        <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
+        <v-btn @click="showEditModal = true" class="editButton">정보 수정</v-btn>
       </div>
     </div>
 
@@ -245,7 +245,7 @@ export default {
 }
 
 .profileInfoBox {
-  min-width: 300px;
+  width: 300px;
   margin-right: 40px;
 }
 
@@ -258,7 +258,7 @@ export default {
 }
 
 .bookmarkGamebox {
-  min-width: 1000px;
+  width: 1100px;
 }
 
 .titleText {
@@ -300,6 +300,16 @@ export default {
 .userName,
 .userNickName {
   margin-right: 5px;
+  font-weight: bold;
+}
+
+.editButton {
+  border: none;
+  cursor: pointer;
+  height: 35px;
+  box-shadow: none;
+  color: white;
+  background-color: $MAIN-COLOR-NAVY;
   font-weight: bold;
 }
 </style>
