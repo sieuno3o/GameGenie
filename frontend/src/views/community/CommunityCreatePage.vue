@@ -73,12 +73,6 @@ export default {
 
       try {
         const token = localStorage.getItem('access');
-        if (!token) {
-          alert('로그인이 필요합니다.');
-          this.$router.push({ name: 'login' });
-          return;
-        }
-
         await api.post('community/create/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -89,11 +83,7 @@ export default {
         this.$router.push({ name: 'communityMain' });
       } catch (error) {
         console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
-        if (error.response && error.response.data) {
-          alert(`글 작성 중 에러가 발생했습니다: ${error.response.data.detail || error.response.data}`);
-        } else {
-          alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
-        }
+        alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
       }
     }
   },

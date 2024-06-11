@@ -35,11 +35,12 @@
       </div>
       <div>
         <ul class="communityList">
-          <li class="communitys" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
+          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
+            @click="goToDetail(item.id)">
             {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}
           </li>
         </ul>
-        <p v-if="!currentPageCommunities.length">커뮤니티에 게시물이 없습니다.</p>
+        <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
         <div class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
@@ -102,7 +103,8 @@ export default {
     },
     currentPageCommunities() {
       const start = (this.currentPage - 1) * this.pageSize;
-      return this.sortedAndFilteredCommunityList.slice(start, start + this.pageSize);
+      const end = start + this.pageSize;
+      return this.sortedAndFilteredCommunityList.slice(start, end);
     },
   },
   mounted() {
@@ -127,13 +129,14 @@ export default {
       this.fetchCommunityList();
     },
     async fetchCommunityList() {
-      try {
-        const response = await api.get(`community/?page=${this.currentPage}`);
-        this.communityList = response.data.results;
-        this.totalPages = Math.ceil(response.data.count / this.pageSize);
-      } catch (error) {
-        console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error);
-      }
+      api.get(`community/?page=${this.currentPage}`)
+        .then(response => {
+          this.communityList = response.data.results;
+          this.totalPages = Math.ceil(response.data.count / this.pageSize);
+        })
+        .catch(error => {
+          console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error);
+        });
     },
     async fetchAccountsUsers() {
       try {
@@ -149,18 +152,20 @@ export default {
     toggleDropdown() {
       this.showDropdown = !this.showDropdown;
     },
-    async fetchCategories() {
-      try {
-        const response = await api.get('community/categories/');
-        this.categories = response.data;
-      } catch (error) {
-        console.error('카테고리를 불러오는 중 오류가 발생했습니다:', error);
-      }
+    fetchCategories() {
+      api.get('community/categories/')
+        .then(response => {
+          this.categories = response.data;
+        })
+        .catch(error => {
+          console.error('카테고리를 불러오는 중 오류가 발생했습니다:', error);
+        });
     },
     selectCategory(category) {
       this.selectedCategory = category.key;
       this.selectedCategoryName = category.value;
       this.showDropdown = false;
+      console.log('선택한 카테고리:', category);
     },
     toggleSortDropdown() {
       this.showSortDropdown = !this.showSortDropdown;

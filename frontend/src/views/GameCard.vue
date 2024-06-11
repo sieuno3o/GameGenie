@@ -1,13 +1,13 @@
 <template>
-  <v-col cols="12" md="3" class="game-card-col">
+  <v-col cols="12" md="6" lg="3" xl="3" class="game-card-col">
     <v-card class="game-card">
       <v-img :src="game.image_url" class="game-card-img" contain></v-img>
       <v-card-title class="game-card-title">{{ game.name }}</v-card-title>
       <v-card-subtitle class="game-card-subtitle">{{ game.review_summary }}</v-card-subtitle>
       <v-card-subtitle class="game-card-subtitle">{{ game.price }}</v-card-subtitle>
-      <v-card-actions>
-        <v-btn :href="game.store_url" target="_blank">스팀 상점 페이지로 이동</v-btn>
-        <v-btn @click="toggleFavorite">{{ isFavorite ? '★' : '☆' }}</v-btn>
+      <v-card-actions class="game-card-actions">
+        <v-btn :href="game.store_url" target="_blank" class="store-button">스팀 상점 페이지로 이동</v-btn>
+        <v-btn @click="toggleFavorite" class="favorite-button">{{ isFavorite ? '★' : '☆' }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-col>
@@ -27,7 +27,7 @@ export default {
     return {
       isFavorite: false,
       favoriteId: null,
-      isLoggedIn: !!localStorage.getItem('access') // 로그인 상태 확인
+      isLoggedIn: !!localStorage.getItem('access')
     };
   },
   methods: {
@@ -36,7 +36,7 @@ export default {
       if (!this.isLoggedIn) {
         console.log('로그인이 필요합니다.');
         alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
-        this.$router.push('/login'); // 로그인 페이지로 이동
+        this.$router.push('/login');
         return;
       }
 
@@ -109,14 +109,14 @@ export default {
 
 <style scoped>
 .game-card-col {
-  width: 300px;
+  margin-bottom: 20px;
 }
 
 .game-card {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  min-width: 230px;
+  margin-right: 200px;
 }
 
 .game-card-img {
@@ -135,5 +135,24 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.game-card-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.store-button {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.favorite-button {
+  flex-shrink: 0;
+  min-width: 10px;
 }
 </style>
