@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://3.34.94.230/api/',  // EC2 인스턴스의 퍼블릭 IP 주소
+  baseURL: 'http://52.79.116.122/api/',  // EC2 인스턴스의 퍼블릭 IP 주소
 });
 
 api.interceptors.request.use(
