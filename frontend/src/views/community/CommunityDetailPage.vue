@@ -110,7 +110,8 @@ export default {
       },
       showEditCommentModal: false,
       errorMessage: '',
-      defaultProfileImage: defaultProfileImage
+      defaultProfileImage: defaultProfileImage,
+      likesCount: 0 // 좋아요 숫자 변수 추가
     };
   },
   async created() {
@@ -124,6 +125,7 @@ export default {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
+        this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0; // 좋아요 숫자 설정
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -200,6 +202,10 @@ export default {
           }
         });
         this.comments.push(response.data); // 새 댓글을 맨 아래로 추가
+        this.$nextTick(() => {
+          const commentBox = this.$el.querySelector('.commentBox');
+          commentBox.scrollTop = commentBox.scrollHeight; // 댓글이 추가되면 자동으로 스크롤
+        });
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
