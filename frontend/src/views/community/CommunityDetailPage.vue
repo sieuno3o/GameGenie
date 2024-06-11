@@ -199,7 +199,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.comments = [response.data, ...this.comments];
+        this.comments.push(response.data); // 새 댓글을 맨 아래로 추가
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
