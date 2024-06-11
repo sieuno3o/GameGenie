@@ -4,9 +4,9 @@
     <div class="profileInfoBox">
       <span class="titleText">프로필</span>
       <div class="userInfo" v-if="user">
-        <span class="body1 userInfoText">사용자 이름: {{ user.username }}</span>
-        <span class="body1 userInfoText">닉네임: {{ user.nickname }}</span>
-        <span class="body1 userInfoText">{{ user.email }}</span>
+        <div> <span class="body1 userName">아이디</span> <span class="body1">{{ user.username }}</span> </div>
+        <div> <span class="body1 userNickName">닉네임</span> <span class="body1">{{ user.nickname }}</span> </div>
+        <span class="body1 userEmail">{{ user.email }}</span>
         <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
       </div>
     </div>
@@ -195,12 +195,12 @@ export default {
 }
 
 .profileInfoBox {
-  max-width: 300px;
+  min-width: 300px;
   margin-right: 40px;
 }
 
 .bookmarkGamebox {
-  max-width: 1200px;
+  min-width: 1000px;
 }
 
 .titleText {
@@ -217,6 +217,7 @@ export default {
   background-color: white;
   padding: 30px 50px;
   border-radius: 0px 10px 10px 10px;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bookmarkGameList {
@@ -236,5 +237,10 @@ export default {
 
 .body1 {
   margin-bottom: 10px;
+}
+
+.userName, .userNickName {
+  margin-right: 5px;
+  font-weight: bold;
 }
 </style>
