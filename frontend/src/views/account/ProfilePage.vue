@@ -312,4 +312,30 @@ export default {
   background-color: $MAIN-COLOR-NAVY;
   font-weight: bold;
 }
+
+.pagination {
+  padding-right: 32px;
+  margin-bottom: -40px;
+  margin-top: 10px;
+}
+
+.body1 {
+  margin-bottom: 10px;
+}
+
+.userName,
+.userNickName {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.editButton {
+  border: none;
+  cursor: pointer;
+  height: 35px;
+  box-shadow: none;
+  color: white;
+  background-color: $MAIN-COLOR-NAVY;
+  font-weight: bold;
+}
 </style>

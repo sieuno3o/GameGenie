@@ -39,7 +39,7 @@ class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        data = request.data
+        data = request.data.copy()  # request.data를 복사하여 새로운 dict 객체를 생성
         data['author'] = request.user.id
         serializer = CommunitySerializer(data=data)
         if serializer.is_valid():

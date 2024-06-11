@@ -10,7 +10,6 @@
 <style lang="scss" scoped>
 #contents {
   background-color: $MAIN-COLOR-SKYBLUE;
-  max-width: 1920px;
   min-height: calc(100vh - 55px);
 }
 </style>

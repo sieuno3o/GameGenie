@@ -2,7 +2,6 @@ import defaultDashboard from "@/layout/dashboard/DefaultDashboard";
 
 const LoginPage = () => import("@/views/account/LoginPage.vue");
 const SignupPage = () => import("@/views/account/SignupPage.vue");
-const ProfilePage = () => import("@/views/account/ProfilePage.vue");
 
 const accountRoutes = [
   {
@@ -24,17 +23,6 @@ const accountRoutes = [
         path: "",
         name: "signup",
         component: SignupPage,
-      },
-    ],
-  },
-  {
-    path: "profile/:nickname",
-    component: defaultDashboard,
-    children: [
-      {
-        path: "",
-        name: "profile",
-        component: ProfilePage,
       },
     ],
   },

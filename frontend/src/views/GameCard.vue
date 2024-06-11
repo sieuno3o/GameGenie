@@ -155,4 +155,23 @@ export default {
   flex-shrink: 0;
   min-width: 10px;
 }
+
+.game-card-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.store-button {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.favorite-button {
+  flex-shrink: 0;
+  min-width: 10px;
+}
 </style>

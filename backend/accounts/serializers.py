@@ -17,8 +17,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True, required=False, validators=[validate_password])
     email = serializers.EmailField(required=False)
+    profile_image = serializers.ImageField(source='profileImage', allow_null=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'nickname']
+        fields = ['id', 'username', 'email', 'password', 'nickname', 'profile_image']  # id 필드 추가
         read_only_fields = ['username']
