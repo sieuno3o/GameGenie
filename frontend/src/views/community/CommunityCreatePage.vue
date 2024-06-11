@@ -1,28 +1,33 @@
 <template>
   <div class="community-create-container">
-    <h1>게임 커뮤니티 게시글 작성</h1>
-    <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="title">제목</label>
-        <input type="text" id="title" v-model="form.title" required>
-      </div>
+    <span class="createHeading heading1">게시글 작성</span>
+    <form @submit.prevent="submitForm" class="formBox">
+      <!-- 카테고리 -->
       <div class="form-group">
         <label for="category">카테고리</label>
         <select id="category" v-model="form.category" required>
-          <option disabled value="">Please select one</option>
+          <option disabled value="">카테고리를 선택해 주세요</option>
           <option v-for="option in categories" :key="option.key" :value="option.key">
             {{ option.value }}
           </option>
         </select>
       </div>
+      <!-- 제목 -->
+      <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" id="title" v-model="form.title" required>
+      </div>
+      <!-- 내용 -->
       <div class="form-group">
         <label for="content">내용</label>
         <textarea id="content" v-model="form.content" rows="10" required></textarea>
       </div>
+      <!-- 링크 -->
       <div class="form-group">
         <label for="url">URL</label>
         <input type="url" id="url" v-model="form.url">
       </div>
+      <!-- 이미지 파일 -->
       <div class="form-group">
         <label for="image">이미지 파일</label>
         <input type="file" id="image" @change="handleFileUpload">
@@ -93,11 +98,15 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.formBox {
+  margin-top: 20px;
+}
+
 .community-create-container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
+  max-width: 1000px;
+  min-width: 600px;
+  padding: 30px;
 }
 
 .form-group {
