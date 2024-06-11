@@ -134,7 +134,7 @@ a.router-link-active {
 
 .navCommunity:hover,
 .navLogin:hover {
-  color: $HOVER-COLOR;
+  color: #898a8b;
 }
 
 .dropdown {
