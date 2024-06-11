@@ -49,7 +49,7 @@ class CommunityCreate(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommunityUpdate(APIView):
+class CommunityDetail(APIView):
     def get(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
         serializer = CommunitySerializer(community)
@@ -108,7 +108,7 @@ class CommentCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CommentUpdate(APIView):
+class CommentDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, community_id, comment_id):
@@ -201,7 +201,7 @@ class ReplyCreate(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ReplyUpdate(APIView):
+class ReplyDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, comment_id, reply_id):

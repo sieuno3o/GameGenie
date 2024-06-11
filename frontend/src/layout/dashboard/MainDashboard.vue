@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-center" id="contents-wrapper">
+  <div class="flex-center" :class="{ 'main-page': isMainPage }" id="contents-wrapper">
     <div class="flex-row-around" id="contents">
       <router-view></router-view>
     </div>
@@ -7,17 +7,26 @@
 </template>
 
 <script>
+export default {
+  computed: {
+    isMainPage() {
+      return this.$route.name === 'main';
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>
 #contents {
   background-color: $MAIN-COLOR-SKYBLUE;
-  max-width: 1920px;
   min-height: calc(100vh - 55px);
-  margin-top: 150px;
 }
 
 #contents-wrapper {
   background-color: $MAIN-COLOR-SKYBLUE;
+}
+
+.main-page #contents {
+  margin-top: 150px;
 }
 </style>

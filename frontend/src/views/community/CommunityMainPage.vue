@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="communityRow2">
-        <input type="text" v-model="query" class="mainSearchInput body1" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
         <div class="communityCreate">
           <a @click.prevent="checkLogin">글 작성</a>
         </div>
@@ -235,6 +235,7 @@ export default {
 
 .communityRow2 {
   display: flex;
+  align-items: center;
   margin: 20px;
 }
 
@@ -244,7 +245,7 @@ export default {
   height: 40px;
   text-align: center;
   border-radius: 10px;
-  background-color: beige;
+  background-color: #EEF1F6;
   cursor: pointer;
 }
 
@@ -260,7 +261,7 @@ export default {
   width: 50px;
   height: 40px;
   border-radius: 10px;
-  background-color: beige;
+  background-color: #EEF1F6;
 }
 
 .categoryButton {
@@ -343,4 +344,12 @@ export default {
 
 .pagination .active {
   font-weight: bold;
-}</style>
+}
+
+.communitySearch {
+  background-color: #EEF1F6;
+  margin: 5px;
+  padding: 5px;
+  border-radius: 10px;
+}
+</style>

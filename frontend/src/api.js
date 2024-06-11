@@ -4,6 +4,17 @@ const api = axios.create({
   baseURL: 'http://localhost:8000/api/',
 });
 
-// 기본적으로 토큰을 사용하지 않도록 설정
-// 필요한 경우 특정 요청에서만 토큰을 추가
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('access');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
 export default api;

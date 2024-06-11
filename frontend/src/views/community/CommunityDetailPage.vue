@@ -9,18 +9,13 @@
     </div>
     <p>{{ communityItem.content }}</p>
     <div class="likeRow">
-      <button class="likeButton" :class="{ liked: isLiked }" @click="toggleLike">
-        <span v-if="isLiked">♥</span>
-        <span v-else>♡</span>
-      </button>
-      <h3>{{ likeCount }}</h3>
+      <button class="likeButton" @click="toggleLike">♥</button>
+      <h3>{{ communityItem.community_like ? communityItem.community_like.length : 0 }}</h3>
     </div>
     <div class="detailButtonList">
-      <router-link to="/community/">
-        <button class="detailButton">목록으로</button>
-      </router-link>
-      <v-btn class="detailButton" color="primary" @click="showEditModal = true">게시글 수정</v-btn>
-      <button class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
+      <button class="detailButton" @click="goToCommunity">목록으로</button>
+      <v-btn v-if="isAuthor" class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
+      <button v-if="isAuthor" class="detailButton" style="background-color: #FF9393;" @click="deletePost">삭제하기</button>
     </div>
     <v-dialog v-model="showEditModal" persistent max-width="600px">
       <v-card>
@@ -46,18 +41,37 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <div class="commentsList">
+      <h2>댓글</h2>
+      <div v-if="comments && comments.length > 0" class="commentBox">
+        <div v-for="comment in comments" :key="comment.id" class="comment">
+          <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
+          <h2><strong>{{ comment.author_nickname }}</strong></h2>
+          <h3>{{ formatDate(comment.created_at) }}</h3>
+          <h2>{{ comment.comments }}</h2>
+        </div>
+      </div>
+      <div v-if="isLoggedIn">
+        <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
+        <v-btn @click="addComment">댓글 달기</v-btn>
+      </div>
+      <div v-else>
+        <p>로그인 후 댓글을 작성할 수 있습니다.</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import api from '../../api';
+import defaultProfileImage from '@/assets/image/account/profileImgIcon.png'; // Corrected import path
 
 export default {
   data() {
     return {
       communityItem: null,
+      comments: [],
       isLiked: false,
-      likeCount: 0,
       isLoggedIn: false,
       userId: null,
       newComment: '',
@@ -67,21 +81,24 @@ export default {
         title: '',
         content: '',
       },
-      errorMessage: ''
+      errorMessage: '',
+      defaultProfileImage: defaultProfileImage, // Default profile image
+      isAuthor: false, // New state to check if the user is the author
     };
   },
   async created() {
     await this.checkLoginStatus();
     const id = this.$route.params.id;
     await this.fetchCommunityItem(id);
+    await this.fetchComments(id);
   },
   methods: {
     async fetchCommunityItem(id) {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
-        this.isLiked = this.communityItem.is_liked;
-        this.likeCount = this.communityItem.community_like_count;
+        console.log('Fetched community item:', this.communityItem); // 로그 추가
+        this.checkAuthor();
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -109,28 +126,48 @@ export default {
             }
           });
           this.isLoggedIn = true;
-          this.userId = response.data.id;
-          this.fetchCommunityItem(this.$route.params.id);
+          this.userId = response.data.id; // userId를 user의 ID로 변경
+          console.log('Logged in user ID:', this.userId); // 로그 추가
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
       }
     },
+    checkAuthor() {
+      console.log('Checking author with community item:', this.communityItem); // 로그 추가
+      if (this.communityItem && this.communityItem.author_id === this.userId) { // author_nickname 대신 author_id 사용
+        this.isAuthor = true;
+      } else {
+        this.isAuthor = false;
+      }
+      console.log('Is Author:', this.isAuthor); // 로그 추가
+    },
     async toggleLike() {
       if (!this.isLoggedIn) {
-        alert('로그인이 필요합니다.');
+        console.error("로그인이 필요합니다.");
         return;
       }
+
       try {
         const response = await api.patch(`community/${this.communityItem.id}/like/`, null, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.isLiked = response.data.liked;
-        this.likeCount = response.data.likes_count;
+        this.$set(this.communityItem, 'likes', response.data.likes);
+        this.$set(this.communityItem, 'is_liked', response.data.is_liked);
       } catch (error) {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
+        this.isLiked = !this.isLiked;
+      }
+    },
+    async fetchComments(id) {
+      try {
+        const response = await api.get(`community/comments/${id}`);
+        this.comments = response.data.results;
+      } catch (error) {
+        console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
+        this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
       }
     },
     async addComment() {
@@ -138,16 +175,17 @@ export default {
       const id = this.$route.params.id;
       try {
         const response = await api.post(`community/comments/${id}/create/`, {
-          content: this.newComment
+          comments: this.newComment
         }, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        this.communityItem.comments.push(response.data);
+        this.comments = [response.data, ...this.comments];
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
+        this.errorMessage = "댓글 작성 중 오류가 발생했습니다.";
       }
     },
     goBack() {
@@ -204,16 +242,17 @@ export default {
     async deletePost() {
       if (confirm('정말 삭제하시겠습니까?')) {
         try {
-          await api.delete(`community/${this.communityItem.id}/`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('access')}` }
-          });
+          await api.delete(`community/${this.communityItem.id}/`);
           this.$router.push({ name: 'communityMain' });
         } catch (error) {
           console.error('게시글 삭제 중 오류가 발생했습니다:', error);
           alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
         }
       }
-    }
+    },
+    goToCommunity() {
+      this.$router.push('/community/');
+    },
   }
 };
 </script>
@@ -234,6 +273,8 @@ export default {
 }
 
 .detailButton {
+  width: 110px;
+  height: 50px;
   padding: 10px;
   font-size: 16px;
   border-radius: 10px;
@@ -242,6 +283,19 @@ export default {
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   text-decoration: none;
   color: black;
+}
+
+.detailvButton {
+  width: 110px !important;
+  height: 50px !important;
+  padding: 10px !important;
+  font-size: 16px !important;
+  border-radius: 10px !important;
+  background-color: white !important;
+  border: 0.3px solid rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3) !important;
+  text-decoration: none !important;
+  color: black !important;
 }
 
 h1 {
@@ -257,7 +311,6 @@ h3 {
 .likeRow {
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .likeButton {
@@ -265,13 +318,6 @@ h3 {
   height: 30px;
   font-size: 25px;
   text-align: center;
-  cursor: pointer;
-  background: none;
-  border: none;
-}
-
-.likeButton.liked {
-  color: red;
 }
 
 .content {
@@ -291,42 +337,33 @@ h3 {
   cursor: pointer;
 }
 
-.comments-section {
-  margin-top: 40px;
+.commentsList {
+  margin: 10px;
+}
+
+.commentsList>h2 {
+  margin: 50px;
+}
+
+.commentBox {
+  display: grid;
+  justify-content: center;
 }
 
 .comment {
   display: flex;
+  background-color: #EEF1F6;
+  border-radius: 15px;
+  margin: 15px;
+  width: 600px;
   align-items: center;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.comment img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-}
-
-.add-comment {
-  margin-top: 20px;
-}
-
-.add-comment textarea {
-  width: 100%;
-  height: 80px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   padding: 10px;
-  margin-bottom: 10px;
 }
 
-.add-comment button {
-  padding: 10px 20px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.commentProfileImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 </style>

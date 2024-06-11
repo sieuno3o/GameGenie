@@ -2,12 +2,11 @@
   <v-container class="mainBox">
     <v-row class="chat-content" ref="chatContent">
       <v-col cols="12" class="chatBox">
-        <div v-for="(message, index) in messages" :key="index" ref="message" class="chat-message"
-          :class="{ 'user-message-container': message.isUser, 'bot-message-container': !message.isUser }">
-          <div :class="{ 'user-message': message.isUser, 'bot-message': !message.isUser }">
+        <div v-for="(message, index) in messages" :key="index" class="chat-message" :class="messageClass(message)">
+          <div :class="messageClass(message, true)">
             {{ message.text }}
           </div>
-          <v-row v-if="message.games && message.games.length > 0" class="game-cards" align="start">
+          <v-row v-if="message.games && message.games.length" class="game-cards" align="start">
             <game-card v-for="game in message.games" :key="game.appid || game.name" :game="game" />
           </v-row>
         </div>
@@ -17,7 +16,7 @@
       <v-row>
         <v-col cols="12">
           <v-text-field v-model="userInput" label="검색어를 입력하세요" @keyup.enter="sendQuery" append-outer-icon="mdi-magnify"
-            @click:append-outer="sendQuery"></v-text-field>
+            @click:append-outer="sendQuery" hide-details dense outlined></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -26,6 +25,7 @@
 
 <script>
 import GameCard from './GameCard.vue';
+import api from '../api';
 
 export default {
   components: {
@@ -37,7 +37,7 @@ export default {
       messages: [],
       error: null,
       previousInput: '',
-      loading: false, // 로딩 상태 추가
+      loading: false,
     };
   },
   mounted() {
@@ -45,29 +45,39 @@ export default {
       this.userInput = this.$route.query.user_input;
       this.sendQuery();
     }
-    this.scrollToBottom(); // Ensure we start at the bottom
+    this.scrollToBottom();
   },
   updated() {
     this.scrollToBottom();
   },
   methods: {
+    messageClass(message, inner = false) {
+      if (message.isUser) {
+        return inner ? 'user-message' : 'user-message-container';
+      } else {
+        return inner ? 'bot-message' : 'bot-message-container';
+      }
+    },
     async sendQuery() {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
-      this.loading = true; // 로딩 시작
-      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.loading = true;
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
       this.$nextTick(() => {
         this.scrollToBottom();
       });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/games/?user_input=${encodeURIComponent(this.userInput)}`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.userInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
-        const data = await response.json();
+        const data = response.data;
 
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
@@ -76,7 +86,7 @@ export default {
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToBottom();
-            }, 500); // Delay to ensure all elements are fully rendered
+            }, 500);
           });
         } else {
           this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
@@ -84,36 +94,38 @@ export default {
 
         this.previousInput = this.userInput;
       } catch (error) {
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
       } finally {
-        this.loading = false; // 로딩 종료
+        this.loading = false;
       }
 
       this.userInput = '';
       this.$nextTick(() => {
-        this.scrollToBottom(); // Scroll after bot response
+        this.scrollToBottom();
       });
     },
     async getMoreRecommendations() {
       if (this.previousInput.trim() === '') return;
 
       this.messages.push({ text: '다른 게임은 없어?', isUser: true });
-      this.loading = true; // 로딩 시작
-      this.messages.push({ text: '게임 추천 중입니다...', isUser: false }); // 로딩 메시지 추가
+      this.loading = true;
+      this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
       this.$nextTick(() => {
         this.scrollToBottom();
       });
 
       try {
-        const response = await fetch(`http://localhost:8000/api/recommendations/?user_input=${encodeURIComponent(this.previousInput)}`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const response = await api.get(`recommendations/games/`, {
+          params: {
+            user_input: this.previousInput
+          }
+        });
+        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
-        const data = await response.json();
+        const data = response.data;
 
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
         if (data.similar_games) {
@@ -122,18 +134,17 @@ export default {
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToBottom();
-            }, 500); // Delay to ensure all elements are fully rendered
+            }, 500);
           });
         } else {
           this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
         }
       } catch (error) {
-        // 로딩 메시지 제거
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
         this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
         this.error = error.toString();
       } finally {
-        this.loading = false; // 로딩 종료
+        this.loading = false;
       }
 
       this.$nextTick(() => {
@@ -144,8 +155,8 @@ export default {
       this.$nextTick(() => {
         const chatContent = this.$refs.chatContent;
         if (chatContent && chatContent.$el) {
-          const messages = this.$refs.message;
-          if (messages && messages.length > 0) {
+          const messages = chatContent.$el.querySelectorAll('.chat-message');
+          if (messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
             lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
           }
@@ -158,7 +169,7 @@ export default {
       this.$nextTick(() => {
         setTimeout(() => {
           this.scrollToBottom();
-        }, 500); // Delay to ensure all elements are fully rendered
+        }, 500);
       });
     },
   }
@@ -177,6 +188,8 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 55px);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .chat-content {
@@ -186,17 +199,23 @@ body {
   overflow-x: hidden;
 }
 
-.user-message-container {
+.chat-content::-webkit-scrollbar {
+  display: none;
+}
+
+.user-message-container,
+.bot-message-container {
   display: flex;
-  justify-content: flex-end;
   margin-bottom: 10px;
 }
 
+.user-message-container {
+  justify-content: flex-end;
+}
+
 .bot-message-container {
-  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .user-message,
@@ -247,21 +266,18 @@ body {
 .search-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
-  background: #fff;
-  padding: 10px;
+  max-width: 1000px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: #ffffff;
 }
 
 .game-cards {
   margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
-}
-
-.game-card-col {
-  flex: 0 0 300px;
-  max-width: 300px;
 }
 </style>
