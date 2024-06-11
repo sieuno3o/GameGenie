@@ -14,8 +14,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "52.79.116.122",  # EC2 인스턴스의 퍼블릭 IP 주소
-    "127.0.0.1",
-    "localhost",
     "*.compute.amazonaws.com",
     "dajh1c5z39wei.cloudfront.net",  # CloudFront 도메인
 ]
@@ -53,7 +51,6 @@ MIDDLEWARE = [
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',  # Vue.js 개발 서버 주소
     'http://dajh1c5z39wei.cloudfront.net',  # 프론트 도메인
 ]
 
