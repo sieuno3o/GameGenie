@@ -16,20 +16,22 @@
     </div>
 
     <!-- 즐겨찾기한 게임 목록 영역 -->
-    <div v-if="favorites && favorites.length" class="bookmarkGamebox">
+    <div>
       <span class="titleText">즐겨찾기한 게임</span>
       <div class="bookmarkGameList">
-        <v-row class="game-cards flex-row-center">
-          <game-card v-for="game in paginatedFormattedFavorites" :key="game.id" :game="game" class="gameCards" />
-        </v-row>
-        <v-pagination class="pagination" v-model="currentPage" :length="pageCount" :total-visible="3"
-          @input="handlePageChange"></v-pagination>
+        <div v-if="favorites && favorites.length" class="bookmarkGamebox">
+          <v-row class="game-cards flex-row-center">
+            <game-card v-for="game in paginatedFormattedFavorites" :key="game.id" :game="game" class="gameCards" />
+          </v-row>
+          <v-pagination class="pagination" v-model="currentPage" :length="pageCount" :total-visible="3"
+            @input="handlePageChange"></v-pagination>
+          </div>
+        <div v-else>
+          <p>즐겨찾기한 게임이 없습니다.</p>
+        </div>
       </div>
     </div>
 
-    <div v-else>
-      <p>즐겨찾기한 게임이 없습니다.</p>
-    </div>
 
     <!-- 프로필 수정 모달 -->
     <v-dialog v-model="showEditModal" persistent max-width="600px">
