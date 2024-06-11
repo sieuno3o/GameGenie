@@ -14,12 +14,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True, required=False, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
     email = serializers.EmailField(required=False)
-    profile_image = serializers.ImageField(allow_null=True)
-    
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'nickname', 'profile_image']
+        fields = ['id', 'username', 'email', 'password', 'nickname', 'profile_image']
         read_only_fields = ['username']

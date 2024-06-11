@@ -81,7 +81,6 @@ export default {
 
 .loginTitle {
   margin-bottom: 50px;
-  font-size: 35px;
 }
 
 .loginInput {

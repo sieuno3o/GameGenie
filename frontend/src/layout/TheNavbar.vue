@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api'; // Adjust the path to where your api.js is located
 
 export default {
   name: "TheNavbar",
@@ -39,8 +39,8 @@ export default {
       isDropdownOpen: false
     };
   },
-  created() {
-    this.checkLoginStatus();
+  async created() {
+    await this.checkLoginStatus();
   },
   mounted() {
     document.addEventListener('click', this.handleOutsideClick);
@@ -53,26 +53,21 @@ export default {
       try {
         const token = localStorage.getItem('access');
         if (token) {
-          const response = await axios.get('http://localhost:8000/api/accounts/profile/', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (response.data) {
-            this.isLoggedIn = true;
-            this.nickname = response.data.nickname;
-          } else {
-            this.isLoggedIn = false;
-          }
+          const response = await api.get('accounts/profile/');
+          this.isLoggedIn = true;
+          this.nickname = response.data.nickname;
+        } else {
+          this.isLoggedIn = false;
         }
       } catch (error) {
+        console.error("Error in checkLoginStatus:", error);
         this.isLoggedIn = false;
       }
     },
     async logout() {
       try {
         const refreshToken = localStorage.getItem('refresh');
-        await axios.post('http://localhost:8000/api/accounts/logout/', { refresh: refreshToken }, {
-          headers: {} // 인증 헤더를 비웁니다.
-        });
+        await api.post('accounts/logout/', { refresh: refreshToken });
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('nickname');
@@ -139,7 +134,7 @@ a.router-link-active {
 
 .navCommunity:hover,
 .navLogin:hover {
-  color: $HOVER-COLOR;
+  color: #898a8b;
 }
 
 .dropdown {

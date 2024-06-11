@@ -26,7 +26,7 @@ class CommunityList(ListAPIView):
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
         queryset = Community.objects.annotate(community_like_count=Count('community_like'))
         ordering = self.request.query_params.get('ordering', 'created_at')
@@ -39,7 +39,7 @@ class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        data = request.data
+        data = request.data.copy()  # request.data를 복사하여 새로운 dict 객체를 생성
         data['author'] = request.user.id
         serializer = CommunitySerializer(data=data)
         if serializer.is_valid():
@@ -111,25 +111,21 @@ class CommentCreate(APIView):
 class CommentDetail(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, community_id, comment_id):
-        comment = get_object_or_404(
-            Comment, pk=comment_id, community__id=community_id)
+    def get(self, request, community_pk, comment_id):
+        comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
         serializer = CommentSerializer(comment)
         return Response(serializer.data)
 
-    def patch(self, request, community_id, comment_id):
-        comment = get_object_or_404(
-            Comment, pk=comment_id, community__id=community_id)
-        serializer = CommentSerializer(
-            comment, data=request.data, partial=True)
+    def patch(self, request, community_pk, comment_id):
+        comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
+        serializer = CommentSerializer(comment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, community_id, comment_id):
-        comment = get_object_or_404(
-            Comment, pk=comment_id, community__id=community_id)
+    def delete(self, request, community_pk, comment_id):
+        comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
         comment.delete()
         return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -159,18 +155,13 @@ class CommentLike(generics.UpdateAPIView):
         return Response({'liked': liked, 'likes_count': likes_count}, status=status.HTTP_200_OK)
 
 
-class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-
 class CommentsList(ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10
 
     def get_queryset(self):
-        community = get_object_or_404(Community, pk=self.kwargs['pk'])
+        community = get_object_or_404(Community, pk=self.kwargs['community_pk'])
         return Comment.objects.filter(community=community).order_by('created_at')
 
 

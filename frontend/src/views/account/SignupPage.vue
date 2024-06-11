@@ -92,7 +92,6 @@ export default {
 
 .signupTitle {
   margin-bottom: 50px;
-  font-size: 35px;
 }
 
 .signupInput {
