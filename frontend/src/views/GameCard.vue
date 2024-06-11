@@ -116,6 +116,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-width: 230px;
+  margin-right: 200px;
 }
 
 .game-card-img {

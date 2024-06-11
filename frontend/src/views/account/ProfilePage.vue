@@ -4,12 +4,14 @@
     <div class="profileInfoBox">
       <span class="titleText">프로필</span>
       <div class="userInfo" v-if="user">
-        <img :src="user.profileImage || defaultProfileImage" alt="Profile Image" class="profileImage" />
-        <span class="body1 userInfoText">사용자 이름: {{ user.username }}</span>
-        <span class="body1 userInfoText">닉네임: {{ user.nickname }}</span>
-        <span class="body1 userInfoText">{{ user.email }}</span>
-        <v-btn color="primary" @click="showEditModal = true">정보 수정</v-btn>
-        <p v-if="!user.profileImage">등록한 사진이 없습니다.</p>
+        <img :src="user.profileImage || defaultProfileImage" alt="Profile Image" class="profileImage"
+          @click="triggerProfileImageUpload" />
+        <input type="file" ref="profileImageInput" @change="handleProfileImageChange" accept="image/*"
+          style="display: none;" />
+        <div> <span class="body1 userName">아이디</span> <span class="body1">{{ user.username }}</span> </div>
+        <div> <span class="body1 userNickName">닉네임</span> <span class="body1">{{ user.nickname }}</span> </div>
+        <span class="body1 userEmail">{{ user.email }}</span>
+        <v-btn @click="showEditModal = true" class="editButton">정보 수정</v-btn>
       </div>
     </div>
 
@@ -39,10 +41,10 @@
           <v-container>
             <v-row>
               <v-col cols="12">
-                <v-text-field v-model="editData.email" label="이메일" /> <!-- 이메일 필드 추가 -->
+                <v-text-field v-model="editData.email" label="이메일" />
               </v-col>
               <v-col cols="12">
-                <v-text-field v-model="editData.nickname" label="닉네임" /> <!-- 닉네임 필드 추가 -->
+                <v-text-field v-model="editData.nickname" label="닉네임" />
               </v-col>
               <v-col cols="12">
                 <v-text-field v-model="editData.currentPassword" label="현재 비밀번호" type="password" />
@@ -52,9 +54,6 @@
               </v-col>
               <v-col cols="12">
                 <v-text-field v-model="editData.confirmPassword" label="새 비밀번호 확인" type="password" />
-              </v-col>
-              <v-col cols="12">
-                <v-file-input v-model="editData.profileImage" label="프로필 이미지" accept="image/*" />
               </v-col>
             </v-row>
             <v-row v-if="updateError">
@@ -97,7 +96,6 @@ export default {
         profileImage: null
       },
       updateError: '',
-      errorMessage: '',
       currentPage: 1,
       itemsPerPage: 8,
       defaultProfileImage: defaultProfileImage
@@ -154,6 +152,40 @@ export default {
     }
   },
   methods: {
+    triggerProfileImageUpload() {
+      this.$refs.profileImageInput.click();
+    },
+    handleProfileImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.editData.profileImage = file;
+        this.updateProfileImage();
+      }
+    },
+    async updateProfileImage() {
+      try {
+        const accessToken = localStorage.getItem('access');
+        const formData = new FormData();
+        formData.append('profile_image', this.editData.profileImage);
+
+        const response = await api.patch('accounts/profile/', formData, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.status === 200) {
+          this.user.profileImage = URL.createObjectURL(this.editData.profileImage);
+          alert('프로필 사진이 성공적으로 업데이트되었습니다.');
+        } else {
+          this.updateError = response.data.message || '프로필 사진 업데이트에 실패했습니다.';
+        }
+      } catch (error) {
+        console.error('Error updating profile image:', error);
+        this.updateError = error.response.data.message || '프로필 사진 업데이트 중 오류가 발생했습니다.';
+      }
+    },
     async updateProfile() {
       const { email, nickname, currentPassword, newPassword, confirmPassword, profileImage } = this.editData;
       if (newPassword !== confirmPassword) {
@@ -173,7 +205,7 @@ export default {
         }
 
         const response = await api.patch('accounts/profile/', formData, {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'multipart/form-data'
           }
@@ -215,9 +247,6 @@ export default {
 .profileInfoBox {
   width: 300px;
   margin-right: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .profileImage {
@@ -225,10 +254,11 @@ export default {
   height: 150px;
   border-radius: 50%;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
 .bookmarkGamebox {
-  width: 1200px;
+  width: 1100px;
 }
 
 .titleText {
@@ -245,6 +275,7 @@ export default {
   background-color: white;
   padding: 30px 50px;
   border-radius: 0px 10px 10px 10px;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bookmarkGameList {
@@ -259,9 +290,26 @@ export default {
 .pagination {
   padding-right: 32px;
   margin-bottom: -40px;
+  margin-top: 10px;
 }
 
 .body1 {
   margin-bottom: 10px;
+}
+
+.userName,
+.userNickName {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.editButton {
+  border: none;
+  cursor: pointer;
+  height: 35px;
+  box-shadow: none;
+  color: white;
+  background-color: $MAIN-COLOR-NAVY;
+  font-weight: bold;
 }
 </style>
