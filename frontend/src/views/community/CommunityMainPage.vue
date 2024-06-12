@@ -10,7 +10,7 @@
               @click="toggleDropdown" />
             <ul v-if="showDropdown" class="categoryDropdown">
               <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value
-                }}</li>
+              }}</li>
             </ul>
           </div>
           <div class="categorySelected">
@@ -51,7 +51,7 @@
               <span class="communityListInfoContour">|</span>
               <span>조회수 {{ item.view_count }}</span>
               <span class="communityListInfoContour">|</span>
-              <span>작성자가 선택한 카테고리 표시</span>
+              <span>{{ getCategoryName(item.category) }}</span> <!-- 선택한 카테고리 표시 -->
             </span>
           </div>
           <div>
@@ -215,6 +215,10 @@ export default {
       } else {
         this.$router.push({ name: 'communityCreate' });
       }
+    },
+    getCategoryName(categoryKey) {
+      const category = this.categories.find(cat => cat.key === categoryKey);
+      return category ? category.value : '알 수 없음';
     }
   }
 };
