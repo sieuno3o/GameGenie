@@ -54,7 +54,10 @@
               <span>작성자가 선택한 카테고리 표시</span>
             </span>
           </div>
-          <span>좋아요: {{ item.community_like.length }}</span>
+          <div>
+            <span>{{ item.community_like.length }}</span>
+            <span style="margin-left: 4px; color: #ff7171;">♥</span>
+          </div>
         </span>
         <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
         <div v-if="sortedAndFilteredCommunityList.length" class="pagination">

@@ -400,7 +400,7 @@ h3 {
 }
 
 .likeButton {
-  color: red;
+  color: #ff7171;
   height: 30px;
   font-size: 25px;
   text-align: center;
