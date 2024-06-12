@@ -400,7 +400,7 @@ ul {
 .communityListInfo {
   margin-top: 2px;
   margin-left: 1px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
   color: rgb(164, 164, 164);
 }
