@@ -44,23 +44,33 @@
     <span class="commentTitle flex-left">댓글 (개수)개</span>
     <div v-if="comments && comments.length > 0" class="commentBox">
       <div v-for="comment in comments" :key="comment.id" class="comment">
-        <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
-        <div class="flex-row">
-          <span><strong>{{ comment.author_nickname }}</strong></span>
-          <span>{{ formatDate(comment.created_at) }}</span>
-          <p>{{ comment.comments }}</p>
-          <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
-          <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
+        <div class="flex-between" style="padding: 10px 0px;">
+          <div class="flex-row-center">
+            <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
+            <div class="flex-col">
+              <div class="flex-row-center">
+                <span id="commentNickname" class="commentTextStyle body1">{{ comment.author_nickname }}</span>
+                <span id="commentDate" class="commentTextStyle body1">{{
+                  formatDate(comment.created_at) }}</span>
+              </div>
+              <span id="commentComments" class="commentTextStyle body1">{{ comment.comments }}</span>
+            </div>
+          </div>
+          <div>
+            <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)"
+              style="margin-right: 10px">수정</v-btn>
+            <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
+          </div>
         </div>
       </div>
     </div>
     <!-- 댓글 작성 -->
-    <div v-if="isLoggedIn">
-      <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
-      <v-btn @click="addComment">댓글 달기</v-btn>
+    <div v-if="isLoggedIn" class="flex-row commentWriteBox">
+      <v-textarea v-model="newComment" label="댓글 작성" rows="1" class="commentWrite"></v-textarea>
+      <v-btn @click="addComment" class="commentAdd">댓글 달기</v-btn>
     </div>
-    <div v-else>
-      <span>로그인 후 댓글을 작성할 수 있습니다.</span>
+    <div v-else class="beforeLoginText">
+      <span class="body3">로그인 후 댓글을 작성할 수 있습니다.</span>
     </div>
     <!-- 댓글 수정 모달 -->
     <v-dialog v-model="showEditCommentModal" persistent max-width="600px">
@@ -360,32 +370,11 @@ export default {
   white-space: pre-line;
 }
 
-.actions {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.like-section {
-  font-size: 1.5em;
-  cursor: pointer;
-}
-
-.commentsList {
-  margin: 10px;
-}
-
-.commentsList>span {
-  margin: 50px;
-}
-
 .comment {
-  display: flex;
-  background-color: #EEF1F6;
-  border-radius: 15px;
   width: 600px;
   align-items: center;
-  padding: 20px;
+  margin: 20px 0;
+  width: 100%;
 }
 
 .commentProfileImage {
@@ -414,7 +403,6 @@ export default {
 }
 
 .communityItemDeatil {
-  font-size: 15px;
   font-weight: bold;
   color: rgb(164, 164, 164);
   margin: 0;
@@ -435,7 +423,29 @@ export default {
   margin-top: 10%; 
 }
 
-.comment {
-  width: 100%;
+.beforeLoginText {
+  padding: 10px;
+}
+
+#commentNickname {
+  font-weight: bold;
+}
+
+#commentDate {
+  color: rgb(164, 164, 164);
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+#commentComments {
+  margin-top: 5px;
+}
+
+.commentWrite {
+  margin-right: 20px;
+}
+
+.commentAdd {
+  height: 56px;
 }
 </style>
