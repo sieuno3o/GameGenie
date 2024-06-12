@@ -8,7 +8,7 @@
     <div v-if="communityItem.image">
       <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지">
     </div>
-    <p>{{ communityItem.content }}</p>
+    <p v-html="formatContent(communityItem.content)"></p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
       <h3>{{ likesCount }}</h3>
@@ -16,34 +16,10 @@
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
       <div v-if="communityItem.author_id === userId" class="editDeleteButtons">
-        <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
+        <v-btn class="detailvButton" color="primary" @click="editPost">수정하기</v-btn>
         <button class="deleteButton" @click="deletePost">삭제하기</button>
       </div>
     </div>
-    <v-dialog v-model="showEditModal" persistent max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">게시글 수정</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field v-model="editData.title" label="제목" />
-              </v-col>
-              <v-col cols="12">
-                <v-textarea v-model="editData.content" label="내용" />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="showEditModal = false">취소</v-btn>
-          <v-btn color="blue darken-1" text @click="updatePost">저장</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <div class="commentsList">
       <h2>댓글</h2>
       <div v-if="comments && comments.length > 0" class="commentBox">
@@ -149,6 +125,9 @@ export default {
       const category = this.categories.find(category => category.key === key);
       return category ? category.value : '알 수 없음';
     },
+    formatContent(content) {
+      return content.replace(/\n/g, '<br>');
+    },
     formatDate(dateString) {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -180,7 +159,7 @@ export default {
     },
     async toggleLike() {
       if (!this.isLoggedIn) {
-        console.error("로그인이 필요합니다.");
+        alert("로그인이 필요합니다.");
         return;
       }
 
@@ -335,6 +314,9 @@ export default {
     goToCommunity() {
       this.$router.push('/community/');
     },
+    editPost() {
+      this.$router.push({ name: 'communityCreate', params: { id: this.communityItem.id } });
+    },
   }
 };
 </script>
@@ -424,6 +406,8 @@ h3 {
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 8px;
+  white-space: pre-line;
+  /* 줄바꿈을 유지 */
 }
 
 .actions {
