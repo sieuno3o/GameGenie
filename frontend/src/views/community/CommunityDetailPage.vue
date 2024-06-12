@@ -35,7 +35,7 @@
       <div class="flex-row-center">
         <button class="detailButton flex-center" @click="goToCommunity">목록으로</button>
         <div v-if="communityItem.author_id === userId" class="editDeleteButtons flex-center">
-          <button class="detailButton flex-center">수정하기</button>
+          <button class="detailButton flex-center" @click="editPost">수정하기</button>
           <button class="detailButton flex-center" @click="deletePost">삭제하기</button>
         </div>
       </div>
@@ -148,6 +148,9 @@ export default {
       const category = this.categories.find(category => category.key === key);
       return category ? category.value : '알 수 없음';
     },
+    formatContent(content) {
+      return content.replace(/\n/g, '<br>');
+    },
     formatDate(dateString) {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -179,7 +182,7 @@ export default {
     },
     toggleLike() {
       if (!this.isLoggedIn) {
-        console.error("로그인이 필요합니다.");
+        alert("로그인이 필요합니다.");
         return;
       }
 
@@ -292,7 +295,10 @@ export default {
     goToCommunity() {
       this.$router.push('/community');
     },
-  },
+    editPost() {
+      this.$router.push({ name: 'communityCreate', params: { id: this.communityItem.id } });
+    },
+  }
 };
 </script>
 
@@ -350,6 +356,8 @@ export default {
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 8px;
+  white-space: pre-line;
+  /* 줄바꿈을 유지 */
 }
 
 .actions {
