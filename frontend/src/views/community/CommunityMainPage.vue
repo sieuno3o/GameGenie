@@ -2,8 +2,8 @@
   <div class="community flex-col">
     <!-- <img class="banner" src="" alt="배너 사진"> -->
     <div class="communityMain">
+      <!-- 카테고리 -->
       <div class="communityRow1 flex-between">
-        <!-- 카테고리 -->
         <div class="categoryButton flex-row-center">
           <div class="categorylist flex-row-center">
             <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
@@ -17,11 +17,10 @@
             <span class="subtitle body3">{{ selectedCategoryName }}</span>
           </div>
         </div>
+        <!-- 정렬 -->
         <div class="flex-row-center">
-          <!-- 정렬 -->
           <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
-            <span class="subtitle body3">{{ sortOptionText
-              }}</span>
+            <span class="subtitle body3">{{ sortOptionText }}</span>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
               <p @click="selectSortOption('time')">최신 순</p>
@@ -31,21 +30,26 @@
             </div>
           </div>
           <!-- 글 작성 버튼 -->
-          <div class="communityCreate flex-row-center body3" @click.prevent="checkLogin">글 작성</div>
+          <div class="communityCreate flex-row-center button2" @click.prevent="checkLogin">글 작성</div>
         </div>
       </div>
       <!-- 검색 -->
-      <div class="communityRow2">
+      <div class="communityRow2 flex-row-center">
+        <img src="../../assets/image/searchIcon.png" class="searchIcon">
         <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
       </div>
       <!-- 게시물 목록 -->
       <div>
-        <ul class="communityList">
-          <li class="communitys flex-left" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}, 조회수: {{
-            item.view_count }}
-          </li>
-        </ul>
+        <div class="communityList">
+          <span class="communitys" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
+            <span>
+              {{ item.title }}
+            </span>
+            <span>
+              작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}, 조회수: {{item.view_count }}
+            </span>
+          </span>
+        </div>
         <span v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</span>
         <div class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
@@ -214,8 +218,8 @@ ul {
 }
 
 .communityList {
-  margin-top: 5px;
-  padding: 5px;
+  border-right: 1px solid rgb(178, 178, 178);
+  border-left: 1px solid rgb(178, 178, 178);
 }
 
 .community {
@@ -225,10 +229,16 @@ ul {
 }
 
 .communitys {
-  height: 40px;
-  width: 100%;
-  padding: 23px 15px;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  display: flex;
+  align-items: left;
+  flex-direction: column;
+  justify-content: center;
   cursor: pointer;
+  height: 70px;
+  width: 100%;
+  padding: 10px 15px;
+
 }
 
 .communitys:hover {
@@ -250,7 +260,7 @@ ul {
 }
 
 .categorySelected {
-  margin-left: -30px;
+  margin-left: -40px;
 }
 
 .communityRow1 {
@@ -259,12 +269,14 @@ ul {
 }
 
 .communityRow2 {
-  margin: 15px 0px 0px 12px;
+  margin-top: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgb(178, 178, 178);
 }
 
 .communityCreate {
   margin-left: 20px; 
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 5px;
   cursor: pointer;
   border: 1px solid rgb(178, 178, 178);
@@ -291,6 +303,13 @@ ul {
   font-size: 16px;
 }
 
+.searchIcon {
+  width: 17px;
+  cursor: pointer;
+  margin-bottom: 5px;
+  margin-right: 4px;
+}
+
 .categorySortButton {
   display: flex;
   cursor: pointer;
@@ -299,6 +318,7 @@ ul {
 .hamburgericon {
   width: 25px;
   height: 25px;
+  margin-left: -30px;
 }
 
 .categoryDropdown {
@@ -367,14 +387,8 @@ ul {
   background-color: #ffffff;
   height: 35px;
   width: 100%;
-  padding: 5px;
-  padding-bottom: 10px;
+  padding: 5px 5px 10px 5px;
   border: none;
-  border-bottom: 1px solid rgb(178, 178, 178);
   outline: none;
-}
-
-.communitySearch:focus {
-  border-bottom: 1px solid rgb(178, 178, 178);
 }
 </style>
