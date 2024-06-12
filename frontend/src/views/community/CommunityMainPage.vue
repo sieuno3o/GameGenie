@@ -1,23 +1,27 @@
 <template>
   <div class="community flex-col">
-    <span class="communityTitle heading1 flex-center">커뮤니티</span>
-    <img class="banner" src="" alt="배너 사진">
+    <!-- <img class="banner" src="" alt="배너 사진"> -->
     <div class="communityMain">
-      <div class="communityRow1">
-        <div class="categoryButton">
-          <div class="categorylist">
+      <div class="communityRow1 flex-between">
+        <!-- 카테고리 -->
+        <div class="categoryButton flex-row-center">
+          <div class="categorylist flex-row-center">
             <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
               @click="toggleDropdown" />
             <ul v-if="showDropdown" class="categoryDropdown">
               <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value
-              }}</li>
+                }}</li>
             </ul>
           </div>
           <div class="categorySelected">
-            <h3 class="subtitle">{{ selectedCategoryName }}</h3>
+            <span class="subtitle body3">{{ selectedCategoryName }}</span>
           </div>
-          <div class="categorySortButton" @click="toggleSortDropdown">
-            <h3 class="subtitle">{{ sortOption === 'time' ? '최신 순' : sortOption === 'oldest' ? '오래된 순' : '좋아요 순' }}</h3>
+        </div>
+        <div class="flex-row-center">
+          <!-- 정렬 -->
+          <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
+            <span class="subtitle body3">{{ sortOption === 'time' ? '최신 순' : sortOption === 'oldest' ? '오래된 순' : '좋아요 순'
+              }}</span>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
               <p @click="selectSortOption('time')">최신 순</p>
@@ -25,22 +29,23 @@
               <p @click="selectSortOption('likes')">좋아요 순</p>
             </div>
           </div>
+          <!-- 글 작성 버튼 -->
+          <div class="communityCreate flex-row-center body3" @click.prevent="checkLogin">글 작성</div>
         </div>
       </div>
+      <!-- 검색 -->
       <div class="communityRow2">
         <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
-        <div class="communityCreate">
-          <a @click.prevent="checkLogin">글 작성</a>
-        </div>
       </div>
-      <div>
-        <ul class="communityList">
-          <li class="communitys" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
+      <!-- 게시물 목록 -->
+      <div class="communityList">
+        <ul>
+          <li class="communitys flex-left" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
             @click="goToDetail(item.id)">
             {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}
           </li>
         </ul>
-        <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
+        <span v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</span>
         <div class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
@@ -187,29 +192,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.communityList {
+ul {
   list-style: none;
+  padding: 0;
+}
+
+.communityList {
+  margin-top: 5px;
+  padding: 5px;
 }
 
 .community {
-  align-items: center;
-  height: 40px;
-  width: 100%;
+  height: auto;
+  width: 650px;
+  min-width: 400px;
 }
 
 .communitys {
-  display: flex;
-  align-items: center;
   height: 40px;
   width: 100%;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 23px 15px;
   cursor: pointer;
 }
 
 .communitys:hover {
-  background-color: lightgray;
+  background-color: $HOVER-COLOR;
 }
 
 .communityTitle {
@@ -226,47 +233,41 @@ export default {
   background-color: lightgray;
 }
 
+.categorySelected {
+  margin-left: -30px;
+}
+
 .communityRow1 {
-  position: relative;
-  display: flex;
-  gap: 0px 14px;
-  margin: 12px;
+  margin-top: 40px;
+  width: 100%;
 }
 
 .communityRow2 {
-  display: flex;
-  align-items: center;
-  margin: 20px;
+  margin: 15px 0px 0px 12px;
 }
 
 .communityCreate {
-  padding: 10px;
-  width: 80px;
-  height: 40px;
-  text-align: center;
-  border-radius: 10px;
-  background-color: #EEF1F6;
+  margin-left: 20px; 
+  padding: 5px 8px;
+  border-radius: 5px;
   cursor: pointer;
+  border: 1px solid rgb(178, 178, 178);
+  box-shadow: none;
+  color: #000;
+  background-color: $MAIN-COLOR-SKYBLUE;
 }
 
-.communityCreate>a {
-  text-decoration: none;
-  color: black;
+.communityCreate:hover {
+  background-color: $HOVER-COLOR;
 }
 
 .categorylist {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 50px;
   height: 40px;
   border-radius: 10px;
-  background-color: #EEF1F6;
 }
 
 .categoryButton {
-  display: flex;
-  align-items: center;
   gap: 30px;
 }
 
@@ -347,9 +348,17 @@ export default {
 }
 
 .communitySearch {
-  background-color: #EEF1F6;
-  margin: 5px;
+  background-color: #ffffff;
+  height: 35px;
+  width: 100%;
   padding: 5px;
-  border-radius: 10px;
+  padding-bottom: 10px;
+  border: none;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  outline: none;
+}
+
+.communitySearch:focus {
+  border-bottom: 1px solid rgb(178, 178, 178);
 }
 </style>
