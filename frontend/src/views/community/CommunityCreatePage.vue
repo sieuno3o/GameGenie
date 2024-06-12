@@ -2,9 +2,11 @@
   <div class="community-create-container">
     <span class="createHeading heading1">게시글 작성</span>
     <form @submit.prevent="submitForm" class="formBox">
+      <!-- 필수 입력 항목 안내 -->
+      <p class="requiredNotice">* 필수 입력 항목</p>
       <!-- 카테고리 -->
       <div class="form-group">
-        <label for="category">카테고리</label>
+        <label for="category">카테고리 <span class="required">*</span></label>
         <select id="category" v-model="form.category" required>
           <option disabled value="">카테고리를 선택해 주세요</option>
           <option v-for="option in categories" :key="option.key" :value="option.key">
@@ -14,19 +16,14 @@
       </div>
       <!-- 제목 -->
       <div class="form-group">
-        <label for="title">제목</label>
+        <label for="title">제목 <span class="required">*</span></label>
         <input type="text" id="title" v-model="form.title" required>
       </div>
       <!-- 내용 -->
       <div class="form-group">
-        <label for="content">내용</label>
+        <label for="content">내용 <span class="required">*</span></label>
         <textarea id="content" v-model="form.content" rows="10" required></textarea>
       </div>
-      <!-- 링크 -->
-      <!-- <div class="form-group">
-        <label for="url">URL</label>
-        <input type="url" id="url" v-model="form.url">
-      </div> -->
       <!-- 이미지 파일 -->
       <div class="form-group">
         <label for="image">이미지 파일</label>
@@ -49,7 +46,6 @@ export default {
         title: '',
         category: '',
         content: '',
-        url: '',
         image: null
       },
       categories: []
@@ -73,7 +69,6 @@ export default {
       formData.append('title', this.form.title);
       formData.append('category', this.form.category);
       formData.append('content', this.form.content);
-      formData.append('url', this.form.url);
       if (this.form.image) {
         formData.append('image', this.form.image);
       }
@@ -121,8 +116,16 @@ label {
   color: #333;
 }
 
+.required {
+  color: red;
+}
+
+.requiredNotice {
+  color: red;
+  font-size: 14px;
+}
+
 input[type="text"],
-input[type="url"],
 textarea,
 select {
   width: 100%;
@@ -144,7 +147,7 @@ input[type="file"] {
 
 .createButton {
   border: 2px solid #ccc;
-  border-radius: 5px; 
+  border-radius: 5px;
   cursor: pointer;
   width: 120px;
   height: 53px;
