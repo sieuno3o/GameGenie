@@ -20,13 +20,14 @@
         <div class="flex-row-center">
           <!-- 정렬 -->
           <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
-            <span class="subtitle body3">{{ sortOption === 'time' ? '최신 순' : sortOption === 'oldest' ? '오래된 순' : '좋아요 순'
+            <span class="subtitle body3">{{ sortOptionText
               }}</span>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
               <p @click="selectSortOption('time')">최신 순</p>
               <p @click="selectSortOption('oldest')">오래된 순</p>
               <p @click="selectSortOption('likes')">좋아요 순</p>
+              <p @click="selectSortOption('views')">조회수 순</p>
             </div>
           </div>
           <!-- 글 작성 버튼 -->
@@ -38,11 +39,11 @@
         <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
       </div>
       <!-- 게시물 목록 -->
-      <div class="communityList">
-        <ul>
-          <li class="communitys flex-left" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
-            @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}
+      <div>
+        <ul class="communityList">
+          <li class="communitys flex-left" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
+            {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}, 조회수: {{
+            item.view_count }}
           </li>
         </ul>
         <span v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</span>
@@ -68,10 +69,10 @@ export default {
       likedCommunities: [],
       categories: [],
       showDropdown: false,
+      showSortDropdown: false,
       query: '',
       selectedCategory: 'all',
       selectedCategoryName: '카테고리를 선택하세요',
-      showSortDropdown: false,
       sortOption: 'time',
       currentPage: 1,
       totalPages: 0,
@@ -79,6 +80,20 @@ export default {
     };
   },
   computed: {
+    sortOptionText() {
+      switch (this.sortOption) {
+        case 'time':
+          return '최신 순';
+        case 'oldest':
+          return '오래된 순';
+        case 'likes':
+          return '좋아요 순';
+        case 'views':
+          return '조회수 순';
+        default:
+          return '정렬';
+      }
+    },
     sortedAndFilteredCommunityList() {
       let filteredList = [...this.communityList];
 
@@ -102,6 +117,8 @@ export default {
         filteredList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       } else if (this.sortOption === 'likes') {
         filteredList.sort((a, b) => b.community_like.length - a.community_like.length);
+      } else if (this.sortOption === 'views') {
+        filteredList.sort((a, b) => b.view_count - a.view_count);
       }
 
       return filteredList;
@@ -170,14 +187,13 @@ export default {
       this.selectedCategory = category.key;
       this.selectedCategoryName = category.value;
       this.showDropdown = false;
-      console.log('선택한 카테고리:', category);
     },
     toggleSortDropdown() {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
       this.sortOption = option;
-      this.showSortDropdown = false;
+      this.showSortDropdown = false; // 드롭다운 닫기
     },
     checkLogin() {
       if (!localStorage.getItem('access')) {

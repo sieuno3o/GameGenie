@@ -4,6 +4,7 @@
     <h3>카테고리 : {{ communityItem.category }}</h3>
     <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
     <h3>작성자 : {{ communityItem.author_nickname }}</h3>
+    <h3>조회수 : {{ communityItem.view_count }}</h3> <!-- 조회수 표시 추가 -->
     <div v-if="communityItem.image">
       <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지">
     </div>

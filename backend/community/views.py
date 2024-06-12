@@ -52,13 +52,14 @@ class CommunityCreate(APIView):
 class CommunityDetail(APIView):
     def get(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
+        community.view_count += 1  # 조회수 증가
+        community.save()
         serializer = CommunitySerializer(community)
         return Response(serializer.data)
 
     def patch(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
-        serializer = CommunitySerializer(
-            community, data=request.data, partial=True)
+        serializer = CommunitySerializer(community, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
