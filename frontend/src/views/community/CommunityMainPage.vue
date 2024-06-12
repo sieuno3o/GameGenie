@@ -14,13 +14,13 @@
             </ul>
           </div>
           <div class="categorySelected">
-            <span class="subtitle body3">{{ selectedCategoryName }}</span>
+            <span class="body3">{{ selectedCategoryName }}</span>
           </div>
         </div>
         <!-- 정렬 -->
         <div class="flex-row-center">
           <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
-            <span class="subtitle body3">{{ sortOptionText }}</span>
+            <span class="body3">{{ sortOptionText }}</span>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
               <p @click="selectSortOption('time')">최신 순</p>
@@ -39,18 +39,24 @@
         <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
       </div>
       <!-- 게시물 목록 -->
-      <div>
-        <div class="communityList">
-          <span class="communitys" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
-            <span>
+      <div class="communityList">
+        <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
+          @click="goToDetail(item.id)">
+          <div class="communityListLeft">
+            <span class="communityListTitle">
               {{ item.title }}
             </span>
-            <span>
-              작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}, 조회수: {{item.view_count }}
+            <span class="communityListInfo">
+              <span>{{ item.author_nickname }}</span>
+              <span class="communityListInfoContour">|</span>
+              <span>조회수 {{ item.view_count }}</span>
+              <span class="communityListInfoContour">|</span>
+              <span>작성자가 선택한 카테고리 표시</span>
             </span>
-          </span>
-        </div>
-        <span v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</span>
+          </div>
+          <span>좋아요: {{ item.community_like.length }}</span>
+        </span>
+        <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
         <div class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
@@ -217,32 +223,23 @@ ul {
   padding: 0;
 }
 
-.communityList {
-  border-right: 1px solid rgb(178, 178, 178);
-  border-left: 1px solid rgb(178, 178, 178);
-}
-
 .community {
   height: auto;
-  width: 650px;
+  width: 55%;
   min-width: 400px;
 }
 
 .communitys {
-  border-bottom: 1px solid rgb(178, 178, 178);
-  display: flex;
-  align-items: left;
-  flex-direction: column;
-  justify-content: center;
   cursor: pointer;
-  height: 70px;
   width: 100%;
-  padding: 10px 15px;
-
+  padding: 20px 20px;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  border-right: 1px solid rgb(178, 178, 178);
+  border-left: 1px solid rgb(178, 178, 178);
 }
 
 .communitys:hover {
-  background-color: $HOVER-COLOR;
+  background-color: rgb(246, 246, 246);
 }
 
 .communityTitle {
@@ -299,10 +296,6 @@ ul {
   gap: 30px;
 }
 
-.subtitle {
-  font-size: 16px;
-}
-
 .searchIcon {
   width: 17px;
   cursor: pointer;
@@ -350,19 +343,20 @@ ul {
 .sortDropdown {
   display: block;
   position: absolute;
-  right: -100px;
+  margin-top: 200px;
   background-color: #f9f9f9;
-  min-width: 100px;
+  min-width: 90px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
 .sortDropdown p {
+  margin: 0;
+  cursor: pointer;
   color: black;
-  margin: 10px;
+  padding: 10px;
   text-decoration: none;
   display: block;
-  cursor: pointer;
 }
 
 .sortDropdown p:hover {
@@ -390,5 +384,34 @@ ul {
   padding: 5px 5px 10px 5px;
   border: none;
   outline: none;
+}
+
+.communityListTitle {
+  font-size: 20px;
+}
+
+.communityListInfo {
+  margin-top: 2px;
+  margin-left: 1px;
+  font-size: 15px;
+  font-weight: bold;
+  color: rgb(164, 164, 164);
+}
+
+.communityListLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+
+.communityListInfoContour {
+  margin: 0px 8px;
+  font-size: 13px;
+  color: rgb(200, 200, 200)
+}
+
+.emptyCommunity {
+  width: 100%;
+  margin: 10px;
 }
 </style>
