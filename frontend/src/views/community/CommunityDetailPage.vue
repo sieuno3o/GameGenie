@@ -40,28 +40,29 @@
         </div>
       </div>
     </div>
-    <div class="commentsList">
-      <h2>댓글</h2>
-      <div v-if="comments && comments.length > 0" class="commentBox">
-        <div v-for="comment in comments" :key="comment.id" class="comment">
-          <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
-          <div>
-            <h2><strong>{{ comment.author_nickname }}</strong></h2>
-            <span>{{ formatDate(comment.created_at) }}</span>
-            <p>{{ comment.comments }}</p>
-            <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
-            <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
-          </div>
+    <!-- 댓글 표시 영역 -->
+    <span class="commentTitle flex-left">댓글 (개수)개</span>
+    <div v-if="comments && comments.length > 0" class="commentBox">
+      <div v-for="comment in comments" :key="comment.id" class="comment">
+        <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
+        <div class="flex-row">
+          <span><strong>{{ comment.author_nickname }}</strong></span>
+          <span>{{ formatDate(comment.created_at) }}</span>
+          <p>{{ comment.comments }}</p>
+          <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
+          <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
         </div>
       </div>
-      <div v-if="isLoggedIn">
-        <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
-        <v-btn @click="addComment">댓글 달기</v-btn>
-      </div>
-      <div v-else>
-        <p>로그인 후 댓글을 작성할 수 있습니다.</p>
-      </div>
     </div>
+    <!-- 댓글 작성 -->
+    <div v-if="isLoggedIn">
+      <v-textarea v-model="newComment" label="댓글 작성"></v-textarea>
+      <v-btn @click="addComment">댓글 달기</v-btn>
+    </div>
+    <div v-else>
+      <span>로그인 후 댓글을 작성할 수 있습니다.</span>
+    </div>
+    <!-- 댓글 수정 모달 -->
     <v-dialog v-model="showEditCommentModal" persistent max-width="600px">
       <v-card>
         <v-card-title>
@@ -357,7 +358,6 @@ export default {
   padding: 20px;
   border-radius: 8px;
   white-space: pre-line;
-  /* 줄바꿈을 유지 */
 }
 
 .actions {
@@ -375,23 +375,17 @@ export default {
   margin: 10px;
 }
 
-.commentsList>h2 {
+.commentsList>span {
   margin: 50px;
-}
-
-.commentBox {
-  display: grid;
-  justify-content: center;
 }
 
 .comment {
   display: flex;
   background-color: #EEF1F6;
   border-radius: 15px;
-  margin: 15px;
   width: 600px;
   align-items: center;
-  padding: 10px;
+  padding: 20px;
 }
 
 .commentProfileImage {
@@ -437,5 +431,11 @@ export default {
   color: black;
 }
 
+.commentTitle {
+  margin-top: 10%; 
+}
 
+.comment {
+  width: 100%;
+}
 </style>
