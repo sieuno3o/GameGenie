@@ -28,7 +28,9 @@
     <span class="communityItemContent body3 flex-left">{{ communityItem.content }}</span>
     <!-- 좋아요 -->
     <div class="likeRow">
-      <button class="likeButton" @click="toggleLike">♥</button>
+      <button class="likeButton" :class="{ liked: isLiked }" @click="toggleLike">
+        ♥
+      </button>
       <span class="likesCount">{{ likesCount }}</span>
     </div>
     <!-- 버튼 -->
@@ -128,6 +130,7 @@ export default {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
         this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0; // 좋아요 숫자 설정
+        this.isLiked = this.communityItem.community_like.some(like => like.user_id === this.userId);
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -187,7 +190,7 @@ export default {
         });
         if (response.data && typeof response.data.likes_count !== 'undefined') {
           this.likesCount = response.data.likes_count;
-          this.isLiked = response.data.liked;
+          this.isLiked = response.data.liked; // Update the isLiked state based on the response
         } else {
           console.error("Invalid response data", response.data);
         }
@@ -376,10 +379,17 @@ export default {
 }
 
 .likeButton {
-  color: #ff7171;
+  color: #d3d3d3;
   height: 30px;
   font-size: 25px;
   text-align: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.likeButton.liked {
+  color: #ff7171;
 }
 
 .content {
@@ -430,12 +440,13 @@ export default {
 }
 
 .communityItemImg {
-  margin: 30px 0;
+  margin-top: 30px;
   height: 300px;
   width: auto;
 }
 
 .communityItemContent {
+  margin-top: 30px;
   height: auto;
   line-height: 1.7;
 }
@@ -446,7 +457,8 @@ export default {
   color: rgb(200, 200, 200)
 }
 
-.communityItemDeatil, .likesCount {
+.communityItemDeatil,
+.likesCount {
   font-size: 15px;
   font-weight: bold;
   color: rgb(164, 164, 164);
@@ -461,4 +473,6 @@ export default {
 .likesCount {
   color: black;
 }
+
+
 </style>
