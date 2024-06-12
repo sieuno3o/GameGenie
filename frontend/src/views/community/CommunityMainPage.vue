@@ -1,23 +1,26 @@
 <template>
   <div class="community flex-col">
-    <span class="communityTitle heading1 flex-center">커뮤니티</span>
-    <img class="banner" src="" alt="배너 사진">
+    <!-- <img class="banner" src="" alt="배너 사진"> -->
     <div class="communityMain">
-      <div class="communityRow1">
-        <div class="categoryButton">
-          <div class="categorylist">
+      <!-- 카테고리 -->
+      <div class="communityRow1 flex-between">
+        <div class="categoryButton flex-row-center">
+          <div class="categorylist flex-row-center">
             <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
               @click="toggleDropdown" />
             <ul v-if="showDropdown" class="categoryDropdown">
               <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value
-              }}</li>
+                }}</li>
             </ul>
           </div>
           <div class="categorySelected">
-            <h3 class="subtitle">{{ selectedCategoryName }}</h3>
+            <span class="body3">{{ selectedCategoryName }}</span>
           </div>
-          <div class="categorySortButton" @click="toggleSortDropdown">
-            <h3 class="subtitle">{{ sortOptionText }}</h3>
+        </div>
+        <!-- 정렬 -->
+        <div class="flex-row-center">
+          <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
+            <span class="body3">{{ sortOptionText }}</span>
             <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
             <div v-if="showSortDropdown" class="sortDropdown">
               <p @click="selectSortOption('time')">최신 순</p>
@@ -26,23 +29,38 @@
               <p @click="selectSortOption('views')">조회수 순</p>
             </div>
           </div>
+          <!-- 글 작성 버튼 -->
+          <div class="communityCreate flex-row-center button2" @click.prevent="checkLogin">글 작성</div>
         </div>
       </div>
-      <div class="communityRow2">
+      <!-- 검색 -->
+      <div class="communityRow2 flex-row-center">
+        <img src="../../assets/image/searchIcon.png" class="searchIcon">
         <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
-        <div class="communityCreate">
-          <a @click.prevent="checkLogin">글 작성</a>
-        </div>
       </div>
-      <div>
-        <ul class="communityList">
-          <li class="communitys" v-for="item in currentPageCommunities" :key="item.id" @click="goToDetail(item.id)">
-            {{ item.title }}, 작성자: {{ item.author_nickname }}, 좋아요: {{ item.community_like.length }}, 조회수: {{
-              item.view_count }}
-          </li>
-        </ul>
-        <p v-if="!sortedAndFilteredCommunityList.length">커뮤니티에 게시물이 없습니다.</p>
-        <div class="pagination">
+      <!-- 게시물 목록 -->
+      <div class="communityList">
+        <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
+          @click="goToDetail(item.id)">
+          <div class="communityListLeft">
+            <span class="communityListTitle">
+              {{ item.title }}
+            </span>
+            <span class="communityListInfo">
+              <span>{{ item.author_nickname }}</span>
+              <span class="communityListInfoContour">|</span>
+              <span>조회수 {{ item.view_count }}</span>
+              <span class="communityListInfoContour">|</span>
+              <span>작성자가 선택한 카테고리 표시</span>
+            </span>
+          </div>
+          <div>
+            <span>{{ item.community_like.length }}</span>
+            <span style="margin-left: 4px; color: #ff7171;">♥</span>
+          </div>
+        </span>
+        <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
+        <div v-if="sortedAndFilteredCommunityList.length" class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
             :class="{ active: currentPage === page }">{{ page }}</button>
@@ -203,29 +221,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.communityList {
+ul {
   list-style: none;
+  padding: 0;
 }
 
 .community {
-  align-items: center;
-  height: 40px;
-  width: 100%;
+  height: auto;
+  width: 55%;
+  min-width: 400px;
 }
 
 .communitys {
-  display: flex;
-  align-items: center;
-  height: 40px;
-  width: 100%;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 10px;
   cursor: pointer;
+  width: 100%;
+  padding: 20px 20px;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  border-right: 1px solid rgb(178, 178, 178);
+  border-left: 1px solid rgb(178, 178, 178);
 }
 
 .communitys:hover {
-  background-color: lightgray;
+  background-color: rgb(246, 246, 246);
 }
 
 .communityTitle {
@@ -242,52 +259,51 @@ export default {
   background-color: lightgray;
 }
 
+.categorySelected {
+  margin-left: -40px;
+}
+
 .communityRow1 {
-  position: relative;
-  display: flex;
-  gap: 0px 14px;
-  margin: 12px;
+  margin-top: 40px;
+  width: 100%;
 }
 
 .communityRow2 {
-  display: flex;
-  align-items: center;
-  margin: 20px;
+  margin-top: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgb(178, 178, 178);
 }
 
 .communityCreate {
-  padding: 10px;
-  width: 80px;
-  height: 40px;
-  text-align: center;
-  border-radius: 10px;
-  background-color: #EEF1F6;
+  margin-left: 20px;
+  padding: 6px 8px;
+  border-radius: 5px;
   cursor: pointer;
+  border: 1px solid rgb(178, 178, 178);
+  box-shadow: none;
+  color: #000;
+  background-color: $MAIN-COLOR-SKYBLUE;
 }
 
-.communityCreate>a {
-  text-decoration: none;
-  color: black;
+.communityCreate:hover {
+  background-color: $HOVER-COLOR;
 }
 
 .categorylist {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 50px;
   height: 40px;
   border-radius: 10px;
-  background-color: #EEF1F6;
 }
 
 .categoryButton {
-  display: flex;
-  align-items: center;
   gap: 30px;
 }
 
-.subtitle {
-  font-size: 16px;
+.searchIcon {
+  width: 17px;
+  cursor: pointer;
+  margin-bottom: 5px;
+  margin-right: 4px;
 }
 
 .categorySortButton {
@@ -298,6 +314,7 @@ export default {
 .hamburgericon {
   width: 25px;
   height: 25px;
+  margin-left: -30px;
 }
 
 .categoryDropdown {
@@ -329,19 +346,20 @@ export default {
 .sortDropdown {
   display: block;
   position: absolute;
-  right: -100px;
+  margin-top: 200px;
   background-color: #f9f9f9;
-  min-width: 100px;
+  min-width: 90px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
 .sortDropdown p {
+  margin: 0;
+  cursor: pointer;
   color: black;
-  margin: 10px;
+  padding: 10px;
   text-decoration: none;
   display: block;
-  cursor: pointer;
 }
 
 .sortDropdown p:hover {
@@ -363,8 +381,40 @@ export default {
 }
 
 .communitySearch {
-  background-color: #EEF1F6;
-  margin: 5px;
-  padding: 5px;
-  border-radius: 10px;
-}</style>
+  background-color: #ffffff;
+  height: 35px;
+  width: 100%;
+  padding: 5px 5px 10px 5px;
+  border: none;
+  outline: none;
+}
+
+.communityListTitle {
+  font-size: 20px;
+}
+
+.communityListInfo {
+  margin-top: 2px;
+  margin-left: 1px;
+  font-size: 15px;
+  font-weight: bold;
+  color: rgb(164, 164, 164);
+}
+
+.communityListLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+
+.communityListInfoContour {
+  margin: 0px 8px;
+  font-size: 13px;
+  color: rgb(200, 200, 200)
+}
+
+.emptyCommunity {
+  width: 100%;
+  margin: 10px;
+}
+</style>
