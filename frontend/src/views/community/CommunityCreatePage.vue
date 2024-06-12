@@ -23,10 +23,10 @@
         <textarea id="content" v-model="form.content" rows="10" required></textarea>
       </div>
       <!-- 링크 -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="url">URL</label>
         <input type="url" id="url" v-model="form.url">
-      </div>
+      </div> -->
       <!-- 이미지 파일 -->
       <div class="form-group">
         <label for="image">이미지 파일</label>
