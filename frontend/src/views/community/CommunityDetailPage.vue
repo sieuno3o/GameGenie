@@ -1,49 +1,44 @@
 <template>
   <div class="communityProfile" v-if="communityItem">
-    <h1>{{ communityItem.title }}</h1>
-    <h3>카테고리 : {{ getCategoryName(communityItem.category) }}</h3> <!-- 한글 카테고리 표시 -->
-    <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
-    <h3>작성자 : {{ communityItem.author_nickname }}</h3>
-    <h3>조회수 : {{ communityItem.view_count }}</h3> <!-- 조회수 표시 추가 -->
-    <div v-if="communityItem.image">
-      <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지">
+    <!-- 제목 부분 -->
+    <div>
+      <div>
+        <span class="communityItemTitle heading1">{{ communityItem.title }}</span>
+      </div>
+      <div class="flex-between communityItemBox">
+        <div class="flex-center">
+          <span class="communityItemDeatil">카테고리 {{ getCategoryName(communityItem.category) }}</span>
+          <span class="communityListInfoContour">|</span>
+          <span class="communityItemDeatil">작성자 {{ communityItem.author_nickname }}</span>
+          <span class="communityListInfoContour">|</span>
+          <span class="communityItemDeatil">작성 일 {{ formatDate(communityItem.created_at) }}</span>
+        </div>
+        <div class="flex-center">
+          <span class="communityItemDeatil">조회 수 {{ communityItem.view_count }}</span>
+          <span class="communityListInfoContour">|</span>
+          <span class="communityItemDeatil">좋아요 수 {{ likesCount }}</span>
+          <!-- <span class="communityItemDeatil">댓글 수 {{ commentCount }}</span> -->
+        </div>
+      </div>
     </div>
-    <p>{{ communityItem.content }}</p>
+    <!-- 이미지 -->
+    <div v-if="communityItem.image"><img :src="getImageUrl(communityItem.image)" alt="게시글 이미지" class="communityItemImg">
+    </div>
+    <!-- 내용 -->
+    <span class="communityItemContent body3 flex-left">{{ communityItem.content }}</span>
+    <!-- 좋아요 -->
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
-      <h3>{{ likesCount }}</h3>
+      <span class="likesCount">{{ likesCount }}</span>
     </div>
+    <!-- 버튼 -->
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
       <div v-if="communityItem.author_id === userId" class="editDeleteButtons">
-        <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
-        <button class="deleteButton" @click="deletePost">삭제하기</button>
+        <v-btn class="detailButton" @click="showEditModal = true">수정하기</v-btn>
+        <button class="detailButton" @click="deletePost">삭제하기</button>
       </div>
     </div>
-    <v-dialog v-model="showEditModal" persistent max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">게시글 수정</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field v-model="editData.title" label="제목" />
-              </v-col>
-              <v-col cols="12">
-                <v-textarea v-model="editData.content" label="내용" />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="showEditModal = false">취소</v-btn>
-          <v-btn color="blue darken-1" text @click="updatePost">저장</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <div class="commentsList">
       <h2>댓글</h2>
       <div v-if="comments && comments.length > 0" class="commentBox">
@@ -51,7 +46,7 @@
           <img :src="comment.author_profile_image || defaultProfileImage" alt="프로필 이미지" class="commentProfileImage" />
           <div>
             <h2><strong>{{ comment.author_nickname }}</strong></h2>
-            <h3>{{ formatDate(comment.created_at) }}</h3>
+            <span>{{ formatDate(comment.created_at) }}</span>
             <p>{{ comment.comments }}</p>
             <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)">수정</v-btn>
             <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
@@ -339,12 +334,11 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
 .communityProfile {
-  width: 100%;
+  width: 70%;
   font-size: 30px;
   margin: 40px;
-  text-align: center;
 }
 
 .detailButtonList {
@@ -372,40 +366,8 @@ export default {
   color: black;
 }
 
-.detailvButton {
-  width: 110px !important;
-  height: 50px !important;
-  padding: 10px !important;
-  font-size: 16px !important;
-  border-radius: 10px !important;
-  background-color: white !important;
-  border: 0.3px solid rgba(0, 0, 0, 0.3) !important;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3) !important;
-  text-decoration: none !important;
-  color: black !important;
-}
-
-.deleteButton {
-  width: 110px;
-  height: 50px;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 10px;
-  background-color: #FF9393;
-  border: 0.3px solid rgba(0, 0, 0, 0.3);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
-  text-decoration: none;
-  color: black;
-}
-
-h1 {
-  font-size: 2em;
-  margin-bottom: 10px;
-}
-
-h3 {
-  font-size: 14px;
-  text-align: center;
+.communityItemTitle {
+  font-size: 45px;
 }
 
 .likeRow {
@@ -465,5 +427,38 @@ h3 {
   height: 50px;
   border-radius: 50%;
   margin-right: 15px;
+}
+
+.communityItemImg {
+  margin: 30px 0;
+  height: 300px;
+  width: auto;
+}
+
+.communityItemContent {
+  height: auto;
+  line-height: 1.7;
+}
+
+.communityListInfoContour {
+  margin: 0px 8px;
+  font-size: 13px;
+  color: rgb(200, 200, 200)
+}
+
+.communityItemDeatil, .likesCount {
+  font-size: 15px;
+  font-weight: bold;
+  color: rgb(164, 164, 164);
+  margin: 0;
+  font-size: 14px;
+}
+
+.communityItemBox {
+  margin-top: 5px;
+}
+
+.likesCount {
+  color: black;
 }
 </style>
