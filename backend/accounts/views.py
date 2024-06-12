@@ -14,7 +14,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class CreateView(APIView):
     def post(self, request):
         try:
@@ -46,6 +45,7 @@ class CreateView(APIView):
         except Exception as e:
             logger.error(f'Error during user creation: {str(e)}')
             return Response({'message': '서버 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class LogoutView(APIView):
@@ -80,6 +80,9 @@ class DeleteView(APIView):
         return Response({"message": "삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
 
+
+
+
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -99,7 +102,7 @@ class UserProfileView(APIView):
         user = request.user
         serializer = UserProfileSerializer(
             user, data=request.data, partial=True, context={'request': request})
-
+        
         if serializer.is_valid():
             email = request.data.get('email')
             if email and email != user.email:

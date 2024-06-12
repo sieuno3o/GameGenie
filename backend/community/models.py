@@ -86,12 +86,12 @@ class Community(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     link = models.URLField(blank=True, null=True)
-    community_like = models.ManyToManyField(
-        User, related_name='liked_communities', blank=True)
+    community_like = models.ManyToManyField(User, related_name='liked_communities', blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='community_images/', null=True, blank=True)
     video = models.FileField(upload_to='community_videos/', null=True, blank=True)
+    view_count = models.IntegerField(default=0)  # 조회수 필드 추가
 
     def like(self, user):
         self.community_like.add(user)
@@ -106,7 +106,6 @@ class Community(models.Model):
         return self.community_like.count()
 
     def communitylist_points(self):
-
         comments_count = self.comments.count()
         comments_count_point = 1 * comments_count
 
