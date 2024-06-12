@@ -8,6 +8,7 @@ class CommunitySerializer(serializers.ModelSerializer):
     author_nickname = serializers.CharField(source='author.nickname', read_only=True)
     author_id = serializers.IntegerField(source='author.id', read_only=True)
     communitylist_points = serializers.IntegerField(read_only=True)
+    view_count = serializers.IntegerField(read_only=True)  # 조회수 필드 추가
 
     class Meta:
         model = Community
