@@ -6,7 +6,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'created_at', 'nickname']
+        fields = ['id', 'username', 'email', 'password', 'created_at', 'nickname', 'profile_image']
         read_only_fields = ['created_at']
 
     def get_author(self, obj):
@@ -14,12 +14,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True, required=False, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
     email = serializers.EmailField(required=False)
-    profile_image = serializers.ImageField(source='profileImage', allow_null=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'nickname', 'profile_image']  # id 필드 추가
+        fields = ['id', 'username', 'email', 'password', 'nickname', 'profile_image']
         read_only_fields = ['username']

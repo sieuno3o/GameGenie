@@ -4,12 +4,17 @@
     <div class="profileInfoBox">
       <span class="titleText">프로필</span>
       <div class="userInfo" v-if="user">
-        <img :src="user.profileImage || defaultProfileImage" alt="Profile Image" class="profileImage"
-          @click="triggerProfileImageUpload" />
+        <img :src="profileImageUrl" alt="Profile Image" class="profileImage" @click="triggerProfileImageUpload" />
         <input type="file" ref="profileImageInput" @change="handleProfileImageChange" accept="image/*"
           style="display: none;" />
-        <div> <span class="body1 userName">아이디</span> <span class="body1">{{ user.username }}</span> </div>
-        <div> <span class="body1 userNickName">닉네임</span> <span class="body1">{{ user.nickname }}</span> </div>
+        <div>
+          <span class="body1 userName">아이디</span>
+          <span class="body1">{{ user.username }}</span>
+        </div>
+        <div>
+          <span class="body1 userNickName">닉네임</span>
+          <span class="body1">{{ user.nickname }}</span>
+        </div>
         <span class="body1 userEmail">{{ user.email }}</span>
         <v-btn @click="showEditModal = true" class="editButton">정보 수정</v-btn>
       </div>
@@ -95,7 +100,7 @@ export default {
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
-        profileImage: null
+        profile_image: null
       },
       updateError: '',
       currentPage: 1,
@@ -107,8 +112,7 @@ export default {
     paginatedFormattedFavorites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      const paginatedFavorites = this.favorites.slice(start, end);
-      return paginatedFavorites.map(favorite => ({
+      return this.favorites.slice(start, end).map(favorite => ({
         image_url: favorite.game_image,
         name: favorite.game_name,
         review_summary: favorite.game_review,
@@ -119,6 +123,9 @@ export default {
     },
     pageCount() {
       return Math.ceil(this.favorites.length / this.itemsPerPage);
+    },
+    profileImageUrl() {
+      return this.user && this.user.profile_image ? this.getImageUrl(this.user.profile_image) : this.defaultProfileImage;
     }
   },
   async mounted() {
@@ -127,7 +134,7 @@ export default {
       if (accessToken) {
         console.log('Fetching user data...');
         const userResponse = await api.get('accounts/profile/', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` }
         });
         this.user = userResponse.data;
         this.editData.email = this.user.email;
@@ -136,10 +143,10 @@ export default {
 
         console.log('Fetching favorite games...');
         const favoritesResponse = await api.get('recommendations/favorites/', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` }
         });
         this.favorites = favoritesResponse.data;
-        console.log('Favorite games:', this.favorites); // 로그 추가
+        console.log('Favorite games:', this.favorites);
       } else {
         this.errorMessage = '로그인이 필요합니다.';
       }
@@ -154,13 +161,16 @@ export default {
     }
   },
   methods: {
+    getImageUrl(imagePath) {
+      return `http://localhost:8000${imagePath}`;
+    },
     triggerProfileImageUpload() {
       this.$refs.profileImageInput.click();
     },
     handleProfileImageChange(event) {
       const file = event.target.files[0];
       if (file) {
-        this.editData.profileImage = file;
+        this.editData.profile_image = file;
         this.updateProfileImage();
       }
     },
@@ -168,17 +178,23 @@ export default {
       try {
         const accessToken = localStorage.getItem('access');
         const formData = new FormData();
-        formData.append('profile_image', this.editData.profileImage);
+        formData.append('profile_image', this.editData.profile_image);
 
         const response = await api.patch('accounts/profile/', formData, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'multipart/form-data'
           }
         });
 
         if (response.status === 200) {
-          this.user.profileImage = URL.createObjectURL(this.editData.profileImage);
+          // 이 부분을 업데이트합니다.
+          const userResponse = await api.get('accounts/profile/', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          this.user = userResponse.data;
+          this.editData.email = this.user.email;
+          this.editData.nickname = this.user.nickname;
           alert('프로필 사진이 성공적으로 업데이트되었습니다.');
         } else {
           this.updateError = response.data.message || '프로필 사진 업데이트에 실패했습니다.';
@@ -189,7 +205,7 @@ export default {
       }
     },
     async updateProfile() {
-      const { email, nickname, currentPassword, newPassword, confirmPassword, profileImage } = this.editData;
+      const { email, nickname, currentPassword, newPassword, confirmPassword, profile_image } = this.editData;
       if (newPassword !== confirmPassword) {
         this.updateError = '새 비밀번호가 일치하지 않습니다.';
         return;
@@ -202,23 +218,24 @@ export default {
         formData.append('nickname', nickname);
         formData.append('old_password', currentPassword);
         formData.append('new_password', newPassword);
-        if (profileImage) {
-          formData.append('profile_image', profileImage);
+        if (profile_image) {
+          formData.append('profile_image', profile_image);
         }
 
         const response = await api.patch('accounts/profile/', formData, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'multipart/form-data'
           }
         });
 
         if (response.status === 200) {
-          this.user.email = email;
-          this.user.nickname = nickname;
-          if (profileImage) {
-            this.user.profileImage = URL.createObjectURL(profileImage);
-          }
+          const userResponse = await api.get('accounts/profile/', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          this.user = userResponse.data;
+          this.editData.email = this.user.email;
+          this.editData.nickname = this.user.nickname;
           this.showEditModal = false;
           this.editData.currentPassword = '';
           this.editData.newPassword = '';

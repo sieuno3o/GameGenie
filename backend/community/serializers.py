@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import Community, Comment, Reply
 from accounts.models import User
@@ -7,7 +6,7 @@ from accounts.models import User
 class CommunitySerializer(serializers.ModelSerializer):
     community_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author_nickname = serializers.CharField(source='author.nickname', read_only=True)
-    author_id = serializers.IntegerField(source='author.id', read_only=True)  # author_id 추가
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
     communitylist_points = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -18,8 +17,9 @@ class CommunitySerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     comments_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    author_nickname = serializers.CharField(source='author.nickname', read_only=True)  # 작성자 닉네임 추가
-    author_id = serializers.IntegerField(source='author.id', read_only=True)  # author_id 추가
+    author_nickname = serializers.CharField(source='author.nickname', read_only=True)
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
+    author_profile_image = serializers.ImageField(source='author.profile_image', read_only=True)  # 프로필 이미지 추가
     replies = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,8 +35,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReplySerializer(serializers.ModelSerializer):
     reply_likes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    author_nickname = serializers.CharField(source='author.nickname', read_only=True)  # 작성자 닉네임 추가
-    author_id = serializers.IntegerField(source='author.id', read_only=True)  # author_id 추가
+    author_nickname = serializers.CharField(source='author.nickname', read_only=True)
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
 
     class Meta:
         model = Reply

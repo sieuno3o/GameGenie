@@ -18,7 +18,7 @@
       <input v-model="nickname" type="text" class="signupInput button2" id="inputNickname" placeholder="닉네임">
     </div>
     <div class="profileImageBox flex-col-center">
-      <img :src="profileImage || defaultImage" class="profileImagePreview" />
+      <img :src="profileImagePreview || defaultImage" class="profileImagePreview" />
       <button @click="triggerFileInput" class="profileImageButton button2">📸 사진 업로드</button>
       <input type="file" ref="fileInput" @change="onImageChange" accept="image/*" class="profileImageInput">
     </div>
@@ -37,6 +37,7 @@ export default {
       email: '',
       nickname: '',
       profileImage: null,
+      profileImagePreview: null,
       defaultImage: require('../../assets/image/account/profileImgIcon.png'),
     };
   },
@@ -47,9 +48,10 @@ export default {
     onImageChange(event) {
       const file = event.target.files[0];
       if (file) {
+        this.profileImage = file; // 원본 파일 저장
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.profileImage = e.target.result;
+          this.profileImagePreview = e.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -62,7 +64,7 @@ export default {
         formData.append('email', this.email);
         formData.append('nickname', this.nickname);
         if (this.profileImage) {
-          formData.append('profile_image', this.profileImage);
+          formData.append('profile_image', this.profileImage); // 원본 파일 추가
         }
 
         const response = await api.post('accounts/create/', formData, {
