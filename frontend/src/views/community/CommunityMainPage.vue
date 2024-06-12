@@ -57,7 +57,7 @@
           <span>좋아요: {{ item.community_like.length }}</span>
         </span>
         <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
-        <div class="pagination">
+        <div v-if="sortedAndFilteredCommunityList.length" class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
             :class="{ active: currentPage === page }">{{ page }}</button>
@@ -272,7 +272,7 @@ ul {
 }
 
 .communityCreate {
-  margin-left: 20px; 
+  margin-left: 20px;
   padding: 6px 8px;
   border-radius: 5px;
   cursor: pointer;
