@@ -14,18 +14,56 @@
         </li>
       </ul>
     </div>
+
+    <!-- HTTPS 알림 모달 -->
+    <v-dialog v-model="showHttpsModal" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">보안 경고</span>
+        </v-card-title>
+        <v-card-text>
+          <p>개발단계라 https 사용이 어렵습니다. http로 접속해주세요.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="showHttpsModal = false">확인</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 사용법 안내 모달 -->
+    <v-dialog v-model="showGuideModal" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">게임 추천 기능 사용법</span>
+        </v-card-title>
+        <v-card-text>
+          <p>검색어를 입력하고 엔터 키를 누르거나 검색 아이콘을 클릭하여 게임을 추천받으세요.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="showGuideModal = false">확인</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import api from '../api';  // `api.js`에서 가져온 인스턴스 사용
+import api from '../api'; // `api.js`에서 가져온 인스턴스 사용
+import { mapState } from 'vuex';
 
 export default {
   data() {
     return {
       query: "",
       suggestions: [],
+      showHttpsModal: false,
+      showGuideModal: false
     };
+  },
+  computed: {
+    ...mapState(['user']),
   },
   methods: {
     fetchSuggestions() {
@@ -56,7 +94,22 @@ export default {
         this.$router.push({ path: '/recommendations', query: { user_input: this.query } });
       }
     },
+    checkHttps() {
+      if (window.location.protocol === 'https:') {
+        this.showHttpsModal = true;
+      }
+    },
+    showGuide() {
+      if (!localStorage.getItem('guideShown')) {
+        this.showGuideModal = true;
+        localStorage.setItem('guideShown', 'true');
+      }
+    }
   },
+  created() {
+    this.checkHttps();
+    this.showGuide();
+  }
 };
 </script>
 
@@ -119,6 +172,6 @@ export default {
 }
 
 .suggestions-list li:hover {
-  background-color: white;
+  background-color: #f0f0f0;
 }
 </style>

@@ -159,7 +159,7 @@ class CommentLike(generics.UpdateAPIView):
 class CommentsList(ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 10
+    pagination_class.page_size = 5
 
     def get_queryset(self):
         community = get_object_or_404(Community, pk=self.kwargs['community_pk'])
