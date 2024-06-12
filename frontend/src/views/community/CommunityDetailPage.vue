@@ -8,7 +8,7 @@
     <div v-if="communityItem.image">
       <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지">
     </div>
-    <p>{{ communityItem.content }}</p>
+    <p v-html="formatContent(communityItem.content)"></p>
     <div class="likeRow">
       <button class="likeButton" @click="toggleLike">♥</button>
       <h3>{{ likesCount }}</h3>
@@ -16,7 +16,7 @@
     <div class="detailButtonList">
       <button class="detailButton" @click="goToCommunity">목록으로</button>
       <div v-if="communityItem.author_id === userId" class="editDeleteButtons">
-        <v-btn class="detailvButton" color="primary" @click="showEditModal = true">수정하기</v-btn>
+        <v-btn class="detailvButton" color="primary" @click="editPost">수정하기</v-btn>
         <button class="deleteButton" @click="deletePost">삭제하기</button>
       </div>
     </div>
@@ -148,6 +148,9 @@ export default {
     getCategoryName(key) {
       const category = this.categories.find(category => category.key === key);
       return category ? category.value : '알 수 없음';
+    },
+    formatContent(content) {
+      return content.replace(/\n/g, '<br>');
     },
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -335,6 +338,9 @@ export default {
     goToCommunity() {
       this.$router.push('/community/');
     },
+    editPost() {
+      this.$router.push({ name: 'communityCreate', params: { id: this.communityItem.id } });
+    },
   }
 };
 </script>
@@ -424,6 +430,8 @@ h3 {
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 8px;
+  white-space: pre-line;
+  /* 줄바꿈을 유지 */
 }
 
 .actions {

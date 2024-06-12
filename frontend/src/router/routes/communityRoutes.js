@@ -20,12 +20,12 @@ const communityRoutes = [
         component: CommunityDetailPage,
       },
       {
-        path: "create",
+        path: "create/:id?",
         name: "communityCreate",
         component: CommunityCreatePage,
       },
     ],
-  }, 
-];  
+  },
+];
 
 export default communityRoutes;
