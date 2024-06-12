@@ -1,7 +1,7 @@
 <template>
   <div class="communityProfile" v-if="communityItem">
     <h1>{{ communityItem.title }}</h1>
-    <h3>카테고리 : {{ communityItem.category }}</h3>
+    <h3>카테고리 : {{ getCategoryName(communityItem.category) }}</h3> <!-- 한글 카테고리 표시 -->
     <h3>작성 일 : {{ formatDate(communityItem.created_at) }}</h3>
     <h3>작성자 : {{ communityItem.author_nickname }}</h3>
     <h3>조회수 : {{ communityItem.view_count }}</h3> <!-- 조회수 표시 추가 -->
@@ -116,7 +116,8 @@ export default {
       showEditCommentModal: false,
       errorMessage: '',
       defaultProfileImage: defaultProfileImage,
-      likesCount: 0 // 좋아요 숫자 변수 추가
+      likesCount: 0, // 좋아요 숫자 변수 추가
+      categories: [] // 카테고리 목록
     };
   },
   async created() {
@@ -124,6 +125,7 @@ export default {
     const id = this.$route.params.id;
     await this.fetchCommunityItem(id);
     await this.fetchComments(id);
+    await this.fetchCategories(); // 카테고리 목록 불러오기
   },
   methods: {
     async fetchCommunityItem(id) {
@@ -134,6 +136,18 @@ export default {
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
+    },
+    async fetchCategories() {
+      try {
+        const response = await api.get('community/categories/');
+        this.categories = response.data;
+      } catch (error) {
+        console.error('카테고리를 불러오는 중 오류가 발생했습니다:', error);
+      }
+    },
+    getCategoryName(key) {
+      const category = this.categories.find(category => category.key === key);
+      return category ? category.value : '알 수 없음';
     },
     formatDate(dateString) {
       const date = new Date(dateString);
