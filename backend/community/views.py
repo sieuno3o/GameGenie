@@ -16,6 +16,13 @@ from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
 
+class CommuityListPagination(PageNumberPagination):
+    page_size = 10
+
+class CommentsListPagination(PageNumberPagination):
+    page_size = 5
+
+
 
 class CommunityList(ListAPIView):
     queryset = Community.objects.all()
@@ -23,8 +30,7 @@ class CommunityList(ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering_fields = ['created_at', 'likes_count', 'views_count']
     search_fields = ['title', 'content', 'author__username']
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 10
+    pagination_class = CommuityListPagination
     ordering = ['-created_at']
 
     def get_queryset(self):
@@ -161,8 +167,7 @@ class CommentLike(generics.UpdateAPIView):
 
 class CommentsList(ListAPIView):
     serializer_class = CommentSerializer
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 5
+    pagination_class = CommentsListPagination
 
     def get_queryset(self):
         community = get_object_or_404(Community, pk=self.kwargs['community_pk'])
