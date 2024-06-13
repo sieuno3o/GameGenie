@@ -9,8 +9,9 @@
             <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
               @click="toggleDropdown" />
             <ul v-if="showDropdown" class="categoryDropdown">
-              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">{{ category.value
-              }}</li>
+              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">
+                {{ category.value }}
+              </li>
             </ul>
           </div>
           <div class="categorySelected">
@@ -52,10 +53,12 @@
               <span>조회수 {{ item.view_count }}</span>
               <span class="communityListInfoContour">|</span>
               <span>{{ getCategoryName(item.category) }}</span> <!-- 선택한 카테고리 표시 -->
+              <span class="communityListInfoContour">|</span>
+              <span>댓글 {{ item.comments_count }}</span> <!-- 댓글 수 표시 -->
             </span>
           </div>
           <div>
-            <span>{{ item.community_like.length }}</span>
+            <span>{{ item.community_like?.length || 0 }}</span>
             <span style="margin-left: 4px; color: #ff7171;">♥</span>
           </div>
         </span>
@@ -121,7 +124,7 @@ export default {
       filteredList = filteredList.map(item => {
         const user = this.accountsUsers.find(user => user.id === item.author);
         const author_nickname = user ? user.nickname : '알 수 없음';
-        return { ...item, author_nickname };
+        return { ...item, author_nickname, community_like: item.community_like || [] }; // community_like 필드가 정의되지 않은 경우 빈 배열 할당
       });
 
       if (this.sortOption === 'time') {
@@ -400,7 +403,7 @@ ul {
 .communityListInfo {
   margin-top: 2px;
   margin-left: 1px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
   color: rgb(164, 164, 164);
 }
