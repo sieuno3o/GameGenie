@@ -41,7 +41,7 @@
       </div>
     </div>
     <!-- 댓글 표시 영역 -->
-    <span class="commentTitle flex-left">댓글 (개수)개</span>
+    <span class="commentTitle flex-left">댓글 ({{ comments.length }})개</span>
     <div v-if="comments && comments.length > 0" class="commentBox">
       <div v-for="comment in comments" :key="comment.id" class="comment">
         <div class="flex-between" style="padding: 10px 0px;">
@@ -50,8 +50,7 @@
             <div class="flex-col">
               <div class="flex-row-center">
                 <span id="commentNickname" class="commentTextStyle body1">{{ comment.author_nickname }}</span>
-                <span id="commentDate" class="commentTextStyle body1">{{
-                  formatDate(comment.created_at) }}</span>
+                <span id="commentDate" class="commentTextStyle body1">{{ formatDate(comment.created_at) }}</span>
               </div>
               <span id="commentComments" class="commentTextStyle body1">{{ comment.comments }}</span>
             </div>
@@ -140,9 +139,6 @@ export default {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
         this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0; // 좋아요 숫자 설정
-
-        const likedItems = JSON.parse(localStorage.getItem('likedItems')) || {};
-        this.isLiked = likedItems[this.communityItem.id] || false; // 로컬 스토리지에서 좋아요 상태 가져오기
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -191,22 +187,27 @@ export default {
         }
       }
     },
-    toggleLike() {
+    async toggleLike() {
       if (!this.isLoggedIn) {
-        alert("로그인이 필요합니다.");
+        console.error("로그인이 필요합니다.");
         return;
       }
 
-      this.isLiked = !this.isLiked;
-      const likedItems = JSON.parse(localStorage.getItem('likedItems')) || {};
-      if (this.isLiked) {
-        likedItems[this.communityItem.id] = true;
-        this.likesCount += 1; // 좋아요 수 증가
-      } else {
-        delete likedItems[this.communityItem.id];
-        this.likesCount -= 1; // 좋아요 수 감소
+      try {
+        const response = await api.patch(`community/${this.communityItem.id}/like/`, null, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
+          }
+        });
+        if (response.data && typeof response.data.likes_count !== 'undefined') {
+          this.likesCount = response.data.likes_count;
+          this.isLiked = response.data.liked;
+        } else {
+          console.error("Invalid response data", response.data);
+        }
+      } catch (error) {
+        console.error("좋아요 처리 중 오류가 발생했습니다:", error);
       }
-      localStorage.setItem('likedItems', JSON.stringify(likedItems));
     },
     async fetchComments(id) {
       try {
@@ -218,93 +219,129 @@ export default {
       }
     },
     async addComment() {
-      if (!this.newComment.trim()) {
-        return;
-      }
-
+      if (this.newComment.trim() === '') return;
+      const id = this.$route.params.id;
       try {
-        const token = localStorage.getItem('access');
-        const response = await api.post(`community/${this.communityItem.id}/comments/`, {
-          comments: this.newComment,
+        await api.post(`community/${id}/comments/create/`, {
+          comments: this.newComment
         }, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-
-        if (response.status === 201) {
-          this.comments.push(response.data);
-          this.newComment = ''; // Clear the new comment input
-        }
+        await this.fetchComments(id);  // 댓글 목록을 다시 가져옴
+        this.newComment = '';
       } catch (error) {
-        console.error("댓글을 추가하는 중 오류가 발생했습니다:", error);
-        this.errorMessage = "댓글을 추가하는 중 오류가 발생했습니다.";
+        console.error("댓글 작성 중 오류가 발생했습니다:", error);
+        this.errorMessage = "댓글 작성 중 오류가 발생했습니다.";
       }
     },
-    async editComment(comment) {
-      this.editCommentData = {
-        id: comment.id,
-        comments: comment.comments,
-      };
+    editComment(comment) {
+      this.editCommentData.id = comment.id;
+      this.editCommentData.comments = comment.comments;
       this.showEditCommentModal = true;
     },
     async updateComment() {
+      const { id, comments } = this.editCommentData;
       try {
-        const token = localStorage.getItem('access');
-        await api.patch(`community/comments/${this.editCommentData.id}/`, {
-          comments: this.editCommentData.comments,
-        }, {
+        const response = await api.patch(`community/${this.communityItem.id}/comments/${id}/`, { comments }, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-
-        // Update the comment in the local comments array
-        const index = this.comments.findIndex(comment => comment.id === this.editCommentData.id);
-        if (index !== -1) {
-          this.comments[index].comments = this.editCommentData.comments;
+        if (response.status === 200) {
+          const updatedComment = this.comments.find(c => c.id === id);
+          if (updatedComment) {
+            updatedComment.comments = comments;
+          }
+          this.showEditCommentModal = false;
+          alert('댓글이 성공적으로 수정되었습니다.');
         }
-
-        // Hide the edit comment modal
-        this.showEditCommentModal = false;
       } catch (error) {
-        console.error("댓글을 수정하는 중 오류가 발생했습니다:", error);
-        this.errorMessage = "댓글을 수정하는 중 오류가 발생했습니다.";
+        console.error("댓글 업데이트 중 오류가 발생했습니다:", error);
+        alert('댓글 업데이트 중 오류가 발생했습니다.');
       }
     },
     async deleteComment(commentId) {
+      if (confirm('정말 삭제하시겠습니까?')) {
+        try {
+          await api.delete(`community/${this.communityItem.id}/comments/${commentId}/`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access')}`
+            }
+          });
+          this.comments = this.comments.filter(comment => comment.id !== commentId);
+          alert('댓글이 성공적으로 삭제되었습니다.');
+        } catch (error) {
+          console.error("댓글 삭제 중 오류가 발생했습니다:", error);
+          alert('댓글 삭제 중 오류가 발생했습니다.');
+        }
+      }
+    },
+    goBack() {
+      this.$router.push({ name: 'communityMain' });
+    },
+    async fetchData() {
       try {
-        const token = localStorage.getItem('access');
-        await api.delete(`community/comments/${commentId}/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const communityId = this.$route.params.id;
+        const accessToken = this.getAccessToken();
+        if (!accessToken) {
+          this.errorMessage = '로그인이 필요합니다.';
+          return;
+        }
+        const response = await api.get(`community/${communityId}/`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
+        this.communityItem = response.data;
+        this.editData.title = this.communityItem.title;
+        this.editData.content = this.communityItem.content;
+      } catch (error) {
+        console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
+        this.errorMessage = '게시글을 가져오는 중 오류가 발생했습니다.';
+      }
+    },
+    getAccessToken() {
+      return localStorage.getItem('access');
+    },
+    closeEditModal() {
+      this.showEditModal = false;
+    },
+    async updatePost() {
+      const { title, content } = this.editData;
+      try {
+        const communityId = this.$route.params.id;
+        const accessToken = this.getAccessToken();
+        const response = await api.patch(`community/${communityId}/`, {
+          title,
+          content,
+        }, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
         });
 
-        // Remove the comment from the local comments array
-        this.comments = this.comments.filter(comment => comment.id !== commentId);
+        if (response.status === 200) {
+          this.communityItem.title = title;
+          this.communityItem.content = content;
+          this.closeEditModal();
+          alert('게시글이 성공적으로 업데이트되었습니다.');
+        }
       } catch (error) {
-        console.error("댓글을 삭제하는 중 오류가 발생했습니다:", error);
-        this.errorMessage = "댓글을 삭제하는 중 오류가 발생했습니다.";
+        console.error('Error updating post:', error);
+        alert('게시글 업데이트 중 오류가 발생했습니다.');
       }
     },
     async deletePost() {
-      try {
-        const token = localStorage.getItem('access');
-        await api.delete(`community/${this.communityItem.id}/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        // Redirect to the community list page
-        this.$router.push('/community');
-      } catch (error) {
-        console.error("게시글을 삭제하는 중 오류가 발생했습니다:", error);
-        this.errorMessage = "게시글을 삭제하는 중 오류가 발생했습니다.";
+      if (confirm('정말 삭제하시겠습니까?')) {
+        try {
+          await api.delete(`community/${this.communityItem.id}/`);
+          this.$router.push({ name: 'communityMain' });
+        } catch (error) {
+          console.error('게시글 삭제 중 오류가 발생했습니다:', error);
+          alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+        }
       }
     },
     goToCommunity() {
-      this.$router.push('/community');
+      this.$router.push('/community/');
     },
     editPost() {
       this.$router.push({ name: 'communityCreate', params: { id: this.communityItem.id } });
@@ -322,7 +359,8 @@ export default {
 
 .detailButton {
   margin-left: 10px;
-  width: 80px; height: 35px;
+  width: 80px;
+  height: 35px;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
@@ -420,7 +458,7 @@ export default {
 }
 
 .commentTitle {
-  margin-top: 10%; 
+  margin-top: 10%;
 }
 
 .beforeLoginText {
@@ -447,5 +485,4 @@ export default {
 
 .commentAdd {
   height: 56px;
-}
-</style>
+}</style>
