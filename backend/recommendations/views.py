@@ -66,7 +66,7 @@ class GameViewSet(viewsets.ViewSet):
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(steam_client.get_top_search_result, game_name)
-                            for game_name in game_names[:5]]
+                           for game_name in game_names[:5]]
                 for future in as_completed(futures):
                     game = future.result()
                     if game:
@@ -101,12 +101,12 @@ class GameViewSet(viewsets.ViewSet):
         """
         검색어의 유효성을 검사합니다.
         """
-        # 최소 길이 조건
-        if len(query) < 2:
+        # 의미 없는 검색어 필터링 (특수 문자만 포함된 경우 등)
+        if re.match(r'^[^a-zA-Z0-9가-힣]+$', query):
             return False
 
-        # 의미 없는 검색어 필터링 (특수 문자, 숫자만 포함된 경우 등)
-        if re.match(r'^[^a-zA-Z0-9]+$', query):
+        # 공백만 포함된 경우 필터링
+        if not query.strip():
             return False
 
         return True
