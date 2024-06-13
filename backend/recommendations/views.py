@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView  # 추가된 부분
+from rest_framework.views import APIView
 from .steam_api import SteamAPI
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -12,33 +12,31 @@ import re
 
 client = OpenAI(api_key=config.OPENAI_API_KEY)
 
-# Steam 클라이언트 설정
 steam_client = SteamAPI()
 
 
 class GameViewSet(viewsets.ViewSet):
     system_instructions = """
-    당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
-    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
-    추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 하며 확장팩이나 DLC는 추천해주지 않습니다.
-    게임 추천 목록은 반드시 다음과 같은 형식으로 제공하세요:
-    1. 게임 이름
-    2. 게임 이름
-    3. 게임 이름
-    4. 게임 이름
-    5. 게임 이름
+    You are a helpful assistant that helps users find similar games on Steam.
+    When a user requests game recommendations, analyze the user's input and provide a list of up to 5 recommended games based on Steam data.
+    The recommended games must be available on Steam and should not include expansions or DLCs.
+    The game recommendation list should be provided in the following format:
+    1. Game name
+    2. Game name
+    3. Game name
+    4. Game name
+    5. Game name
     """
 
-    conversation_history = [
-        {"role": "system", "content": system_instructions}
-    ]
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.conversation_history = [{"role": "system", "content": self.system_instructions}]
 
     def list(self, request):
         user_input = request.query_params.get('user_input')
         if not user_input:
             return Response({"error": "No user input provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 검색어 유효성 검사
         if not self.is_valid_search_query(user_input):
             return Response({"error": "Invalid search query"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,24 +47,24 @@ class GameViewSet(viewsets.ViewSet):
                 messages=self.conversation_history,
                 max_tokens=500
             )
-            ai_response = response.choices[0].message.content.strip()
+            ai_response = response.choices[0].message['content'].strip()
             self.conversation_history.append({"role": "assistant", "content": ai_response})
             game_names = self.extract_game_names(ai_response)
 
             if not game_names:
-                return Response({"error": "추천 목록에서 게임 이름을 추출할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Unable to extract game names from the recommendation list."}, status=status.HTTP_400_BAD_REQUEST)
 
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(steam_client.get_top_search_result, game_name)
-                            for game_name in game_names[:5]]
+                           for game_name in game_names[:5]]
                 for future in as_completed(futures):
                     game = future.result()
                     if game:
                         similar_games_info.append(game)
 
             if not similar_games_info:
-                return Response({"error": "유사한 게임을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Could not find similar games."}, status=status.HTTP_404_NOT_FOUND)
 
             return Response({"similar_games": similar_games_info})
         except Exception as e:
@@ -80,11 +78,11 @@ class GameViewSet(viewsets.ViewSet):
                 if line and line[0].isdigit() and '.' in line:
                     parts = line.split('. ')
                     if len(parts) > 1:
-                        game_name = parts[1].strip().split('**')[0]  # 불필요한 텍스트 제거
+                        game_name = parts[1].strip().split('**')[0]
                         if game_name:
                             game_names.append(game_name)
         except Exception as e:
-            print(f"extract_game_names 메서드에서 에러 발생: {e}")
+            print(f"Error in extract_game_names method: {e}")
         return game_names
 
     def is_valid_search_query(self, query):
@@ -111,7 +109,7 @@ class FavoriteCreateView(APIView):
             }
         )
         if not created:
-            return Response({'message': '이미 즐겨찾기에 추가되어 있습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Already added to favorites.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(FavoriteSerializer(favorite).data, status=status.HTTP_201_CREATED)
 
 
@@ -121,7 +119,7 @@ class FavoriteDeleteView(APIView):
     def delete(self, request, pk):
         favorite = Favorite.objects.filter(user=request.user, pk=pk).first()
         if not favorite:
-            return Response({'message': '즐겨찾기 항목을 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Favorite item not found.'}, status=status.HTTP_404_NOT_FOUND)
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
