@@ -29,6 +29,7 @@ class GameViewSet(viewsets.ViewSet):
     5. 게임 이름
     """
 
+    # 대화 기록을 저장할 변수
     conversation_history = [
         {"role": "system", "content": system_instructions}
     ]
@@ -45,28 +46,34 @@ class GameViewSet(viewsets.ViewSet):
             return Response({"error": "Invalid search query"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # 사용자 메시지를 대화 기록에 추가
             self.conversation_history.append({"role": "user", "content": user_input})
 
+            # AI에게 사용자 입력을 이해하도록 요청
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=self.conversation_history,
-                max_tokens=500
+                max_tokens=500  # 토큰 수를 늘림
             )
 
             print('OpenAI 응답:', response)
+
             ai_response = response.choices[0].message.content.strip()
             print(f"AI 응답: {ai_response}")
 
+            # AI 응답을 대화 기록에 추가
             self.conversation_history.append({"role": "assistant", "content": ai_response})
 
+            # 추천 게임 목록에서 게임 이름 추출
             game_names = self.extract_game_names(ai_response)
             if not game_names:
                 return Response({"error": "추천 목록에서 게임 이름을 추출할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
+            # 병렬 처리로 추천 게임 목록을 스팀에서 검색하여 첫 번째 결과 가져오기
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(steam_client.get_top_search_result, game_name)
-                            for game_name in game_names[:5]]
+                           for game_name in game_names[:5]]
                 for future in as_completed(futures):
                     game = future.result()
                     if game:
@@ -85,9 +92,11 @@ class GameViewSet(viewsets.ViewSet):
     def extract_game_names(self, recommendations):
         game_names = []
         try:
+            # 줄바꿈으로 분리된 게임 이름 추출
             for line in recommendations.split('\n'):
                 line = line.strip()
                 if line and any(char.isdigit() for char in line):
+                    # 게임 이름 추출
                     parts = line.split('. ')
                     if len(parts) > 1:
                         game_name = parts[1].strip()
