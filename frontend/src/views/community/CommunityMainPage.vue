@@ -1,6 +1,5 @@
 <template>
   <div class="community flex-col">
-    <!-- <img class="banner" src="" alt="배너 사진"> -->
     <div class="communityMain">
       <!-- 카테고리 -->
       <div class="communityRow1 flex-between">
@@ -37,12 +36,12 @@
       <!-- 검색 -->
       <div class="communityRow2 flex-row-center">
         <img src="../../assets/image/searchIcon.png" class="searchIcon">
-        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색"
+          @keyup.enter="fetchCommunityList" />
       </div>
       <!-- 게시물 목록 -->
       <div class="communityList">
-        <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
-          @click="goToDetail(item.id)">
+        <span class="communitys flex-between" v-for="item in communityList" :key="item.id" @click="goToDetail(item.id)">
           <div class="communityListLeft">
             <span class="communityListTitle">
               {{ item.title }}
@@ -62,8 +61,8 @@
             <span style="margin-left: 4px; color: #ff7171;">♥</span>
           </div>
         </span>
-        <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
-        <div v-if="sortedAndFilteredCommunityList.length" class="pagination">
+        <div v-if="!communityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
+        <div v-if="totalPages > 1" class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
             :class="{ active: currentPage === page }">{{ page }}</button>
@@ -82,7 +81,6 @@ export default {
     return {
       communityList: [],
       accountsUsers: [],
-      likedCommunities: [],
       categories: [],
       showDropdown: false,
       showSortDropdown: false,
@@ -110,40 +108,6 @@ export default {
           return '정렬';
       }
     },
-    sortedAndFilteredCommunityList() {
-      let filteredList = [...this.communityList];
-
-      if (this.query) {
-        filteredList = filteredList.filter(item => item.title.toLowerCase().includes(this.query.toLowerCase()));
-      }
-
-      if (this.selectedCategory !== 'all') {
-        filteredList = filteredList.filter(item => item.category === this.selectedCategory);
-      }
-
-      filteredList = filteredList.map(item => {
-        const user = this.accountsUsers.find(user => user.id === item.author);
-        const author_nickname = user ? user.nickname : '알 수 없음';
-        return { ...item, author_nickname, community_like: item.community_like || [] }; // community_like 필드가 정의되지 않은 경우 빈 배열 할당
-      });
-
-      if (this.sortOption === 'time') {
-        filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      } else if (this.sortOption === 'oldest') {
-        filteredList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      } else if (this.sortOption === 'likes') {
-        filteredList.sort((a, b) => b.community_like.length - a.community_like.length);
-      } else if (this.sortOption === 'views') {
-        filteredList.sort((a, b) => b.view_count - a.view_count);
-      }
-
-      return filteredList;
-    },
-    currentPageCommunities() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      return this.sortedAndFilteredCommunityList.slice(start, end);
-    },
   },
   mounted() {
     this.fetchAccountsUsers();
@@ -155,26 +119,39 @@ export default {
       return new Date(dateString).toLocaleString();
     },
     prevPage() {
-      this.currentPage = Math.max(this.currentPage - 1, 1);
-      this.fetchCommunityList();
+      if (this.currentPage > 1) {
+        this.currentPage -= 1;
+        this.fetchCommunityList();
+      }
     },
     nextPage() {
-      this.currentPage = Math.min(this.currentPage + 1, this.totalPages);
-      this.fetchCommunityList();
+      if (this.currentPage < this.totalPages) {
+        this.currentPage += 1;
+        this.fetchCommunityList();
+      }
     },
     goToPage(page) {
-      this.currentPage = page;
-      this.fetchCommunityList();
+      if (page !== this.currentPage) {
+        this.currentPage = page;
+        this.fetchCommunityList();
+      }
     },
     async fetchCommunityList() {
-      api.get(`community/?page=${this.currentPage}`)
-        .then(response => {
-          this.communityList = response.data.results;
-          this.totalPages = Math.ceil(response.data.count / this.pageSize);
-        })
-        .catch(error => {
-          console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error);
+      try {
+        const response = await api.get(`community/`, {
+          params: {
+            page: this.currentPage,
+            page_size: this.pageSize,
+            query: this.query,
+            category: this.selectedCategory,
+            sort: this.sortOption,
+          },
         });
+        this.communityList = response.data.results;
+        this.totalPages = Math.ceil(response.data.count / this.pageSize);
+      } catch (error) {
+        console.error('커뮤니티 목록을 가져오는 중 오류가 발생했습니다: ', error);
+      }
     },
     async fetchAccountsUsers() {
       try {
@@ -203,13 +180,15 @@ export default {
       this.selectedCategory = category.key;
       this.selectedCategoryName = category.value;
       this.showDropdown = false;
+      this.fetchCommunityList();
     },
     toggleSortDropdown() {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
       this.sortOption = option;
-      this.showSortDropdown = false; // 드롭다운 닫기
+      this.showSortDropdown = false;
+      this.fetchCommunityList();
     },
     checkLogin() {
       if (!localStorage.getItem('access')) {
