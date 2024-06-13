@@ -58,10 +58,30 @@ export default {
         return inner ? 'bot-message' : 'bot-message-container';
       }
     },
+    isValidSearchQuery(query) {
+      // 의미 없는 검색어 필터링 (특수 문자만 포함된 경우 등)
+      if (/^[^a-zA-Z0-9가-힣]+$/.test(query)) return false;
+
+      // 공백만 포함된 경우 필터링
+      if (!query.trim()) return false;
+
+      return true;
+    },
     async sendQuery() {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
+
+      // 검색어 유효성 검사
+      if (!this.isValidSearchQuery(this.userInput)) {
+        this.messages.push({ text: '유효한 검색어를 입력해주세요.', isUser: false });
+        this.userInput = '';
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+        return;
+      }
+
       this.loading = true;
       this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
       this.$nextTick(() => {
