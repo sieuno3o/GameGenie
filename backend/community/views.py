@@ -24,7 +24,6 @@ class CommuityListPagination(PageNumberPagination):
 class CommentsListPagination(PageNumberPagination):
     page_size = 5
 
-
 class CommunityList(ListAPIView):
     queryset = Community.objects.all()
     serializer_class = CommunitySerializer

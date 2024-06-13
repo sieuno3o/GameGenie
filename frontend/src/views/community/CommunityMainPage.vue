@@ -41,7 +41,7 @@
       </div>
       <!-- 게시물 목록 -->
       <div class="communityList">
-        <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
+        <span class="communitys flex-between" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
           @click="goToDetail(item.id)">
           <div class="communityListLeft">
             <span class="communityListTitle">
