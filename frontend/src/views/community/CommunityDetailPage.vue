@@ -43,7 +43,7 @@
     </div>
     <!-- 댓글 표시 영역 -->
     <div class="flex-row commentTopBox">
-      <span class="commentTitle flex-left">댓글 ({{ comments.length }})개</span>
+      <span class="commentTitle flex-left">댓글 ({{ pagination.totalCount }})개</span>
       <!-- 페이지 네이션 버튼 -->
       <div class="pagination flex-left" v-if="pagination.totalPages > 1">
         <button v-for="page in pagination.totalPages" :key="page" :class="{ active: page === pagination.page }"
@@ -138,6 +138,7 @@ export default {
         page: 1,
         pageSize: 5,
         totalPages: 1,
+        totalCount: 0, // 전체 댓글 수 추가
       },
     };
   },
@@ -154,6 +155,7 @@ export default {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
         this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0; // 좋아요 숫자 설정
+        this.isLiked = this.communityItem.liked_by_user; // 사용자가 좋아요를 눌렀는지 여부 설정
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -204,7 +206,7 @@ export default {
     },
     async toggleLike() {
       if (!this.isLoggedIn) {
-        console.error("로그인이 필요합니다.");
+        alert("로그인이 필요합니다.");
         return;
       }
 
@@ -232,8 +234,9 @@ export default {
           },
         });
         this.comments = response.data.results;
-        this.pagination.page = response.data.page;
+        this.pagination.page = page;
         this.pagination.totalPages = Math.ceil(response.data.count / this.pagination.pageSize);
+        this.pagination.totalCount = response.data.count; // 전체 댓글 수 설정
       } catch (error) {
         console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
         this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
@@ -250,7 +253,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        await this.fetchComments(this.pagination.page);  // 현재 페이지의 댓글 목록을 다시 가져옴
+        await this.fetchComments(id, this.pagination.page);  // 현재 페이지의 댓글 목록을 다시 가져옴
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
