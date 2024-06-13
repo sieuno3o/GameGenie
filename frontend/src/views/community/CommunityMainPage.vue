@@ -41,7 +41,7 @@
       </div>
       <!-- 게시물 목록 -->
       <div class="communityList">
-        <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
+        <span class="communitys flex-between" v-for="item in sortedAndFilteredCommunityList" :key="item.id"
           @click="goToDetail(item.id)">
           <div class="communityListLeft">
             <span class="communityListTitle">
@@ -63,7 +63,7 @@
           </div>
         </span>
         <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
-        <div v-if="sortedAndFilteredCommunityList.length" class="pagination">
+        <div v-if="sortedAndFilteredCommunityList" class="pagination">
           <button @click="prevPage" :disabled="currentPage === 1">이전</button>
           <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
             :class="{ active: currentPage === page }">{{ page }}</button>

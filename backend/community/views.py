@@ -17,14 +17,20 @@ from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
 
 
+class CommunityPagination(PageNumberPagination):
+    page_size = 10
+
+class CommentPagination(PageNumberPagination):
+    page_size = 5
+
+
 class CommunityList(ListAPIView):
     queryset = Community.objects.all()
     serializer_class = CommunitySerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering_fields = ['created_at', 'likes_count', 'views_count']
     search_fields = ['title', 'content', 'author__username']
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 10
+    pagination_class = CommunityPagination
     ordering = ['-created_at']
 
     def get_queryset(self):
@@ -161,8 +167,7 @@ class CommentLike(generics.UpdateAPIView):
 
 class CommentsList(ListAPIView):
     serializer_class = CommentSerializer
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 5
+    pagination_class = CommentPagination
 
     def get_queryset(self):
         community = get_object_or_404(Community, pk=self.kwargs['community_pk'])
