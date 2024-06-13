@@ -1,6 +1,6 @@
 <template>
   <div class="community-create-container">
-    <span class="createHeading heading1">게시글 작성</span>
+    <span class="createHeading heading1">{{ isEditMode ? '게시글 수정' : '게시글 작성' }}</span>
     <form @submit.prevent="submitForm" class="formBox">
       <!-- 필수 입력 항목 안내 -->
       <p class="requiredNotice">* 필수 입력 항목</p>
@@ -29,7 +29,7 @@
         <label for="image">이미지 파일</label>
         <div class="flex-between">
           <input type="file" id="image" @change="handleFileUpload">
-          <button type="submit" class="createButton">글 작성</button>
+          <button type="submit" class="createButton">{{ isEditMode ? '수정 완료' : '글 작성' }}</button>
         </div>
       </div>
     </form>
@@ -48,7 +48,9 @@ export default {
         content: '',
         image: null
       },
-      categories: []
+      categories: [],
+      isEditMode: false,
+      postId: null
     };
   },
   methods: {
@@ -59,6 +61,19 @@ export default {
         })
         .catch(error => {
           console.error("카테고리를 불러오는 중 에러가 발생했습니다:", error);
+        });
+    },
+    fetchPostData(id) {
+      api.get(`community/${id}/`)
+        .then((response) => {
+          const post = response.data;
+          this.form.title = post.title;
+          this.form.category = post.category;
+          this.form.content = post.content;
+          // 이미지 처리 로직 추가 필요 시 추가
+        })
+        .catch(error => {
+          console.error("게시글 데이터를 불러오는 중 에러가 발생했습니다:", error);
         });
     },
     handleFileUpload(event) {
@@ -75,22 +90,40 @@ export default {
 
       try {
         const token = localStorage.getItem('access');
-        await api.post('community/create/', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        alert('글이 등록되었습니다!');
+        if (this.isEditMode) {
+          // 수정 모드일 때 PATCH 요청
+          await api.patch(`community/${this.postId}/`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          alert('글이 수정되었습니다!');
+        } else {
+          // 작성 모드일 때 POST 요청
+          await api.post('community/create/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          alert('글이 등록되었습니다!');
+        }
         this.$router.push({ name: 'communityMain' });
       } catch (error) {
         console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
-        alert("글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
+        alert(this.isEditMode ? "글 수정 중 에러가 발생했습니다. 다시 시도해주세요." : "글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
       }
     }
   },
   created() {
     this.fetchCategories();
+    const id = this.$route.params.id;
+    if (id) {
+      this.isEditMode = true;
+      this.postId = id;
+      this.fetchPostData(id);
+    }
   }
 }
 </script>

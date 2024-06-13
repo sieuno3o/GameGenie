@@ -21,10 +21,11 @@
       </div>
     </div>
     <!-- 이미지 -->
-    <div v-if="communityItem.image"><img :src="getImageUrl(communityItem.image)" alt="게시글 이미지" class="communityItemImg">
+    <div v-if="communityItem.image">
+      <img :src="getImageUrl(communityItem.image)" alt="게시글 이미지" class="communityItemImg">
     </div>
     <!-- 내용 -->
-    <span class="communityItemContent body3 flex-left">{{ communityItem.content }}</span>
+    <span class="communityItemContent body3 flex-left" v-html="formatContent(communityItem.content)"></span>
     <div class="flex-between bottomBox">
       <!-- 좋아요 -->
       <div class="likeRow flex-center">
@@ -485,4 +486,5 @@ export default {
 
 .commentAdd {
   height: 56px;
-}</style>
+}
+</style>
