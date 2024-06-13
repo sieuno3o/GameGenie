@@ -527,19 +527,16 @@ export default {
 }
 
 .pagination button {
-  border-radius: 10px;
-  height: 45px;
+  height: 42px;
   padding: 15px;
   border: none;
   cursor: pointer;
+  border-radius: 10px;
+  color: #9a9a9a;
 }
 
 .pagination button.active {
-  background: #ffffff;
   font-weight: bolder;
-}
-
-.pagination button:hover {
-  background-color: #f0f0f0;
+  color: black;
 }
 </style>
