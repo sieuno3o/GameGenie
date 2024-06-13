@@ -9,10 +9,10 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import ListAPIView
 
-
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class CreateView(APIView):
     def post(self, request):
@@ -47,9 +47,7 @@ class CreateView(APIView):
             return Response({'message': '서버 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class LogoutView(APIView):
-
     def post(self, request):
         token = request.data.get('refresh')
         if token:
@@ -80,9 +78,6 @@ class DeleteView(APIView):
         return Response({"message": "삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
 
-
-
-
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -95,14 +90,14 @@ class UserProfileView(APIView):
             serializer = UserProfileSerializer(user)
             return Response(serializer.data)
         except Exception as e:
-            print(f"Error: {e}")  # 예외 메시지를 로그로 출력
+            logger.error(f"Error: {e}")
             return Response({'message': '프로필을 불러오는 중 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def patch(self, request, id=None):
         user = request.user
         serializer = UserProfileSerializer(
             user, data=request.data, partial=True, context={'request': request})
-        
+
         if serializer.is_valid():
             email = request.data.get('email')
             if email and email != user.email:
