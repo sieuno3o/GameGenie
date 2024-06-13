@@ -37,7 +37,7 @@
         <button class="detailButton flex-center" @click="goToCommunity">목록으로</button>
         <div v-if="communityItem.author_id === userId || isSuperuser" class="editDeleteButtons flex-center">
           <button class="detailButton flex-center" @click="editPost">수정하기</button>
-          <button class="detailButton flex-center" @click="deletePost">삭제하기</button>
+          <button class="deleteButton flex-center" @click="deletePost">삭제하기</button>
         </div>
       </div>
     </div>
@@ -403,6 +403,28 @@ export default {
 
 .detailButton:hover {
   background-color: #f5f5f5;
+}
+
+.deleteButton {
+  margin-left: 10px;
+  width: 80px;
+  height: 35px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  background-color: #ff4d4d;
+  /* 빨간색 */
+  border: none;
+  /* 테두리 제거 */
+  box-shadow: 0 2px 1px rgb(216, 216, 216);
+  color: white;
+  /* 텍스트 색상 */
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background-color: #ff1a1a;
+  /* 호버 시 더 진한 빨간색 */
 }
 
 .communityItemTitle {
