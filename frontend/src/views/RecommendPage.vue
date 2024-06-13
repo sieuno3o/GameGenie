@@ -59,11 +59,11 @@ export default {
       }
     },
     isValidSearchQuery(query) {
-      // 최소 길이 조건
-      if (query.length < 2) return false;
+      // 의미 없는 검색어 필터링 (특수 문자만 포함된 경우 등)
+      if (/^[^a-zA-Z0-9가-힣]+$/.test(query)) return false;
 
-      // 의미 없는 검색어 필터링 (특수 문자, 숫자만 포함된 경우 등)
-      if (/^[^a-zA-Z0-9]+$/.test(query)) return false;
+      // 공백만 포함된 경우 필터링
+      if (!query.trim()) return false;
 
       return true;
     },
