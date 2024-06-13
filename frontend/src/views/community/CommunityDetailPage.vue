@@ -35,7 +35,7 @@
       <!-- 버튼 -->
       <div class="flex-row-center">
         <button class="detailButton flex-center" @click="goToCommunity">목록으로</button>
-        <div v-if="communityItem.author_id === userId" class="editDeleteButtons flex-center">
+        <div v-if="communityItem.author_id === userId || isSuperuser" class="editDeleteButtons flex-center">
           <button class="detailButton flex-center" @click="editPost">수정하기</button>
           <button class="detailButton flex-center" @click="deletePost">삭제하기</button>
         </div>
@@ -66,9 +66,10 @@
             </div>
           </div>
           <div>
-            <v-btn v-if="comment.author_id === userId" small @click="editComment(comment)"
+            <v-btn v-if="comment.author_id === userId || isSuperuser" small @click="editComment(comment)"
               style="margin-right: 10px">수정</v-btn>
-            <v-btn v-if="comment.author_id === userId" small color="error" @click="deleteComment(comment.id)">삭제</v-btn>
+            <v-btn v-if="comment.author_id === userId || isSuperuser" small color="error"
+              @click="deleteComment(comment.id)">삭제</v-btn>
           </div>
         </div>
       </div>
@@ -118,6 +119,7 @@ export default {
       isLiked: false,
       isLoggedIn: false,
       userId: null,
+      isSuperuser: false,
       newComment: '',
       post: null,
       showEditModal: false,
@@ -199,6 +201,7 @@ export default {
           });
           this.isLoggedIn = true;
           this.userId = response.data.id;
+          this.isSuperuser = response.data.is_superuser; // 슈퍼유저 여부 설정
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }

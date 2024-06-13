@@ -16,12 +16,13 @@ from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
 
+
 class CommuityListPagination(PageNumberPagination):
     page_size = 10
 
+
 class CommentsListPagination(PageNumberPagination):
     page_size = 5
-
 
 
 class CommunityList(ListAPIView):
@@ -68,16 +69,20 @@ class CommunityDetail(APIView):
 
     def patch(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
-        serializer = CommunitySerializer(community, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user == community.author or request.user.is_superuser:
+            serializer = CommunitySerializer(community, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
-        community.delete()
-        return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+        if request.user == community.author or request.user.is_superuser:
+            community.delete()
+            return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
 
 class CommunityLike(generics.UpdateAPIView):
@@ -128,16 +133,20 @@ class CommentDetail(APIView):
 
     def patch(self, request, community_pk, comment_id):
         comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
-        serializer = CommentSerializer(comment, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user == comment.author or request.user.is_superuser:
+            serializer = CommentSerializer(comment, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, community_pk, comment_id):
         comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
-        comment.delete()
-        return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+        if request.user == comment.author or request.user.is_superuser:
+            comment.delete()
+            return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
 
 class CommentLike(generics.UpdateAPIView):

@@ -1,73 +1,69 @@
 <template>
   <div class="community flex-col">
-    <div class="communityMain">
-      <!-- 카테고리 -->
-      <div class="communityRow1 flex-between">
-        <div class="categoryButton flex-row-center">
-          <div class="categorylist flex-row-center">
-            <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
-              @click="toggleDropdown" />
-            <ul v-if="showDropdown" class="categoryDropdown">
-              <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">
-                {{ category.value }}
-              </li>
-            </ul>
-          </div>
-          <div class="categorySelected">
-            <span class="body3">{{ selectedCategoryName }}</span>
-          </div>
+    <!-- 카테고리 선택 UI -->
+    <div class="communityRow1 flex-between">
+      <div class="categoryButton flex-row-center">
+        <div class="categorylist flex-row-center">
+          <img class="hamburgericon" src="../../assets/image/community/hamburger.png" alt="카테고리"
+            @click="toggleDropdown" />
+          <ul v-if="showDropdown" class="categoryDropdown">
+            <li v-for="category in categories" :key="category.key" @click="selectCategory(category)">
+              {{ category.value }}
+            </li>
+          </ul>
         </div>
-        <!-- 정렬 -->
-        <div class="flex-row-center">
-          <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
-            <span class="body3">{{ sortOptionText }}</span>
-            <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
-            <div v-if="showSortDropdown" class="sortDropdown">
-              <p @click="selectSortOption('time')">최신 순</p>
-              <p @click="selectSortOption('oldest')">오래된 순</p>
-              <p @click="selectSortOption('likes')">좋아요 순</p>
-              <p @click="selectSortOption('views')">조회수 순</p>
-            </div>
-          </div>
-          <!-- 글 작성 버튼 -->
-          <div class="communityCreate flex-row-center button2" @click.prevent="checkLogin">글 작성</div>
+        <div class="categorySelected">
+          <span class="body3">{{ selectedCategoryName }}</span>
         </div>
       </div>
-      <!-- 검색 -->
-      <div class="communityRow2 flex-row-center">
-        <img src="../../assets/image/searchIcon.png" class="searchIcon">
-        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색"
-          @keyup.enter="fetchCommunityList" />
-      </div>
-      <!-- 게시물 목록 -->
-      <div class="communityList">
-        <span class="communitys flex-between" v-for="item in communityList" :key="item.id" @click="goToDetail(item.id)">
-          <div class="communityListLeft">
-            <span class="communityListTitle">
-              {{ item.title }}
-            </span>
-            <span class="communityListInfo">
-              <span>{{ item.author_nickname }}</span>
-              <span class="communityListInfoContour">|</span>
-              <span>조회수 {{ item.view_count }}</span>
-              <span class="communityListInfoContour">|</span>
-              <span>{{ getCategoryName(item.category) }}</span> <!-- 선택한 카테고리 표시 -->
-              <span class="communityListInfoContour">|</span>
-              <span>댓글 {{ item.comments_count }}</span> <!-- 댓글 수 표시 -->
-            </span>
+      <!-- 정렬 선택 UI -->
+      <div class="flex-row-center">
+        <div class="categorySortButton flex-row-center" @click="toggleSortDropdown">
+          <span class="body3">{{ sortOptionText }}</span>
+          <img class="image1" src="../../assets/image/community/dropdown.png" width="20px;" height="20px;">
+          <div v-if="showSortDropdown" class="sortDropdown">
+            <p @click="selectSortOption('time')">최신 순</p>
+            <p @click="selectSortOption('oldest')">오래된 순</p>
+            <p @click="selectSortOption('likes')">좋아요 순</p>
+            <p @click="selectSortOption('views')">조회수 순</p>
           </div>
-          <div>
-            <span>{{ item.community_like?.length || 0 }}</span>
-            <span style="margin-left: 4px; color: #ff7171;">♥</span>
-          </div>
-        </span>
-        <div v-if="!communityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
-        <div v-if="totalPages > 1" class="pagination">
-          <button @click="prevPage" :disabled="currentPage === 1">이전</button>
-          <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
-            :class="{ active: currentPage === page }">{{ page }}</button>
-          <button @click="nextPage" :disabled="currentPage === totalPages">다음</button>
         </div>
+        <!-- 글 작성 버튼 -->
+        <div class="communityCreate flex-row-center button2" @click.prevent="checkLogin">글 작성</div>
+      </div>
+    </div>
+    <!-- 검색 -->
+    <div class="communityRow2 flex-row-center">
+      <img src="../../assets/image/searchIcon.png" class="searchIcon">
+      <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
+    </div>
+    <!-- 게시물 목록 -->
+    <div class="communityList">
+      <span class="communitys flex-between" v-for="item in currentPageCommunities" :key="item.id"
+        @click="goToDetail(item.id)">
+        <div class="communityListLeft">
+          <span class="communityListTitle">{{ item.title }}</span>
+          <span class="communityListInfo">
+            <span>{{ item.author_nickname }}</span>
+            <span class="communityListInfoContour">|</span>
+            <span>조회수 {{ item.view_count }}</span>
+            <span class="communityListInfoContour">|</span>
+            <span>{{ getCategoryName(item.category) }}</span>
+            <span class="communityListInfoContour">|</span>
+            <span>댓글 {{ item.comments_count }}</span>
+          </span>
+        </div>
+        <div>
+          <span>{{ item.community_like?.length || 0 }}</span>
+          <span style="margin-left: 4px; color: #ff7171;">♥</span>
+        </div>
+      </span>
+      <div v-if="!sortedAndFilteredCommunityList.length" class="emptyCommunity">커뮤니티에 게시물이 없습니다.</div>
+      <div v-if="sortedAndFilteredCommunityList.length" class="pagination">
+        <button @click="prevPage" :disabled="currentPage === 1">이전</button>
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+          :class="{ active: currentPage === page }">{{ page }}</button>
+        <button @click="nextPage" :disabled="currentPage === totalPages">다음</button>
       </div>
     </div>
   </div>
@@ -80,7 +76,6 @@ export default {
   data() {
     return {
       communityList: [],
-      accountsUsers: [],
       categories: [],
       showDropdown: false,
       showSortDropdown: false,
@@ -96,17 +91,40 @@ export default {
   computed: {
     sortOptionText() {
       switch (this.sortOption) {
-        case 'time':
-          return '최신 순';
-        case 'oldest':
-          return '오래된 순';
-        case 'likes':
-          return '좋아요 순';
-        case 'views':
-          return '조회수 순';
-        default:
-          return '정렬';
+        case 'time': return '최신 순';
+        case 'oldest': return '오래된 순';
+        case 'likes': return '좋아요 순';
+        case 'views': return '조회수 순';
+        default: return '정렬';
       }
+    },
+    sortedAndFilteredCommunityList() {
+      let filteredList = [...this.communityList];
+      if (this.query) {
+        filteredList = filteredList.filter(item => item.title.toLowerCase().includes(this.query.toLowerCase()));
+      }
+      if (this.selectedCategory !== 'all') {
+        filteredList = filteredList.filter(item => item.category === this.selectedCategory);
+      }
+      filteredList = filteredList.map(item => {
+        const author_nickname = this.accountsUsers.find(user => user.id === item.author)?.nickname || '알 수 없음';
+        return { ...item, author_nickname, community_like: item.community_like || [] };
+      });
+      if (this.sortOption === 'time') {
+        filteredList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      } else if (this.sortOption === 'oldest') {
+        filteredList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      } else if (this.sortOption === 'likes') {
+        filteredList.sort((a, b) => b.community_like.length - a.community_like.length);
+      } else if (this.sortOption === 'views') {
+        filteredList.sort((a, b) => b.view_count - a.view_count);
+      }
+      return filteredList;
+    },
+    currentPageCommunities() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.sortedAndFilteredCommunityList.slice(start, end);
     },
   },
   mounted() {
@@ -120,33 +138,27 @@ export default {
     },
     prevPage() {
       if (this.currentPage > 1) {
-        this.currentPage -= 1;
+        this.currentPage--;
         this.fetchCommunityList();
       }
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
-        this.currentPage += 1;
+        this.currentPage++;
         this.fetchCommunityList();
       }
     },
     goToPage(page) {
-      if (page !== this.currentPage) {
-        this.currentPage = page;
-        this.fetchCommunityList();
-      }
+      this.currentPage = page;
+      this.fetchCommunityList();
     },
     async fetchCommunityList() {
+      const params = { page: this.currentPage };
+      if (this.selectedCategory !== 'all') {
+        params.category = this.selectedCategory;
+      }
       try {
-        const response = await api.get(`community/`, {
-          params: {
-            page: this.currentPage,
-            page_size: this.pageSize,
-            query: this.query,
-            category: this.selectedCategory,
-            sort: this.sortOption,
-          },
-        });
+        const response = await api.get('community/', { params });
         this.communityList = response.data.results;
         this.totalPages = Math.ceil(response.data.count / this.pageSize);
       } catch (error) {
@@ -180,15 +192,15 @@ export default {
       this.selectedCategory = category.key;
       this.selectedCategoryName = category.value;
       this.showDropdown = false;
-      this.fetchCommunityList();
+      this.currentPage = 1;  // 카테고리를 변경하면 페이지를 첫 페이지로 초기화
+      this.fetchCommunityList();  // 카테고리 변경 시 게시물 목록을 다시 불러옴
     },
     toggleSortDropdown() {
       this.showSortDropdown = !this.showSortDropdown;
     },
     selectSortOption(option) {
       this.sortOption = option;
-      this.showSortDropdown = false;
-      this.fetchCommunityList();
+      this.showSortDropdown = false;  // 드롭다운 닫기
     },
     checkLogin() {
       if (!localStorage.getItem('access')) {
@@ -205,6 +217,7 @@ export default {
   }
 };
 </script>
+
 
 <style lang="scss" scoped>
 ul {
