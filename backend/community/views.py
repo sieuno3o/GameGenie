@@ -28,7 +28,10 @@ class CommunityList(ListAPIView):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Community.objects.annotate(community_like_count=Count('community_like'))
+        queryset = Community.objects.annotate(
+            community_like_count=Count('community_like'),
+            comments_count=Count('comments')  # 댓글 수를 계산하여 추가
+        )
         ordering = self.request.query_params.get('ordering', 'created_at')
         if ordering == 'community_like_count':
             queryset = queryset.order_by('-community_like_count')
@@ -159,7 +162,7 @@ class CommentLike(generics.UpdateAPIView):
 class CommentsList(ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 10
+    pagination_class.page_size = 5
 
     def get_queryset(self):
         community = get_object_or_404(Community, pk=self.kwargs['community_pk'])
