@@ -66,7 +66,7 @@ class GameViewSet(viewsets.ViewSet):
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(steam_client.get_top_search_result, game_name)
-                           for game_name in game_names[:5]]
+                            for game_name in game_names[:5]]
                 for future in as_completed(futures):
                     game = future.result()
                     if game:
