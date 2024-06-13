@@ -42,7 +42,16 @@
       </div>
     </div>
     <!-- 댓글 표시 영역 -->
-    <span class="commentTitle flex-left">댓글 ({{ comments.length }})개</span>
+    <div class="flex-row commentTopBox">
+      <span class="commentTitle flex-left">댓글 ({{ comments.length }})개</span>
+      <!-- 페이지 네이션 버튼 -->
+      <div class="pagination flex-left" v-if="pagination.totalPages > 1">
+        <button v-for="page in pagination.totalPages" :key="page" :class="{ active: page === pagination.page }"
+          @click="goToPage(page)" class="paginationButton flex-center">
+          {{ page }}
+        </button>
+      </div>
+    </div>
     <div v-if="comments && comments.length > 0" class="commentBox">
       <div v-for="comment in comments" :key="comment.id" class="comment">
         <div class="flex-between" style="padding: 10px 0px;">
@@ -124,7 +133,12 @@ export default {
       errorMessage: '',
       defaultProfileImage: defaultProfileImage,
       likesCount: 0, // 좋아요 숫자 변수 추가
-      categories: [] // 카테고리 목록
+      categories: [], // 카테고리 목록
+      pagination: { // 페이지 네이션 관련 변수
+        page: 1,
+        pageSize: 5,
+        totalPages: 1,
+      },
     };
   },
   async created() {
@@ -210,10 +224,16 @@ export default {
         console.error("좋아요 처리 중 오류가 발생했습니다:", error);
       }
     },
-    async fetchComments(id) {
+    async fetchComments(id, page = 1) {
       try {
-        const response = await api.get(`community/${id}/comments/`);
+        const response = await api.get(`community/${id}/comments/`, {
+          params: {
+            page: page,
+          },
+        });
         this.comments = response.data.results;
+        this.pagination.page = response.data.page;
+        this.pagination.totalPages = Math.ceil(response.data.count / this.pagination.pageSize);
       } catch (error) {
         console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
         this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
@@ -230,7 +250,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        await this.fetchComments(id);  // 댓글 목록을 다시 가져옴
+        await this.fetchComments(this.pagination.page);  // 현재 페이지의 댓글 목록을 다시 가져옴
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
@@ -347,6 +367,10 @@ export default {
     editPost() {
       this.$router.push({ name: 'communityCreate', params: { id: this.communityItem.id } });
     },
+    async goToPage(page) {
+      const id = this.$route.params.id;
+      await this.fetchComments(id, page);
+    },
   }
 };
 </script>
@@ -458,8 +482,9 @@ export default {
   color: black;
 }
 
-.commentTitle {
+.commentTopBox {
   margin-top: 10%;
+  height: 45px;
 }
 
 .beforeLoginText {
@@ -486,5 +511,32 @@ export default {
 
 .commentAdd {
   height: 56px;
+}
+
+.pagination {
+  height: auto;
+  margin-left: 25px;
+  background: white;
+  font-size: 16px;
+  box-shadow: 0 2px 1px rgb(216, 216, 216);
+  border: 1px solid rgb(216, 216, 216);
+  border-radius: 10px;
+}
+
+.pagination button {
+  border-radius: 10px;
+  height: 45px;
+  padding: 15px;
+  border: none;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background: #ffffff;
+  font-weight: bolder;
+}
+
+.pagination button:hover {
+  background-color: #f0f0f0;
 }
 </style>
