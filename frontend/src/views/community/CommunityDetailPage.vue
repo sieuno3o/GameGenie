@@ -16,7 +16,7 @@
         <div class="flex-center">
           <span class="communityItemDeatil">조회 수 {{ communityItem.view_count }}</span>
           <span class="communityListInfoContour">|</span>
-          <span class="communityItemDeatil">좋아요 수 {{ likesCount }}</span>
+          <span class="communityItemDeatil">댓글 수 {{ pagination.totalCount }}</span>
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@
     </div>
     <!-- 댓글 표시 영역 -->
     <div class="flex-row commentTopBox">
-      <span class="commentTitle flex-left">댓글 ({{ pagination.totalCount }})개</span>
+      <span class="commentTitle flex-left">댓글 {{ pagination.totalCount }}개</span>
       <!-- 페이지 네이션 버튼 -->
       <div class="pagination flex-left" v-if="pagination.totalPages > 1">
         <button v-for="page in pagination.totalPages" :key="page" :class="{ active: page === pagination.page }"
