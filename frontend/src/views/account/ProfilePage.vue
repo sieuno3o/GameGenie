@@ -162,7 +162,7 @@ export default {
   },
   methods: {
     getImageUrl(imagePath) {
-      return `http://localhost:8000${imagePath}`;
+      return `http://52.79.116.122${imagePath}`;
     },
     triggerProfileImageUpload() {
       this.$refs.profileImageInput.click();

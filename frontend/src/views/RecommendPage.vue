@@ -115,7 +115,7 @@ export default {
         this.previousInput = this.userInput;
       } catch (error) {
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
-        this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
+        this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다. 검색어를 확인해주세요.', isUser: false });
         this.error = error.toString();
       } finally {
         this.loading = false;

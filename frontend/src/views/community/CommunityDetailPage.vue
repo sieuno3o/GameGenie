@@ -186,7 +186,7 @@ export default {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     getImageUrl(imagePath) {
-      return `http://localhost:8000${imagePath}`;
+      return `http://52.79.116.122${imagePath}`;
     },
     async checkLoginStatus() {
       const token = localStorage.getItem('access');

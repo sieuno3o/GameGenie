@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'http://52.79.116.122/api/',
 });
 
 api.interceptors.request.use(
@@ -26,7 +26,7 @@ api.interceptors.response.use(
       if (refreshToken && !originalRequest._retry) {
         originalRequest._retry = true;
         try {
-          const response = await axios.post('http://localhost:8000/api/accounts/refresh/', { refresh: refreshToken });
+          const response = await axios.post('http://52.79.116.122/api/accounts/refresh/', { refresh: refreshToken });
           localStorage.setItem('access', response.data.access);
           originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
           return api(originalRequest);

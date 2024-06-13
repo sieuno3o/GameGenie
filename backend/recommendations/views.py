@@ -21,6 +21,7 @@ class GameViewSet(viewsets.ViewSet):
     당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
     사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
     추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 하며 확장팩이나 DLC는 추천해주지 않습니다.
+    만약 사용자가 의미 없는 단어나 문자만 입력하여 추천해줄 수 없다면 추천해주지 말아주세요.
     게임 추천 목록은 다음과 같은 형식으로 제공하세요:
     1. "게임 이름"
     2. "게임 이름"
@@ -105,8 +106,8 @@ class GameViewSet(viewsets.ViewSet):
         if re.match(r'^[^a-zA-Z0-9가-힣]+$', query):
             return False
 
-        # 공백만 포함된 경우 필터링
-        if not query.strip():
+        # 최소 길이 조건
+        if len(query) < 1:
             return False
 
         return True
