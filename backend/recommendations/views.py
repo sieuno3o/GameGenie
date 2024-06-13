@@ -1,7 +1,8 @@
+import logging
 from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView  # 추가된 부분
+from rest_framework.views import APIView
 from .steam_api import SteamAPI
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -9,6 +10,10 @@ from GameGenie import config
 from .models import Favorite
 from .serializers import FavoriteSerializer
 import re
+
+# Logger 설정
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 client = OpenAI(api_key=config.OPENAI_API_KEY)
 
@@ -44,12 +49,16 @@ class GameViewSet(viewsets.ViewSet):
 
         try:
             self.conversation_history.append({"role": "user", "content": user_input})
+            logger.info(f"User input: {user_input}")
+
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=self.conversation_history,
                 max_tokens=500
             )
             ai_response = response.choices[0].message.content.strip()
+            logger.info(f"AI response: {ai_response}")
+
             self.conversation_history.append({"role": "assistant", "content": ai_response})
             game_names = self.extract_game_names(ai_response)
 
@@ -59,7 +68,7 @@ class GameViewSet(viewsets.ViewSet):
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(steam_client.get_top_search_result, game_name)
-                            for game_name in game_names[:5]]
+                           for game_name in game_names[:5]]
                 for future in as_completed(futures):
                     game = future.result()
                     if game:
@@ -70,6 +79,7 @@ class GameViewSet(viewsets.ViewSet):
 
             return Response({"similar_games": similar_games_info})
         except Exception as e:
+            logger.error(f"Error in list method: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def extract_game_names(self, recommendations):
@@ -84,7 +94,7 @@ class GameViewSet(viewsets.ViewSet):
                         if game_name:
                             game_names.append(game_name)
         except Exception as e:
-            print(f"extract_game_names 메서드에서 에러 발생: {e}")
+            logger.error(f"Error in extract_game_names method: {e}")
         return game_names
 
     def is_valid_search_query(self, query):
