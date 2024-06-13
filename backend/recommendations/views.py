@@ -22,11 +22,11 @@ class GameViewSet(viewsets.ViewSet):
     사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
     추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 하며 확장팩이나 DLC는 추천해주지 않습니다.
     게임 추천 목록은 다음과 같은 형식으로 제공하세요:
-    1. 게임 이름
-    2. 게임 이름
-    3. 게임 이름
-    4. 게임 이름
-    5. 게임 이름
+    1. "게임 이름"
+    2. "게임 이름"
+    3. "게임 이름"
+    4. "게임 이름"
+    5. "게임 이름"
     """
 
     # 대화 기록을 저장할 변수
@@ -110,12 +110,12 @@ class GameViewSet(viewsets.ViewSet):
         """
         검색어의 유효성을 검사합니다.
         """
-        # 최소 길이 조건
-        if len(query) < 2:
+        # 의미 없는 검색어 필터링 (특수 문자만 포함된 경우 등)
+        if re.match(r'^[^a-zA-Z0-9가-힣]+$', query):
             return False
 
-        # 의미 없는 검색어 필터링 (특수 문자, 숫자만 포함된 경우 등)
-        if re.match(r'^[^a-zA-Z0-9]+$', query):
+        # 공백만 포함된 경우 필터링
+        if not query.strip():
             return False
 
         return True
