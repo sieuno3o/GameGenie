@@ -277,8 +277,7 @@ export default {
 }
 
 .bookmarkGameList {
-  width: 100%;
-  max-width: 1100px;
+  width: 1100px;
 }
 
 .titleText {
