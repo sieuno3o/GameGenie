@@ -90,26 +90,32 @@ export default {
 
       try {
         const token = localStorage.getItem('access');
+        let response;
+        let postId;
+
         if (this.isEditMode) {
           // 수정 모드일 때 PATCH 요청
-          await api.patch(`community/${this.postId}/`, formData, {
+          response = await api.patch(`community/${this.postId}/`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': `Bearer ${token}`
             }
           });
+          postId = this.postId;
           alert('글이 수정되었습니다!');
         } else {
           // 작성 모드일 때 POST 요청
-          await api.post('community/create/', formData, {
+          response = await api.post('community/create/', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': `Bearer ${token}`
             }
           });
+          postId = response.data.communityId; // create 응답에서 ID 추출
           alert('글이 등록되었습니다!');
         }
-        this.$router.push({ name: 'communityMain' });
+
+        this.$router.push({ name: 'communityDetail', params: { id: postId } });
       } catch (error) {
         console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
         alert(this.isEditMode ? "글 수정 중 에러가 발생했습니다. 다시 시도해주세요." : "글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
