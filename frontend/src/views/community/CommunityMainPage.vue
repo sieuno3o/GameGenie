@@ -37,7 +37,8 @@
       <!-- 검색 -->
       <div class="communityRow2 flex-row-center">
         <img src="../../assets/image/searchIcon.png" class="searchIcon">
-        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" />
+        <input type="text" v-model="query" class="communitySearch" placeholder="게임 이름 또는 장르 검색" 
+          @keyup.enter="fetchCommunityList"/>
       </div>
       <!-- 게시물 목록 -->
       <div class="communityList">
@@ -82,7 +83,6 @@ export default {
     return {
       communityList: [],
       accountsUsers: [],
-      likedCommunities: [],
       categories: [],
       showDropdown: false,
       showSortDropdown: false,

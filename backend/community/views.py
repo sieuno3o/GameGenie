@@ -15,6 +15,7 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
+from django.utils.html import escape
 
 class CommuityListPagination(PageNumberPagination):
     page_size = 10
@@ -48,12 +49,18 @@ class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        data = request.data.copy()  # request.data를 복사하여 새로운 dict 객체를 생성
+        data = request.data.copy()
         data['author'] = request.user.id
+
+        # 데이터 정규화 및 유효성 검사
         serializer = CommunitySerializer(data=data)
         if serializer.is_valid():
             community = serializer.save(author=request.user)
-            return Response({"message": "등록완료", "communityId": community.id}, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "등록완료",
+                "communityId": community.id
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

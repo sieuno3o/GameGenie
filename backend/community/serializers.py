@@ -1,3 +1,4 @@
+import bleach
 from rest_framework import serializers
 from .models import Community, Comment, Reply
 from accounts.models import User
@@ -14,6 +15,18 @@ class CommunitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Community
         fields = '__all__'
+        
+    def validate_title(self, value):
+        clean_value = bleach.clean(value, tags=[], attributes={})
+        if clean_value != value:
+            raise serializers.ValidationError("유효하지 않은 문자가 포함되어 있습니다.")
+        return clean_value
+
+    def validate_content(self, value):
+        clean_value = bleach.clean(value, tags=[], attributes={})
+        if clean_value != value:
+            raise serializers.ValidationError("유효하지 않은 문자가 포함되어 있습니다.")
+        return clean_value
 
 
 class CommentSerializer(serializers.ModelSerializer):
