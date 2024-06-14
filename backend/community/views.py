@@ -15,6 +15,7 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
+from django.utils.html import escape
 
 
 class CommuityListPagination(PageNumberPagination):
@@ -49,12 +50,18 @@ class CommunityCreate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        data = request.data.copy()  # request.data를 복사하여 새로운 dict 객체를 생성
+        data = request.data.copy()
         data['author'] = request.user.id
+
+        # 데이터 정규화 및 유효성 검사
         serializer = CommunitySerializer(data=data)
         if serializer.is_valid():
             community = serializer.save(author=request.user)
-            return Response({"message": "등록완료", "communityId": community.id}, status=status.HTTP_201_CREATED)
+            response_data = {
+                "message": "등록완료",
+                "communityId": community.id
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -69,20 +76,16 @@ class CommunityDetail(APIView):
 
     def patch(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
-        if request.user == community.author or request.user.is_superuser:
-            serializer = CommunitySerializer(community, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = CommunitySerializer(community, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "수정완료"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         community = get_object_or_404(Community, pk=pk)
-        if request.user == community.author or request.user.is_superuser:
-            community.delete()
-            return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        community.delete()
+        return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommunityLike(generics.UpdateAPIView):
@@ -133,20 +136,16 @@ class CommentDetail(APIView):
 
     def patch(self, request, community_pk, comment_id):
         comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
-        if request.user == comment.author or request.user.is_superuser:
-            serializer = CommentSerializer(comment, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = CommentSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, community_pk, comment_id):
         comment = get_object_or_404(Comment, pk=comment_id, community__id=community_pk)
-        if request.user == comment.author or request.user.is_superuser:
-            comment.delete()
-            return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
+        return Response({"message": "삭제완료"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentLike(generics.UpdateAPIView):
