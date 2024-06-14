@@ -2,6 +2,7 @@ import os
 from .config import SECRET_KEY
 from datetime import timedelta
 from pathlib import Path
+from .config import DATABASES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,16 +78,8 @@ WSGI_APPLICATION = 'GameGenie.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'gamegenie',
-        'USER': 'spiderjiwon',
-        'PASSWORD': 'park1357',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+DATABASES = DATABASES
+
 
 AUTH_USER_MODEL = 'accounts.User'
 
