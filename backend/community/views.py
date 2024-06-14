@@ -17,7 +17,6 @@ from .serializers import CategorySerializer
 from rest_framework.pagination import PageNumberPagination
 from django.utils.html import escape
 
-
 class CommuityListPagination(PageNumberPagination):
     page_size = 10
 
