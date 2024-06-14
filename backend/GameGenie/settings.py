@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "52.79.116.122",  # EC2 인스턴스의 퍼블릭 IP 주소
@@ -79,8 +79,12 @@ WSGI_APPLICATION = 'GameGenie.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gamegenie',
+        'USER': 'spiderjiwon',
+        'PASSWORD': 'park1357',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
