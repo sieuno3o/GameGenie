@@ -22,6 +22,7 @@
       <button @click="triggerFileInput" class="profileImageButton button2">📸 사진 업로드</button>
       <input type="file" ref="fileInput" @change="onImageChange" accept="image/*" class="profileImageInput">
     </div>
+    <div v-if="errorMessage" class="errorMessage">{{ errorMessage }}</div>
     <button @click="signup" type="submit" class="signupInputBox" id="signupButton">회원가입</button>
   </div>
 </template>
@@ -39,6 +40,7 @@ export default {
       profileImage: null,
       profileImagePreview: null,
       defaultImage: require('../../assets/image/account/profileImgIcon.png'),
+      errorMessage: '',
     };
   },
   methods: {
@@ -57,6 +59,23 @@ export default {
       }
     },
     async signup() {
+      if (!this.username) {
+        this.errorMessage = '아이디를 입력해주세요.';
+        return;
+      }
+      if (!this.password) {
+        this.errorMessage = '비밀번호를 입력해주세요.';
+        return;
+      }
+      if (!this.email) {
+        this.errorMessage = '이메일을 입력해주세요.';
+        return;
+      }
+      if (!this.nickname) {
+        this.errorMessage = '닉네임을 입력해주세요.';
+        return;
+      }
+
       try {
         const formData = new FormData();
         formData.append('username', this.username);
@@ -78,7 +97,18 @@ export default {
           this.$router.push({ name: 'login' });
         }
       } catch (error) {
-        console.error('Signup failed:', error);
+        if (error.response && error.response.data) {
+          if (error.response.data.username) {
+            this.errorMessage = '아이디가 이미 사용 중입니다.';
+          } else if (error.response.data.email) {
+            this.errorMessage = '이메일 형식이 잘못되었거나 이미 사용 중입니다.';
+          } else {
+            this.errorMessage = '회원가입에 실패했습니다. 다시 시도해주세요.';
+          }
+        } else {
+          console.error('Signup failed:', error);
+          this.errorMessage = '회원가입에 실패했습니다. 다시 시도해주세요.';
+        }
       }
     }
   }
@@ -152,5 +182,10 @@ export default {
 
 #signupButton {
   margin-bottom: 130px
+}
+
+.errorMessage {
+  margin-bottom: 20px;
+  font-size: 20px;
 }
 </style>
