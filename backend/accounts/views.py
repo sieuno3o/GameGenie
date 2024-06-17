@@ -88,7 +88,9 @@ class UserProfileView(APIView):
             else:
                 user = request.user
             serializer = UserProfileSerializer(user)
-            return Response(serializer.data)
+            data = serializer.data
+            data['is_superuser'] = user.is_superuser  # 슈퍼유저 정보 추가
+            return Response(data)
         except Exception as e:
             logger.error(f"Error: {e}")
             return Response({'message': '프로필을 불러오는 중 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
