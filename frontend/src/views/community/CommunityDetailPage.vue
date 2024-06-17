@@ -35,7 +35,7 @@
       <!-- 버튼 -->
       <div class="flex-row-center">
         <button class="detailButton flex-center" @click="goToCommunity">목록으로</button>
-        <div v-if="communityItem.author_id === userId" class="editDeleteButtons flex-center">
+        <div v-if="communityItem.author_id === userId || isSuperuser" class="editDeleteButtons flex-center">
           <button class="detailButton flex-center" @click="editPost">수정하기</button>
           <button class="detailButton flex-center" @click="deletePost">삭제하기</button>
         </div>
@@ -118,6 +118,7 @@ export default {
       isLiked: false,
       isLoggedIn: false,
       userId: null,
+      isSuperuser: false, // 슈퍼유저 여부 추가
       newComment: '',
       post: null,
       showEditModal: false,
@@ -173,7 +174,13 @@ export default {
       return category ? category.value : '알 수 없음';
     },
     formatContent(content) {
-      return content.replace(/\n/g, '<br>');
+      // 유튜브 링크를 찾는 정규 표현식
+      const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+
+      // 유튜브 링크를 iframe으로 변환
+      return content.replace(youtubeRegex, (match, p1) => {
+        return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${p1}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      }).replace(/\n/g, '<br>');
     },
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -199,6 +206,7 @@ export default {
           });
           this.isLoggedIn = true;
           this.userId = response.data.id;
+          this.isSuperuser = response.data.is_superuser; // 슈퍼유저 정보 추가
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
