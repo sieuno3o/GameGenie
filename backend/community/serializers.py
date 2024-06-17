@@ -15,7 +15,7 @@ class CommunitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Community
         fields = '__all__'
-        
+
     def validate_title(self, value):
         clean_value = bleach.clean(value, tags=[], attributes={})
         if clean_value != value:
@@ -23,7 +23,7 @@ class CommunitySerializer(serializers.ModelSerializer):
         return clean_value
 
     def validate_content(self, value):
-        clean_value = bleach.clean(value, tags=[], attributes={})
+        clean_value = bleach.clean(value, tags=['br'], attributes={})  # 'br' 태그를 허용
         if clean_value != value:
             raise serializers.ValidationError("유효하지 않은 문자가 포함되어 있습니다.")
         return clean_value
