@@ -3,9 +3,7 @@
     <v-row class="chat-content" ref="chatContent">
       <v-col cols="12" class="chatBox">
         <div v-for="(message, index) in messages" :key="index" class="chat-message" :class="messageClass(message)">
-          <div :class="messageClass(message, true)">
-            {{ message.text }}
-          </div>
+          <div :class="messageClass(message, true)" v-html="message.text"></div>
           <v-row v-if="message.games && message.games.length" class="game-cards" align="start">
             <game-card v-for="game in message.games" :key="game.appid || game.name" :game="game" />
           </v-row>
@@ -35,7 +33,6 @@ export default {
     return {
       userInput: '',
       messages: [],
-      error: null,
       previousInput: '',
       loading: false,
     };
@@ -58,29 +55,10 @@ export default {
         return inner ? 'bot-message' : 'bot-message-container';
       }
     },
-    isValidSearchQuery(query) {
-      // 의미 없는 검색어 필터링 (특수 문자만 포함된 경우 등)
-      if (/^[^a-zA-Z0-9가-힣]+$/.test(query)) return false;
-
-      // 공백만 포함된 경우 필터링
-      if (!query.trim()) return false;
-
-      return true;
-    },
     async sendQuery() {
       if (this.userInput.trim() === '') return;
 
       this.messages.push({ text: this.userInput, isUser: true });
-
-      // 검색어 유효성 검사
-      if (!this.isValidSearchQuery(this.userInput)) {
-        this.messages.push({ text: '유효한 검색어를 입력해주세요.', isUser: false });
-        this.userInput = '';
-        this.$nextTick(() => {
-          this.scrollToBottom();
-        });
-        return;
-      }
 
       this.loading = true;
       this.messages.push({ text: '게임 추천 중입니다...', isUser: false });
@@ -89,34 +67,26 @@ export default {
       });
 
       try {
-        const response = await api.get(`recommendations/games/`, {
+        const response = await api.get('recommendations/games/', {
           params: {
             user_input: this.userInput
           }
         });
-        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
         const data = response.data;
-
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
-        if (data.similar_games) {
-          const botMessage = { text: '다음은 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
-          this.messages.push(botMessage);
-          this.$nextTick(() => {
-            setTimeout(() => {
-              this.scrollToBottom();
-            }, 500);
-          });
-        } else {
-          this.messages.push({ text: data.error || '추천 게임을 찾을 수 없습니다.', isUser: false });
+        if (data.ai_response) {
+          const formattedResponse = data.ai_response.replace(/\n/g, '<br>');
+          this.messages.push({ text: formattedResponse, isUser: false, games: data.similar_games || [] });
         }
 
-        this.previousInput = this.userInput;
       } catch (error) {
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
-        this.messages.push({ text: '추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
-        this.error = error.toString();
+        if (error.response && error.response.data && error.response.data.ai_response) {
+          const formattedErrorResponse = error.response.data.ai_response.replace(/\n/g, '<br>');
+          this.messages.push({ text: formattedErrorResponse, isUser: false });
+        }
       } finally {
         this.loading = false;
       }
@@ -137,32 +107,26 @@ export default {
       });
 
       try {
-        const response = await api.get(`recommendations/games/`, {
+        const response = await api.get('recommendations/games/', {
           params: {
             user_input: this.previousInput
           }
         });
-        if (!response.status === 200) throw new Error(`Error: ${response.statusText}`);
 
         const data = response.data;
-
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
 
-        if (data.similar_games) {
-          const botMessage = { text: '다음은 추가 추천 게임입니다:', isUser: false, games: data.similar_games.slice(0, 4) };
-          this.messages.push(botMessage);
-          this.$nextTick(() => {
-            setTimeout(() => {
-              this.scrollToBottom();
-            }, 500);
-          });
-        } else {
-          this.messages.push({ text: data.error || '추가 추천 게임을 찾을 수 없습니다.', isUser: false });
+        if (data.ai_response) {
+          const formattedResponse = data.ai_response.replace(/\n/g, '<br>');
+          this.messages.push({ text: formattedResponse, isUser: false, games: data.similar_games || [] });
         }
+
       } catch (error) {
         this.messages = this.messages.filter(message => message.text !== '게임 추천 중입니다...');
-        this.messages.push({ text: '추가 추천 게임을 가져오는 중 오류가 발생했습니다.', isUser: false });
-        this.error = error.toString();
+        if (error.response && error.response.data && error.response.data.ai_response) {
+          const formattedErrorResponse = error.response.data.ai_response.replace(/\n/g, '<br>');
+          this.messages.push({ text: formattedErrorResponse, isUser: false });
+        }
       } finally {
         this.loading = false;
       }
