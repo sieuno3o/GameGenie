@@ -79,14 +79,24 @@ export default {
     handleFileUpload(event) {
       this.form.image = event.target.files[0];
     },
+    formatContent(content) {
+      return content.replace(/\n/g, '<br>'); // 줄바꿈을 <br>로 변환
+    },
     async submitForm() {
       const formData = new FormData();
       formData.append('title', this.form.title);
       formData.append('category', this.form.category);
-      formData.append('content', this.form.content);
+      formData.append('content', this.formatContent(this.form.content));
       if (this.form.image) {
         formData.append('image', this.form.image);
       }
+
+      console.log("Submitting form data:", {
+        title: this.form.title,
+        category: this.form.category,
+        content: this.formatContent(this.form.content),
+        image: this.form.image ? this.form.image.name : null
+      });
 
       try {
         const token = localStorage.getItem('access');
@@ -117,8 +127,13 @@ export default {
 
         this.$router.push({ name: 'communityDetail', params: { id: postId } });
       } catch (error) {
-        console.error("폼을 제출하는 중 에러가 발생했습니다:", error);
-        alert(this.isEditMode ? "글 수정 중 에러가 발생했습니다. 다시 시도해주세요." : "글 작성 중 에러가 발생했습니다. 다시 시도해주세요.");
+        if (error.response) {
+          console.error("폼을 제출하는 중 에러가 발생했습니다:", error.response.data);
+          alert(`Error: ${JSON.stringify(error.response.data)}`);
+        } else {
+          console.error("폼을 제출하는 중 에러가 발생했습니다:", error.message);
+          alert(`Error: ${error.message}`);
+        }
       }
     }
   },
