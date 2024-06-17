@@ -19,14 +19,14 @@ steam_client = SteamAPI()
 class GameViewSet(viewsets.ViewSet):
     system_instructions = """
     당신은 사용자들이 Steam에서 유사한 게임을 찾도록 돕는 유용한 도우미입니다.
-    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 5개의 추천 게임 목록을 제공합니다.
+    사용자가 게임 추천을 요청하면 사용자의 입력을 분석하고 Steam 데이터를 기반으로 최대 4개의 추천 게임 목록을 제공합니다.
     추천하는 게임은 반드시 Steam에서 사용할 수 있는 게임이어야 하며 확장팩이나 DLC는 추천해주지 않습니다.
     게임 추천 목록은 다음과 같은 형식으로 제공하세요:
     1. "게임 이름"
     2. "게임 이름"
     3. "게임 이름"
     4. "게임 이름"
-    5. "게임 이름"
+    만약 사용자가 의미 없는 입력(예: *, 특수 문자 등)을 제공하면, "의미 있는 입력을 제공해주세요."라고 응답하세요.
     """
 
     conversation_history = [
@@ -39,10 +39,6 @@ class GameViewSet(viewsets.ViewSet):
 
         if not user_input:
             return Response({"error": "No user input provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 검색어 유효성 검사
-        if not self.is_valid_search_query(user_input):
-            return Response({"error": "Invalid search query"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             self.conversation_history.append({"role": "user", "content": user_input})
@@ -60,8 +56,8 @@ class GameViewSet(viewsets.ViewSet):
             self.conversation_history.append({"role": "assistant", "content": ai_response})
 
             game_names = self.extract_game_names(ai_response)
-            if not game_names:
-                return Response({"error": "추천 목록에서 게임 이름을 추출할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            if not game_names and "의미 있는 입력을 제공해주세요." in ai_response:
+                return Response({"ai_response": ai_response}, status=status.HTTP_200_OK)
 
             similar_games_info = []
             with ThreadPoolExecutor() as executor:
@@ -75,12 +71,12 @@ class GameViewSet(viewsets.ViewSet):
                         print(f"게임 정보를 가져오는 데 실패했습니다")
 
             if not similar_games_info:
-                return Response({"error": "유사한 게임을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"ai_response": ai_response, "similar_games": []}, status=status.HTTP_200_OK)
 
-            return Response({"similar_games": similar_games_info})
+            return Response({"similar_games": similar_games_info, "ai_response": ai_response})
         except Exception as e:
             print(f"list 메서드에서 에러 발생: {e}")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e), "ai_response": ""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def extract_game_names(self, recommendations):
         game_names = []
