@@ -80,9 +80,6 @@ class DeleteView(APIView):
         return Response({"message": "삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
 
-
-
-
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -93,11 +90,12 @@ class UserProfileView(APIView):
             else:
                 user = request.user
             serializer = UserProfileSerializer(user)
-            return Response(serializer.data)
+            data = serializer.data
+            data['is_superuser'] = user.is_superuser  # 슈퍼유저 정보 추가
+            return Response(data)
         except Exception as e:
             print(f"Error: {e}")  # 예외 메시지를 로그로 출력
             return Response({'message': '프로필을 불러오는 중 오류가 발생했습니다.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
     def patch(self, request, id=None):
         user = request.user

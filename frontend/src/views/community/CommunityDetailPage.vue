@@ -35,7 +35,7 @@
       <!-- 버튼 -->
       <div class="flex-row-center">
         <button class="detailButton flex-center" @click="goToCommunity">목록으로</button>
-        <div v-if="communityItem.author_id === userId" class="editDeleteButtons flex-center">
+        <div v-if="communityItem.author_id === userId || isSuperUser" class="editDeleteButtons flex-center">
           <button class="detailButton flex-center" @click="editPost">수정하기</button>
           <button class="detailButton flex-center" @click="deletePost">삭제하기</button>
         </div>
@@ -132,14 +132,15 @@ export default {
       showEditCommentModal: false,
       errorMessage: '',
       defaultProfileImage: defaultProfileImage,
-      likesCount: 0, // 좋아요 숫자 변수 추가
-      categories: [], // 카테고리 목록
-      pagination: { // 페이지 네이션 관련 변수
+      likesCount: 0,
+      categories: [],
+      pagination: {
         page: 1,
         pageSize: 5,
         totalPages: 1,
-        totalCount: 0, // 전체 댓글 수 추가
+        totalCount: 0,
       },
+      isSuperUser: false,  // 슈퍼유저 여부를 나타내는 변수
     };
   },
   async created() {
@@ -147,15 +148,15 @@ export default {
     const id = this.$route.params.id;
     await this.fetchCommunityItem(id);
     await this.fetchComments(id);
-    await this.fetchCategories(); // 카테고리 목록 불러오기
+    await this.fetchCategories();
   },
   methods: {
     async fetchCommunityItem(id) {
       try {
         const response = await api.get(`community/${id}/`);
         this.communityItem = response.data;
-        this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0; // 좋아요 숫자 설정
-        this.isLiked = this.communityItem.liked_by_user; // 사용자가 좋아요를 눌렀는지 여부 설정
+        this.likesCount = this.communityItem.community_like ? this.communityItem.community_like.length : 0;
+        this.isLiked = this.communityItem.liked_by_user;
       } catch (error) {
         console.error("게시글을 가져오는 중 오류가 발생했습니다:", error);
       }
@@ -173,7 +174,10 @@ export default {
       return category ? category.value : '알 수 없음';
     },
     formatContent(content) {
-      return content.replace(/\n/g, '<br>');
+      const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11}))/g;
+      return content.replace(youtubeRegex, (match, p1, p2) => {
+        return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${p2}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      }).replace(/\n/g, '<br>');
     },
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -199,6 +203,7 @@ export default {
           });
           this.isLoggedIn = true;
           this.userId = response.data.id;
+          this.isSuperUser = response.data.is_superuser;  // 슈퍼유저 여부 설정
         } catch (error) {
           console.error("로그인 상태를 확인하는 중 오류가 발생했습니다:", error);
         }
@@ -236,7 +241,7 @@ export default {
         this.comments = response.data.results;
         this.pagination.page = page;
         this.pagination.totalPages = Math.ceil(response.data.count / this.pagination.pageSize);
-        this.pagination.totalCount = response.data.count; // 전체 댓글 수 설정
+        this.pagination.totalCount = response.data.count;
       } catch (error) {
         console.error("댓글을 가져오는 중 오류가 발생했습니다:", error);
         this.errorMessage = "댓글을 가져오는 중 오류가 발생했습니다.";
@@ -253,7 +258,7 @@ export default {
             'Authorization': `Bearer ${localStorage.getItem('access')}`
           }
         });
-        await this.fetchComments(id, this.pagination.page);  // 현재 페이지의 댓글 목록을 다시 가져옴
+        await this.fetchComments(id, this.pagination.page);
         this.newComment = '';
       } catch (error) {
         console.error("댓글 작성 중 오류가 발생했습니다:", error);
